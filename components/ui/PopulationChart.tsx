@@ -1,6 +1,6 @@
 'use client'
 
-import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import {
   ChartConfig,
   ChartContainer,
@@ -9,7 +9,8 @@ import {
 } from '@/components/ui/chart'
 
 interface PopulationDataPoint {
-  month: string
+  month?: string
+  year?: string
   value: number
   date: string
 }
@@ -17,22 +18,36 @@ interface PopulationDataPoint {
 interface PopulationChartProps {
   data: PopulationDataPoint[]
   color?: string
+  showGrid?: boolean
+  height?: number
 }
 
 export default function PopulationChart({ 
   data,
-  color = '#5B903A'
+  color = '#5B903A',
+  showGrid = true,
+  height = 180
 }: PopulationChartProps) {
   const chartConfig = {
-    population: {
+    value: {
       label: 'Penduduk',
       color: color,
     },
   } satisfies ChartConfig
 
+  const dataKey = data[0]?.month ? 'month' : 'year'
+
   return (
-    <ChartContainer config={chartConfig} className="h-[120px] w-full">
-      <AreaChart data={data}>
+    <ChartContainer config={chartConfig} className="w-full" style={{ height: `${height}px` }}>
+      <AreaChart
+        data={data}
+        margin={{
+          top: 5,
+          right: 5,
+          left: -20,
+          bottom: 5,
+        }}
+      >
         <defs>
           <linearGradient id="fillPopulation" x1="0" y1="0" x2="0" y2="1">
             <stop
@@ -47,30 +62,41 @@ export default function PopulationChart({
             />
           </linearGradient>
         </defs>
-        <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.2} />
+        {showGrid && (
+          <CartesianGrid 
+            strokeDasharray="3 3" 
+            vertical={false} 
+            stroke="#e5e7eb" 
+            opacity={0.5}
+          />
+        )}
         <XAxis
-          dataKey="month"
+          dataKey={dataKey}
           tickLine={false}
           axisLine={false}
           tickMargin={8}
-          tick={{ fontSize: 10, fill: '#666' }}
+          tick={{ fontSize: 11, fill: '#9CA3AF' }}
           interval="preserveStartEnd"
         />
+        <YAxis hide />
         <ChartTooltip
-          cursor={{ stroke: color, strokeWidth: 1, strokeDasharray: '5 5' }}
+          cursor={{ stroke: color, strokeWidth: 1, strokeDasharray: '3 3' }}
           content={
             <ChartTooltipContent
-              labelFormatter={(value) => `Bulan: ${value}`}
-              formatter={(value) => [`${Number(value).toLocaleString('id-ID')} jiwa`, 'Penduduk']}
+              labelFormatter={(value) => value}
+              formatter={(value) => [
+                `${Number(value).toLocaleString('id-ID')} jiwa`, 
+                'Penduduk'
+              ]}
             />
           }
         />
         <Area
           dataKey="value"
-          type="monotone"
+          type="natural"
           fill="url(#fillPopulation)"
           stroke={color}
-          strokeWidth={2}
+          strokeWidth={2.5}
           dot={false}
         />
       </AreaChart>

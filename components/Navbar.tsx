@@ -18,7 +18,7 @@ interface NavbarProps {
 
 export default function Navbar({ 
   siteName = 'Baturraden',
-  logoSrc = '/assets/icons/logo.svg',
+  logoSrc = '/assets/icons/logo.png',
   menuItems = [
     { name: 'Home', path: '/' },
     { name: 'Profile', path: '/profile' },
