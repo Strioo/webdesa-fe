@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import { laporanApi } from "@/lib/api";
 import {
-  Plus,
   Search,
-  Filter,
   Eye,
-  Edit,
   Trash2,
   CheckCircle,
   XCircle,
@@ -15,7 +14,10 @@ import {
   MapPin,
   Calendar,
   User,
-  FileText
+  FileText,
+  X,
+  AlertCircleIcon,
+  Loader2
 } from "lucide-react";
 
 interface Laporan {
@@ -28,6 +30,7 @@ interface Laporan {
   foto?: string;
   tanggapan?: string;
   createdAt: string;
+  updatedAt?: string;
   user: {
     id: string;
     name: string;
@@ -39,15 +42,15 @@ const StatusBadge = ({ status }: { status: string }) => {
   const getStatusConfig = (status: string) => {
     switch (status) {
       case "PENDING":
-        return { color: "bg-yellow-100 text-yellow-800", icon: Clock };
+        return { color: "bg-yellow-100 text-yellow-800 border border-yellow-200", icon: Clock, label: "Menunggu" };
       case "PROSES":
-        return { color: "bg-blue-100 text-blue-800", icon: AlertTriangle };
+        return { color: "bg-blue-100 text-blue-800 border border-blue-200", icon: AlertTriangle, label: "Diproses" };
       case "SELESAI":
-        return { color: "bg-green-100 text-green-800", icon: CheckCircle };
+        return { color: "bg-green-100 text-green-800 border border-green-200", icon: CheckCircle, label: "Selesai" };
       case "DITOLAK":
-        return { color: "bg-red-100 text-red-800", icon: XCircle };
+        return { color: "bg-red-100 text-red-800 border border-red-200", icon: XCircle, label: "Ditolak" };
       default:
-        return { color: "bg-gray-100 text-gray-800", icon: Clock };
+        return { color: "bg-gray-100 text-gray-800 border border-gray-200", icon: Clock, label: status };
     }
   };
 
@@ -55,35 +58,90 @@ const StatusBadge = ({ status }: { status: string }) => {
   const Icon = config.icon;
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
-      <Icon className="w-3 h-3 mr-1" />
-      {status}
+    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>
+      <Icon className="w-3.5 h-3.5 mr-1.5" />
+      {config.label}
     </span>
   );
 };
 
 const KategoriBadge = ({ kategori }: { kategori: string }) => {
-  const getKategoriColor = (kategori: string) => {
+  const getKategoriConfig = (kategori: string) => {
     switch (kategori) {
       case "INFRASTRUKTUR":
-        return "bg-purple-100 text-purple-800";
+        return { color: "bg-purple-100 text-purple-800 border border-purple-200", label: "Infrastruktur" };
       case "KESEHATAN":
-        return "bg-red-100 text-red-800";
+        return { color: "bg-red-100 text-red-800 border border-red-200", label: "Kesehatan" };
       case "PENDIDIKAN":
-        return "bg-blue-100 text-blue-800";
+        return { color: "bg-blue-100 text-blue-800 border border-blue-200", label: "Pendidikan" };
       case "LINGKUNGAN":
-        return "bg-green-100 text-green-800";
+        return { color: "bg-green-100 text-green-800 border border-green-200", label: "Lingkungan" };
       case "KEAMANAN":
-        return "bg-orange-100 text-orange-800";
+        return { color: "bg-orange-100 text-orange-800 border border-orange-200", label: "Keamanan" };
       default:
-        return "bg-gray-100 text-gray-800";
+        return { color: "bg-gray-100 text-gray-800 border border-gray-200", label: kategori };
     }
   };
 
+  const config = getKategoriConfig(kategori);
+
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getKategoriColor(kategori)}`}>
-      {kategori}
+    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>
+      {config.label}
     </span>
+  );
+};
+
+const DeleteConfirmModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  loading
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  loading: boolean;
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl">
+        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mx-auto mb-4">
+          <AlertCircleIcon className="w-6 h-6 text-red-600" />
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">
+          Hapus Laporan?
+        </h3>
+        <p className="text-sm text-gray-600 text-center mb-6">
+          Tindakan ini tidak dapat dibatalkan. Laporan akan dihapus secara permanen dari sistem.
+        </p>
+        <div className="flex space-x-3">
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="flex-1 px-4 py-2.5 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-medium disabled:opacity-50"
+          >
+            Batal
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={loading}
+            className="flex-1 px-4 py-2.5 bg-red-600 text-white hover:bg-red-700 rounded-lg transition-colors font-medium disabled:opacity-50 flex items-center justify-center"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Menghapus...
+              </>
+            ) : (
+              "Hapus"
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -100,6 +158,7 @@ const DetailModal = ({
 }) => {
   const [newStatus, setNewStatus] = useState("");
   const [tanggapan, setTanggapan] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (laporan) {
@@ -108,115 +167,164 @@ const DetailModal = ({
     }
   }, [laporan]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (laporan) {
-      onStatusUpdate(laporan.id, newStatus, tanggapan);
-      onClose();
+      setLoading(true);
+      try {
+        await onStatusUpdate(laporan.id, newStatus, tanggapan);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   if (!isOpen || !laporan) return null;
 
+  const statusConfig = {
+    PENDING: { color: "text-yellow-600", bgColor: "bg-yellow-50", borderColor: "border-yellow-200" },
+    PROSES: { color: "text-blue-600", bgColor: "bg-blue-50", borderColor: "border-blue-200" },
+    SELESAI: { color: "text-green-600", bgColor: "bg-green-50", borderColor: "border-green-200" },
+    DITOLAK: { color: "text-red-600", bgColor: "bg-red-50", borderColor: "border-red-200" }
+  };
+
+  const currentConfig = statusConfig[laporan.status] || statusConfig.PENDING;
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-gray-200">
+      <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b border-gray-200 p-6 z-10">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">Detail Laporan</h3>
+            <h3 className="text-xl font-bold text-gray-900">Detail Laporan</h3>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
+              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              <XCircle className="w-6 h-6" />
+              <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
         <div className="p-6 space-y-6">
-          <div>
-            <h4 className="text-xl font-semibold text-gray-900 mb-2">{laporan.judul}</h4>
-            <div className="flex items-center space-x-4 text-sm text-gray-500 mb-4">
+          {/* Info Card */}
+          <div className={`${currentConfig.bgColor} ${currentConfig.borderColor} border-2 rounded-xl p-5`}>
+            <h4 className="text-xl font-bold text-gray-900 mb-3">{laporan.judul}</h4>
+            
+            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
               <div className="flex items-center">
-                <User className="w-4 h-4 mr-1" />
-                {laporan.user.name}
+                <User className="w-4 h-4 mr-1.5" />
+                <span className="font-medium">{laporan.user.name}</span>
               </div>
               <div className="flex items-center">
-                <Calendar className="w-4 h-4 mr-1" />
-                {new Date(laporan.createdAt).toLocaleDateString('id-ID')}
+                <Calendar className="w-4 h-4 mr-1.5" />
+                {new Date(laporan.createdAt).toLocaleDateString('id-ID', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric'
+                })}
               </div>
               {laporan.lokasi && (
                 <div className="flex items-center">
-                  <MapPin className="w-4 h-4 mr-1" />
+                  <MapPin className="w-4 h-4 mr-1.5" />
                   {laporan.lokasi}
                 </div>
               )}
             </div>
-            <div className="flex items-center space-x-2 mb-4">
+            
+            <div className="flex items-center gap-2">
               <StatusBadge status={laporan.status} />
               <KategoriBadge kategori={laporan.kategori} />
             </div>
           </div>
 
-          <div>
-            <h5 className="font-medium text-gray-900 mb-2">Deskripsi</h5>
-            <p className="text-gray-700 leading-relaxed">{laporan.deskripsi}</p>
+          {/* Deskripsi */}
+          <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+            <h5 className="font-semibold text-gray-900 mb-3 flex items-center">
+              <FileText className="w-5 h-5 mr-2 text-gray-600" />
+              Deskripsi Laporan
+            </h5>
+            <p className="text-gray-700 leading-relaxed whitespace-pre-line">{laporan.deskripsi}</p>
           </div>
 
+          {/* Foto */}
           {laporan.foto && (
-            <div>
-              <h5 className="font-medium text-gray-900 mb-2">Foto</h5>
+            <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+              <h5 className="font-semibold text-gray-900 mb-3">Dokumentasi</h5>
               <img
-                src={laporan.foto}
+                src={laporan.foto.startsWith('http') ? laporan.foto : `http://localhost:5000${laporan.foto}`}
                 alt="Foto laporan"
-                className="w-full h-48 object-cover rounded-lg border border-gray-200"
+                className="w-full h-64 object-cover rounded-lg border-2 border-gray-300 shadow-sm"
+                onError={(e) => {
+                  e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f3f4f6" width="100" height="100"/%3E%3Ctext fill="%239ca3af" x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14"%3EGambar tidak tersedia%3C/text%3E%3C/svg%3E';
+                }}
               />
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Tanggapan Existing */}
+          {laporan.tanggapan && (
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-5">
+              <h5 className="font-semibold text-blue-900 mb-3">Tanggapan Admin Sebelumnya</h5>
+              <p className="text-blue-800 leading-relaxed whitespace-pre-line">{laporan.tanggapan}</p>
+            </div>
+          )}
+
+          {/* Form Update Status */}
+          <form onSubmit={handleSubmit} className="bg-white border-2 border-gray-200 rounded-xl p-6 space-y-5">
+            <h5 className="font-semibold text-gray-900 text-lg mb-4">Update Status Laporan</h5>
+            
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Status
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Status Laporan
               </label>
               <select
                 value={newStatus}
                 onChange={(e) => setNewStatus(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               >
-                <option value="PENDING">Pending</option>
-                <option value="PROSES">Proses</option>
+                <option value="PENDING">Menunggu</option>
+                <option value="PROSES">Diproses</option>
                 <option value="SELESAI">Selesai</option>
                 <option value="DITOLAK">Ditolak</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Tanggapan Admin
               </label>
               <textarea
                 value={tanggapan}
                 onChange={(e) => setTanggapan(e.target.value)}
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Berikan tanggapan untuk laporan ini..."
+                rows={5}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                placeholder="Berikan tanggapan terhadap laporan ini..."
               />
             </div>
 
-            <div className="flex justify-end space-x-3 pt-4">
+            <div className="flex justify-end space-x-3 pt-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                disabled={loading}
+                className="px-6 py-2.5 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-medium disabled:opacity-50"
               >
                 Batal
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors"
+                disabled={loading}
+                className="px-6 py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors font-medium disabled:opacity-50 flex items-center"
               >
-                Update Status
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Memperbarui...
+                  </>
+                ) : (
+                  "Perbarui Status"
+                )}
               </button>
             </div>
           </form>
@@ -234,7 +342,9 @@ export default function LaporanPage() {
   const [kategoriFilter, setKategoriFilter] = useState("ALL");
   const [selectedLaporan, setSelectedLaporan] = useState<Laporan | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: string | null }>({ isOpen: false, id: null });
   const [loading, setLoading] = useState(true);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     fetchLaporan();
@@ -247,6 +357,21 @@ export default function LaporanPage() {
   const fetchLaporan = async () => {
     try {
       setLoading(true);
+      console.log('Fetching laporan...');
+      
+      const response = await laporanApi.getAll();
+      console.log('Laporan response:', response);
+
+      if (response.success && response.data) {
+        setLaporan(response.data as Laporan[]);
+      } else {
+        throw new Error(response.message || 'Gagal memuat data laporan');
+      }
+    } catch (error: any) {
+      console.error("Error fetching laporan:", error);
+      toast.error(error.message || 'Gagal memuat data laporan');
+      
+      // Set mock data jika fetch gagal (untuk development)
       const mockData: Laporan[] = [
         {
           id: "1",
@@ -262,41 +387,9 @@ export default function LaporanPage() {
             name: "Budi Santoso",
             email: "budi@gmail.com"
           }
-        },
-        {
-          id: "2",
-          judul: "Lampu Jalan Mati",
-          deskripsi: "Lampu jalan di sepanjang Jl. Pemuda sudah mati sejak 3 hari yang lalu. Kondisi ini membuat jalan gelap dan rawan kejahatan.",
-          kategori: "INFRASTRUKTUR",
-          status: "PROSES",
-          lokasi: "Jl. Pemuda",
-          tanggapan: "Laporan telah diterima dan sedang diproses oleh dinas terkait.",
-          createdAt: "2025-09-30T14:15:00.000Z",
-          user: {
-            id: "user2",
-            name: "Siti Nurhaliza",
-            email: "siti@gmail.com"
-          }
-        },
-        {
-          id: "3",
-          judul: "Sampah Menumpuk di TPS",
-          deskripsi: "Tempat pembuangan sampah sementara di RT 03 sudah penuh dan tidak diangkut selama seminggu.",
-          kategori: "LINGKUNGAN",
-          status: "SELESAI",
-          lokasi: "TPS RT 03/RW 01",
-          tanggapan: "Sampah telah diangkut dan jadwal pengangkutan akan diperbaiki.",
-          createdAt: "2025-09-28T08:45:00.000Z",
-          user: {
-            id: "user3",
-            name: "Ahmad Wijaya",
-            email: "ahmad@gmail.com"
-          }
         }
       ];
       setLaporan(mockData);
-    } catch (error) {
-      console.error("Error fetching laporan:", error);
     } finally {
       setLoading(false);
     }
@@ -326,25 +419,53 @@ export default function LaporanPage() {
 
   const handleStatusUpdate = async (id: string, status: string, tanggapan: string) => {
     try {
-      setLaporan(prev =>
-        prev.map(item =>
-          item.id === id
-            ? { ...item, status: status as any, tanggapan }
-            : item
-        )
-      );
-    } catch (error) {
+      console.log('Updating status:', { id, status, tanggapan });
+      
+      const response = await laporanApi.updateStatus(id, { status, tanggapan });
+      console.log('Update response:', response);
+
+      if (response.success) {
+        setLaporan(prev =>
+          prev.map(item =>
+            item.id === id
+              ? { ...item, status: status as any, tanggapan, updatedAt: new Date().toISOString() }
+              : item
+          )
+        );
+        
+        toast.success('Status laporan berhasil diperbarui!');
+        setIsDetailModalOpen(false);
+      } else {
+        throw new Error(response.message || 'Gagal memperbarui status');
+      }
+    } catch (error: any) {
       console.error("Error updating status:", error);
+      toast.error(error.message || 'Gagal memperbarui status laporan');
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus laporan ini?")) {
-      try {
-        setLaporan(prev => prev.filter(item => item.id !== id));
-      } catch (error) {
-        console.error("Error deleting laporan:", error);
+  const handleDelete = async () => {
+    if (!deleteModal.id) return;
+
+    try {
+      setDeleteLoading(true);
+      console.log('Deleting laporan:', deleteModal.id);
+      
+      const response = await laporanApi.delete(deleteModal.id);
+      console.log('Delete response:', response);
+
+      if (response.success) {
+        setLaporan(prev => prev.filter(item => item.id !== deleteModal.id));
+        toast.success('Laporan berhasil dihapus');
+        setDeleteModal({ isOpen: false, id: null });
+      } else {
+        throw new Error(response.message || 'Gagal menghapus laporan');
       }
+    } catch (error: any) {
+      console.error("Error deleting laporan:", error);
+      toast.error(error.message || 'Gagal menghapus laporan');
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -353,13 +474,27 @@ export default function LaporanPage() {
     setIsDetailModalOpen(true);
   };
 
+  const openDeleteModal = (id: string) => {
+    setDeleteModal({ isOpen: true, id });
+  };
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center h-[calc(100vh-200px)]">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Memuat data laporan...</p>
+        </div>
       </div>
     );
   }
+
+  const stats = {
+    total: laporan.length,
+    pending: laporan.filter(l => l.status === 'PENDING').length,
+    proses: laporan.filter(l => l.status === 'PROSES').length,
+    selesai: laporan.filter(l => l.status === 'SELESAI').length,
+  };
 
   return (
     <div className="space-y-6">
@@ -370,34 +505,83 @@ export default function LaporanPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-xl border-2 border-gray-200 p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Total Laporan</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">{stats.total}</p>
+            </div>
+            <div className="p-3 bg-blue-100 rounded-lg">
+              <FileText className="w-6 h-6 text-blue-600" />
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl border-2 border-yellow-200 p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-yellow-800">Menunggu</p>
+              <p className="text-2xl font-bold text-yellow-600 mt-1">{stats.pending}</p>
+            </div>
+            <div className="p-3 bg-yellow-100 rounded-lg">
+              <Clock className="w-6 h-6 text-yellow-600" />
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl border-2 border-blue-200 p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-blue-800">Diproses</p>
+              <p className="text-2xl font-bold text-blue-600 mt-1">{stats.proses}</p>
+            </div>
+            <div className="p-3 bg-blue-100 rounded-lg">
+              <AlertTriangle className="w-6 h-6 text-blue-600" />
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl border-2 border-green-200 p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-green-800">Selesai</p>
+              <p className="text-2xl font-bold text-green-600 mt-1">{stats.selesai}</p>
+            </div>
+            <div className="p-3 bg-green-100 rounded-lg">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters and Table */}
+      <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="Cari laporan..."
+              placeholder="Cari laporan, pelapor, atau lokasi..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="pl-10 pr-4 py-2.5 w-full border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             />
           </div>
           <div className="flex items-center space-x-3">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors font-medium"
             >
               <option value="ALL">Semua Status</option>
-              <option value="PENDING">Pending</option>
-              <option value="PROSES">Proses</option>
+              <option value="PENDING">Menunggu</option>
+              <option value="PROSES">Diproses</option>
               <option value="SELESAI">Selesai</option>
               <option value="DITOLAK">Ditolak</option>
             </select>
             <select
               value={kategoriFilter}
               onChange={(e) => setKategoriFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors font-medium"
             >
               <option value="ALL">Semua Kategori</option>
               <option value="INFRASTRUKTUR">Infrastruktur</option>
@@ -413,27 +597,27 @@ export default function LaporanPage() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-medium text-gray-900">Laporan</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">Pelapor</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">Kategori</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">Status</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">Tanggal</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">Aksi</th>
+              <tr className="border-b-2 border-gray-200">
+                <th className="text-left py-4 px-4 font-semibold text-gray-900">Laporan</th>
+                <th className="text-left py-4 px-4 font-semibold text-gray-900">Pelapor</th>
+                <th className="text-left py-4 px-4 font-semibold text-gray-900">Kategori</th>
+                <th className="text-left py-4 px-4 font-semibold text-gray-900">Status</th>
+                <th className="text-left py-4 px-4 font-semibold text-gray-900">Tanggal</th>
+                <th className="text-left py-4 px-4 font-semibold text-gray-900">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {filteredLaporan.map((item) => (
-                <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
+                <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                   <td className="py-4 px-4">
                     <div>
-                      <p className="font-medium text-gray-900">{item.judul}</p>
-                      <p className="text-sm text-gray-500 mt-1 truncate max-w-xs">
+                      <p className="font-semibold text-gray-900">{item.judul}</p>
+                      <p className="text-sm text-gray-500 mt-1 line-clamp-2">
                         {item.deskripsi}
                       </p>
                       {item.lokasi && (
-                        <div className="flex items-center mt-1 text-xs text-gray-500">
-                          <MapPin className="w-3 h-3 mr-1" />
+                        <div className="flex items-center mt-2 text-xs text-gray-500">
+                          <MapPin className="w-3.5 h-3.5 mr-1" />
                           {item.lokasi}
                         </div>
                       )}
@@ -452,7 +636,11 @@ export default function LaporanPage() {
                     <StatusBadge status={item.status} />
                   </td>
                   <td className="py-4 px-4 text-sm text-gray-500">
-                    {new Date(item.createdAt).toLocaleDateString('id-ID')}
+                    {new Date(item.createdAt).toLocaleDateString('id-ID', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric'
+                    })}
                   </td>
                   <td className="py-4 px-4">
                     <div className="flex items-center space-x-2">
@@ -464,7 +652,7 @@ export default function LaporanPage() {
                         <Eye className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDelete(item.id)}
+                        onClick={() => openDeleteModal(item.id)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Hapus"
                       >
@@ -479,18 +667,27 @@ export default function LaporanPage() {
         </div>
 
         {filteredLaporan.length === 0 && (
-          <div className="text-center py-12">
-            <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500">Tidak ada laporan yang ditemukan</p>
+          <div className="text-center py-16">
+            <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500 text-lg font-medium">Tidak ada laporan yang ditemukan</p>
+            <p className="text-gray-400 text-sm mt-1">Coba ubah filter atau kata kunci pencarian</p>
           </div>
         )}
       </div>
 
+      {/* Modals */}
       <DetailModal
         laporan={selectedLaporan}
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         onStatusUpdate={handleStatusUpdate}
+      />
+
+      <DeleteConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, id: null })}
+        onConfirm={handleDelete}
+        loading={deleteLoading}
       />
     </div>
   );

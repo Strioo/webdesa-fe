@@ -62,11 +62,21 @@ interface DailyData {
   laporan: number;
 }
 
+interface RecentActivity {
+  id: string;
+  type: string;
+  message: string;
+  status: string;
+  timeAgo: string;
+  user?: string;
+}
+
 interface DashboardResponse {
   overview: DashboardStats;
   laporanStatus: LaporanStatus;
   monthlyData: MonthlyData[];
   dailyData: DailyData[];
+  recentActivities: RecentActivity[];
 }
 
 const StatCard = ({ 
@@ -119,42 +129,12 @@ const StatCard = ({
   );
 };
 
-const RecentActivity = () => {
-  const activities = [
-    {
-      id: 1,
-      type: "laporan",
-      message: "Laporan baru: Jalan Rusak di RT 01",
-      time: "2 menit yang lalu",
-      status: "pending"
-    },
-    {
-      id: 2,
-      type: "transaction",
-      message: "Pembayaran tiket Air Terjun Pelangi berhasil",
-      time: "15 menit yang lalu",
-      status: "success"
-    },
-    {
-      id: 3,
-      type: "umkm",
-      message: "UMKM baru terdaftar: Keripik Pisang Bu Sari",
-      time: "1 jam yang lalu",
-      status: "info"
-    },
-    {
-      id: 4,
-      type: "user",
-      message: "User baru mendaftar: Ahmad Wijaya",
-      time: "2 jam yang lalu",
-      status: "info"
-    }
-  ];
-
+const RecentActivity = ({ activities }: { activities: RecentActivity[] }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "success": return "text-green-600 bg-green-50";
       case "pending": return "text-yellow-600 bg-yellow-50";
+      case "proses": return "text-blue-600 bg-blue-50";
       case "error": return "text-red-600 bg-red-50";
       default: return "text-blue-600 bg-blue-50";
     }
@@ -164,6 +144,7 @@ const RecentActivity = () => {
     switch (status) {
       case "success": return <CheckCircle className="w-4 h-4" />;
       case "pending": return <Clock className="w-4 h-4" />;
+      case "proses": return <Eye className="w-4 h-4" />;
       case "error": return <XCircle className="w-4 h-4" />;
       default: return <Eye className="w-4 h-4" />;
     }
@@ -173,28 +154,43 @@ const RecentActivity = () => {
     <div className="bg-white rounded-xl border border-gray-200 p-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">Aktivitas Terbaru</h3>
       <div className="space-y-4">
-        {activities.map((activity) => (
-          <div key={activity.id} className="flex items-start space-x-3">
-            <div className={`p-2 rounded-lg ${getStatusColor(activity.status)}`}>
-              {getStatusIcon(activity.status)}
+        {activities.length > 0 ? (
+          activities.map((activity) => (
+            <div key={activity.id} className="flex items-start space-x-3">
+              <div className={`p-2 rounded-lg ${getStatusColor(activity.status)}`}>
+                {getStatusIcon(activity.status)}
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-900">{activity.message}</p>
+                {activity.user && (
+                  <p className="text-xs text-gray-500 mt-0.5">oleh {activity.user}</p>
+                )}
+                <p className="text-xs text-gray-500 mt-1">{activity.timeAgo}</p>
+              </div>
             </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">{activity.message}</p>
-              <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
-            </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p className="text-sm text-gray-500 text-center py-4">Belum ada aktivitas terbaru</p>
+        )}
       </div>
     </div>
   );
 };
 
 const QuickStats = ({ laporanStatus, revenue }: { laporanStatus: LaporanStatus; revenue: number }) => {
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
   const stats = [
     { label: "Laporan Pending", value: laporanStatus.PENDING, color: "text-yellow-600" },
     { label: "Laporan Selesai", value: laporanStatus.SELESAI, color: "text-green-600" },
     { label: "Laporan Proses", value: laporanStatus.PROSES, color: "text-blue-600" },
-    { label: "Revenue", value: `Rp ${(revenue / 1000000).toFixed(1)}M`, color: "text-purple-600" }
+    { label: "Pendapatan", value: formatCurrency(revenue), color: "text-purple-600" }
   ];
 
   return (
@@ -231,6 +227,7 @@ export default function DashboardPage() {
   });
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [dailyData, setDailyData] = useState<DailyData[]>([]);
+  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
 
   const formatCurrency = (amount: number) => {
@@ -251,7 +248,7 @@ export default function DashboardPage() {
 
         if (response.success && response.data) {
           const data = response.data as DashboardResponse;
-          const { overview, laporanStatus: statusData, monthlyData: monthly, dailyData: daily } = data;
+          const { overview, laporanStatus: statusData, monthlyData: monthly, dailyData: daily, recentActivities: activities } = data;
           
           setStats({
             totalUsers: overview.totalUsers || 0,
@@ -273,49 +270,11 @@ export default function DashboardPage() {
 
           setMonthlyData(monthly || []);
           setDailyData(daily || []);
-        } else {
-          throw new Error('Failed to fetch dashboard data');
+          setRecentActivities(activities || []);
         }
 
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
-        
-        setStats({
-          totalUsers: 156,
-          totalLaporan: 89,
-          totalWisata: 12,
-          totalUMKM: 34,
-          totalTransactions: 245,
-          totalProgram: 15,
-          revenue: 12500000,
-          completionRate: 73
-        });
-        
-        setLaporanStatus({
-          PENDING: 12,
-          PROSES: 8,
-          SELESAI: 65,
-          DITOLAK: 4
-        });
-
-        setMonthlyData([
-          { month: 'Jan', laporan: 12, selesai: 10, revenue: 2500000, transactions: 15 },
-          { month: 'Feb', laporan: 19, selesai: 16, revenue: 3200000, transactions: 22 },
-          { month: 'Mar', laporan: 15, selesai: 14, revenue: 2800000, transactions: 18 },
-          { month: 'Apr', laporan: 22, selesai: 18, revenue: 4100000, transactions: 28 },
-          { month: 'Mei', laporan: 28, selesai: 25, revenue: 5200000, transactions: 35 },
-          { month: 'Jun', laporan: 24, selesai: 22, revenue: 4800000, transactions: 30 }
-        ]);
-
-        setDailyData([
-          { day: 'Sen', wisata: 8, umkm: 12, laporan: 5 },
-          { day: 'Sel', wisata: 12, umkm: 8, laporan: 7 },
-          { day: 'Rab', wisata: 15, umkm: 14, laporan: 3 },
-          { day: 'Kam', wisata: 10, umkm: 16, laporan: 8 },
-          { day: 'Jum', wisata: 18, umkm: 10, laporan: 6 },
-          { day: 'Sab', wisata: 22, umkm: 18, laporan: 4 },
-          { day: 'Min', wisata: 25, umkm: 15, laporan: 2 }
-        ]);
       } finally {
         setLoading(false);
       }
@@ -339,11 +298,11 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Ringkasan Dashboard</h1>
           <p className="text-gray-600 mt-2">Selamat datang di panel admin Desa Suka Maju</p>
         </div>
         <div className="text-right">
-          <p className="text-sm text-gray-500">Terakhir diupdate</p>
+          <p className="text-sm text-gray-500">Terakhir diperbarui</p>
           <p className="text-sm font-medium text-gray-900">
             {new Date().toLocaleDateString('id-ID', {
               weekday: 'long',
@@ -357,7 +316,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <StatCard
-          title="Total Users"
+          title="Total Pengguna"
           value={stats.totalUsers}
           icon={Users}
           trend="up"
@@ -405,7 +364,7 @@ export default function DashboardPage() {
           color="purple"
         />
         <StatCard
-          title="Revenue"
+          title="Pendapatan"
           value={formatCurrency(stats.revenue)}
           icon={DollarSign}
           trend="up"
@@ -413,7 +372,7 @@ export default function DashboardPage() {
           color="green"
         />
         <StatCard
-          title="Completion Rate"
+          title="Tingkat Penyelesaian"
           value={`${stats.completionRate}%`}
           icon={Award}
           trend="up"
@@ -426,7 +385,7 @@ export default function DashboardPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Laporan Bulanan</h3>
-            <p className="text-sm text-gray-500 mt-1">Showing laporan data for the last 6 months</p>
+            <p className="text-sm text-gray-500 mt-1">Data laporan 6 bulan terakhir</p>
           </div>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
@@ -488,8 +447,8 @@ export default function DashboardPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Revenue Trend</h3>
-              <p className="text-sm text-gray-500 mt-1">Monthly revenue from transactions</p>
+              <h3 className="text-lg font-semibold text-gray-900">Tren Pendapatan</h3>
+              <p className="text-sm text-gray-500 mt-1">Pendapatan bulanan dari transaksi</p>
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-500">Total</p>
@@ -520,7 +479,7 @@ export default function DashboardPage() {
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => `${(value / 1000000).toFixed(1)}M`}
+                  tickFormatter={(value) => formatCurrency(value)}
                 />
                 <Tooltip 
                   contentStyle={{
@@ -529,7 +488,7 @@ export default function DashboardPage() {
                     borderRadius: '8px',
                     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
                   }}
-                  formatter={(value: number) => [`Rp ${(value / 1000000).toFixed(1)}M`, 'Revenue']}
+                  formatter={(value: number) => [formatCurrency(value), 'Pendapatan']}
                   cursor={{ stroke: '#10b981', strokeWidth: 1, strokeDasharray: '5 5' }}
                 />
                 <Area 
@@ -538,7 +497,7 @@ export default function DashboardPage() {
                   stroke="#10b981" 
                   strokeWidth={2}
                   fill="url(#colorRevenue)"
-                  name="Revenue"
+                  name="Pendapatan"
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -550,7 +509,7 @@ export default function DashboardPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Aktivitas Harian</h3>
-            <p className="text-sm text-gray-500 mt-1">Daily activity trends for the last 7 days</p>
+            <p className="text-sm text-gray-500 mt-1">Tren aktivitas harian 7 hari terakhir</p>
           </div>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
@@ -624,8 +583,8 @@ export default function DashboardPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Transaction Trend</h3>
-              <p className="text-sm text-gray-500 mt-1">Monthly transaction volume</p>
+              <h3 className="text-lg font-semibold text-gray-900">Tren Transaksi</h3>
+              <p className="text-sm text-gray-500 mt-1">Volume transaksi bulanan</p>
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-500">Total</p>
@@ -673,7 +632,7 @@ export default function DashboardPage() {
                   stroke="#3b82f6" 
                   strokeWidth={2}
                   fill="url(#colorTransactions)"
-                  name="Transactions"
+                  name="Transaksi"
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -682,13 +641,13 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RecentActivity />
+        <RecentActivity activities={recentActivities} />
         <QuickStats laporanStatus={laporanStatus} revenue={stats.revenue} />
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Laporan Status Overview</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Ringkasan Status Laporan</h3>
           <Link href="/dashboard/laporan" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
             Lihat Semua →
           </Link>

@@ -150,7 +150,9 @@ export const laporanApi = {
   create: (data: any) => apiClient.post('/laporan/create', data),
   update: (id: string, data: any) => apiClient.put(`/laporan/update/${id}`, data),
   delete: (id: string) => apiClient.delete(`/laporan/delete/${id}`),
-  updateStatus: (id: string, status: string) => apiClient.patch(`/laporan/status/${id}`, { status }),
+  // FIX: Kirim langsung sebagai object flat, bukan nested
+  updateStatus: (id: string, data: { status: string; tanggapan?: string }) => 
+    apiClient.patch(`/laporan/status/${id}`, data),
 };
 
 export const wisataApi = {
