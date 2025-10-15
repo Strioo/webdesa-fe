@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 
 interface Testimonial {
@@ -15,6 +15,27 @@ const TestimonialSection = () => {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [direction, setDirection] = useState<'next' | 'prev'>('next')
+  const [isVisible, setIsVisible] = useState(false)
+  const sectionRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting)
+      },
+      { threshold: 0.1 }
+    )
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current)
+    }
+
+    return () => {
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current)
+      }
+    }
+  }, [])
 
   const testimonials: Testimonial[] = [
     {
@@ -61,6 +82,7 @@ const TestimonialSection = () => {
     }, 5000)
 
     return () => clearInterval(interval)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIndex])
 
   const handleNext = () => {
@@ -98,26 +120,26 @@ const TestimonialSection = () => {
   }
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8">
+    <section ref={sectionRef} className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-[1400px] mx-auto">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row justify-between items-start gap-8 mb-16">
+        <div className={`flex flex-col lg:flex-row justify-between items-start gap-6 sm:gap-8 mb-12 sm:mb-16 animate-on-scroll ${isVisible ? 'animate-fade-in-up' : ''}`}>
           <div>
-            <h2 className="text-5xl md:text-6xl font-semibold text-gray-900 leading-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-gray-900 leading-tight">
               Cerita Nyata dari<br />Pengunjung Baturaden
             </h2>
           </div>
           <div className="text-gray-500 max-w-sm">
-            <p className="text-base leading-relaxed">
+            <p className="text-sm sm:text-base leading-relaxed">
               Dengarkan pengalaman mereka yang telah merasakan keindahan alam dan kehangatan budaya lokal Baturaden.
             </p>
           </div>
         </div>
 
         {/* Content Grid */}
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className={`flex flex-col lg:flex-row gap-6 sm:gap-8 animate-on-scroll ${isVisible ? 'animate-fade-in-up animation-delay-200' : ''}`}>
           {/* Left Side - Main Image (Person) with slide animation */}
-          <div className="h-[552px] w-full lg:w-2/5 rounded-3xl overflow-hidden shadow-xl bg-[#F8F8F8]">
+          <div className="h-[400px] sm:h-[500px] lg:h-[552px] w-full lg:w-2/5 rounded-3xl overflow-hidden shadow-xl bg-[#F8F8F8]">
             <div className="relative w-full h-full">
               {testimonials.map((testimonial, index) => {
                 const isActive = index === activeIndex
@@ -194,19 +216,19 @@ const TestimonialSection = () => {
                 <button
                   onClick={handlePrev}
                   disabled={isTransitioning}
-                  className="w-10 h-10 rounded-full bg-transparent border hover:bg-gray-100 flex items-center justify-center transition-all duration-300 disabled:opacity-50"
+                  className="w-10 h-10 rounded-full bg-transparent border hover:bg-gray-100 flex items-center justify-center transition-all duration-300 disabled:opacity-50 cursor-pointer"
                   aria-label="Previous testimonial"
                 >
-                  <Image src="/assets/icons/ArrowRight.png" alt="Arrow" width={12} height={12} className="w-5 rotate-180" />
+                  <Image src="/assets/icons/arrowright.png" alt="Arrow" width={12} height={12} className="w-5 rotate-180" />
                 </button>
 
                 <button
                   onClick={handleNext}
                   disabled={isTransitioning}
-                  className="w-10 h-10 rounded-full bg-gray-900 hover:bg-gray-800 flex items-center justify-center transition-all duration-300 disabled:opacity-50"
+                  className="w-10 h-10 rounded-full bg-gray-900 hover:bg-gray-800 flex items-center justify-center transition-all duration-300 disabled:opacity-50 cursor-pointer"
                   aria-label="Next testimonial"
                 >
-                  <Image src="/assets/icons/ArrowRight.png" alt="Arrow" width={12} height={12} className="w-5 invert" />
+                  <Image src="/assets/icons/arrowright.png" alt="Arrow" width={12} height={12} className="w-5 invert" />
                 </button>
               </div>
             </div>
@@ -218,7 +240,7 @@ const TestimonialSection = () => {
                   key={`${testimonial.id}-${idx}`}
                   onClick={() => handleThumbnailClick(testimonial.originalIndex)}
                   disabled={isTransitioning}
-                  className="relative rounded-2xl overflow-hidden flex-1 h-full transition-all duration-700 ease-out bg-[#F8F8F8] opacity-60 hover:opacity-100 hover:scale-105"
+                  className="relative rounded-2xl overflow-hidden flex-1 h-full transition-all duration-700 ease-out bg-[#F8F8F8] opacity-60 hover:opacity-100 hover:scale-105 cursor-pointer"
                   style={{
                     transform: `translateX(${isTransitioning ? (direction === 'next' ? '-24px' : '24px') : '0'})`
                   }}
@@ -238,19 +260,19 @@ const TestimonialSection = () => {
               <button
                 onClick={handlePrev}
                 disabled={isTransitioning}
-                className="w-10 h-10 rounded-full bg-transparent border hover:bg-gray-100 flex items-center justify-center transition-all duration-300 disabled:opacity-50"
+                className="w-10 h-10 rounded-full bg-transparent border hover:bg-gray-100 flex items-center justify-center transition-all duration-300 disabled:opacity-50 cursor-pointer"
                 aria-label="Previous testimonial"
               >
-                <Image src="/assets/icons/ArrowRight.png" alt="Arrow" width={12} height={12} className="w-5 rotate-180" />
+                <Image src="/assets/icons/arrowright.png" alt="Arrow" width={12} height={12} className="w-5 rotate-180" />
               </button>
 
               <button
                 onClick={handleNext}
                 disabled={isTransitioning}
-                className="w-10 h-10 rounded-full bg-gray-900 hover:bg-gray-800 flex items-center justify-center transition-all duration-300 disabled:opacity-50"
+                className="w-10 h-10 rounded-full bg-gray-900 hover:bg-gray-800 flex items-center justify-center transition-all duration-300 disabled:opacity-50 cursor-pointer"
                 aria-label="Next testimonial"
               >
-                <Image src="/assets/icons/ArrowRight.png" alt="Arrow" width={12} height={12} className="w-5 invert" />
+                <Image src="/assets/icons/arrowright.png" alt="Arrow" width={12} height={12} className="w-5 invert" />
               </button>
             </div>
           </div>

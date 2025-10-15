@@ -58,7 +58,7 @@ export default function Navbar({
               <li key={item.path} className="list-none">
                 <Link
                   href={item.path}
-                  className={`inline-block rounded-full px-4 py-2 font-medium transition-all duration-200 ${
+                  className={`inline-block rounded-full px-4 py-2 font-medium transition-all duration-200 cursor-pointer ${
                     isActive(item.path) 
                       ? 'border border-[#C0C0C0] text-[#5B903A] bg-transparent hover:text-[#5B903A] hover:bg-transparent' 
                       : 'text-[#6B7280] bg-transparent hover:text-[#5B903A] hover:bg-transparent'
@@ -73,10 +73,10 @@ export default function Navbar({
 
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center gap-4">
-          <button className="btn btn-ghost btn-sm text-sm rounded-full font-normal text-gray-600 hover:text-[#5B903A] transition-colors">
+          <button className="btn btn-ghost btn-sm text-sm rounded-full font-normal text-gray-600 hover:text-[#5B903A] transition-colors cursor-pointer">
             Register
           </button>
-          <button className="btn btn-primary btn-sm rounded-full py-5 pe-1 flex items-center gap-2 text-sm hover:opacity-90 transition-opacity">
+          <button className="btn btn-primary btn-sm rounded-full py-5 pe-1 flex items-center gap-2 text-sm hover:opacity-90 transition-opacity cursor-pointer">
             Login
             <div className="bg-white rounded-full w-8 h-8 flex items-center justify-center">
               <Image src="/assets/icons/arrow.svg" alt="Login Icon" width={12} height={12} className="w-3" />
@@ -87,7 +87,7 @@ export default function Navbar({
         {/* Mobile Menu Button */}
         <button
           onClick={toggleMobileMenu}
-          className="lg:hidden p-2 rounded-md text-gray-600 hover:text-[#5B903A] transition-colors"
+          className="lg:hidden p-2 rounded-md text-gray-600 hover:text-[#5B903A] transition-colors cursor-pointer"
         >
           {!isMobileMenuOpen ? (
             <svg
@@ -122,7 +122,7 @@ export default function Navbar({
                 <Link
                   href={item.path}
                   onClick={closeMobileMenu}
-                  className={`block px-6 py-3 font-medium transition-all duration-200 ${
+                  className={`block px-6 py-3 font-medium transition-all duration-200 cursor-pointer ${
                     isActive(item.path) 
                       ? 'text-[#5B903A] bg-[#F0F7ED]' 
                       : 'text-[#6B7280] hover:text-[#5B903A] hover:bg-[#F9FAFB]'

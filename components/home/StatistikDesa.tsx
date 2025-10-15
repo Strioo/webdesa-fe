@@ -1,9 +1,38 @@
+'use client'
+
 import React from 'react'
 import PopulationChart from '@/components/ui/PopulationChart'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { useCountUp } from '@/hooks/useCountUp'
 
 const StatistikDesa = () => {
+    const [isVisible, setIsVisible] = useState(false)
+    const sectionRef = useRef<HTMLDivElement>(null)
+
+    // Count-up animations
+    const destinationCountUp = useCountUp({ end: 20, duration: 2000 })
+    const umkmCountUp = useCountUp({ end: 150, duration: 2000, suffix: '+' })
+    const touristCountUp = useCountUp({ end: 50000, duration: 2500, separator: '.' })
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setIsVisible(entry.isIntersecting)
+            },
+            { threshold: 0.1 }
+        )
+
+        if (sectionRef.current) {
+            observer.observe(sectionRef.current)
+        }
+
+        return () => {
+            if (sectionRef.current) {
+                observer.unobserve(sectionRef.current)
+            }
+        }
+    }, [])
 
     // Data untuk area chart (12 bulan)
     const [populationData] = useState([
@@ -65,36 +94,36 @@ const StatistikDesa = () => {
     }
 
     return (
-        <div>
-            <section className="py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div ref={sectionRef}>
+            <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
                 <div className="max-w-[1400px] mx-auto">
                     {/* Header Section */}
-                    <div className="flex justify-between items-start mb-12">
+                    <div className={`flex flex-col lg:flex-row justify-between items-start gap-6 sm:gap-8 mb-8 sm:mb-12 animate-on-scroll ${isVisible ? 'animate-fade-in-up' : ''}`}>
                         <div>
-                            <h1 className="text-5xl md:text-6xl font-semibold mb-2">
+                            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold mb-2">
                                 Statistik Desa<br />Baturaden
                             </h1>
                         </div>
                         <div className="text-gray-500 max-w-xs">
-                            <p className='text-lg'>Sekilas data desa untuk melihat potensi, perkembangan, dan daya tarik Baturaden.</p>
+                            <p className='text-sm sm:text-base lg:text-lg'>Sekilas data desa untuk melihat potensi, perkembangan, dan daya tarik Baturaden.</p>
                         </div>
                     </div>
 
                     {/* Stats Grid - Wisata & UMKM Cards */}
-                    <div className="flex gap-6 mb-6">
+                    <div className={`flex flex-col lg:flex-row gap-4 sm:gap-6 mb-4 sm:mb-6 animate-on-scroll ${isVisible ? 'animate-fade-in-left animation-delay-200' : ''}`}>
                         {/* Wisata Card */}
-                        <div className="card bg-[#F5F5F5] border-2 border-gray-300 rounded-3xl w-2/5 overflow-hidden relative">
-                            <div className="card-body p-8">
-                                <div className="flex items-start justify-between gap-6">
+                        <div className="card bg-[#F5F5F5] border-2 border-gray-300 rounded-3xl w-full lg:w-2/5 overflow-hidden relative">
+                            <div className="card-body p-6 sm:p-8">
+                                <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-6">
                                     {/* Left Content */}
                                     <div className="flex-1 relative z-10">
-                                        <div className="inline-block border-[#CCDDC2] bg-white text-[#5B903A] text-sm font-medium px-4 py-1.5 rounded-full mb-4 border">
+                                        <div className="inline-block border-[#CCDDC2] bg-white text-[#5B903A] text-xs sm:text-sm font-medium px-3 sm:px-4 py-1 sm:py-1.5 rounded-full mb-3 sm:mb-4 border">
                                             Wisata
                                         </div>
-                                        <h2 className="text-3xl font-semibold text-gray-900 mb-3 leading-tight">
-                                            20 Destinasi<br />Alam & Budaya
+                                        <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-2 sm:mb-3 leading-tight">
+                                            <span ref={destinationCountUp.ref}>{destinationCountUp.count}</span> Destinasi<br />Alam & Budaya
                                         </h2>
-                                        <p className="text-sm max-w-[200px] text-gray-500 leading-relaxed">
+                                        <p className="text-xs sm:text-sm max-w-[200px] text-gray-500 leading-relaxed">
                                             Menikmati keindahan pegunungan, air terjun, dan budaya khas Baturaden.
                                         </p>
                                     </div>
@@ -133,18 +162,18 @@ const StatistikDesa = () => {
                         </div>
 
                         {/* UMKM Card */}
-                        <div className="card w-3/5 bg-[#F5F5F5] border-2 border-gray-300 rounded-3xl overflow-hidden relative shadow-sm">
-                            <div className="card-body p-10">
-                                <div className="flex items-start justify-between gap-6">
+                        <div className="card w-full lg:w-3/5 bg-[#F5F5F5] border-2 border-gray-300 rounded-3xl overflow-hidden relative shadow-sm">
+                            <div className="card-body p-6 sm:p-8 lg:p-10">
+                                <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-6">
                                     {/* Left Content */}
                                     <div className="flex-1 relative z-10">
-                                        <div className="inline-block bg-white text-[#5B903A] text-sm font-medium px-4 py-1.5 rounded-full mb-4 border border-[#CCDDC2]">
+                                        <div className="inline-block bg-white text-[#5B903A] text-xs sm:text-sm font-medium px-3 sm:px-4 py-1 sm:py-1.5 rounded-full mb-3 sm:mb-4 border border-[#CCDDC2]">
                                             UMKM
                                         </div>
-                                        <h2 className="text-3xl font-semibold text-gray-900 mb-3 leading-tight">
-                                            150+ Usaha Lokal
+                                        <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-2 sm:mb-3 leading-tight">
+                                            <span ref={umkmCountUp.ref}>{umkmCountUp.count}</span> Usaha Lokal
                                         </h2>
-                                        <p className="text-md max-w-[180px] text-gray-500 leading-relaxed">
+                                        <p className="text-sm sm:text-md max-w-[180px] text-gray-500 leading-relaxed">
                                             Dukung produk asli desa, dari kerajinan tangan hingga kuliner khas.
                                         </p>
                                     </div>
@@ -208,10 +237,10 @@ const StatistikDesa = () => {
                     </div>
 
                     {/* Bottom Section - Population Chart & Tourism Stats */}
-                    <div className="flex gap-6 ">
+                    <div className={`flex flex-col lg:flex-row gap-4 sm:gap-6 animate-on-scroll ${isVisible ? 'animate-fade-in-up animation-delay-400' : ''}`}>
                         {/* Population Growth Chart */}
-                        <div className="card w-3/5 border-2 bg-[#F5F5F5] border-gray-300 rounded-3xl shadow-sm">
-                            <div className="card-body p-8">
+                        <div className="card w-full lg:w-3/5 border-2 bg-[#F5F5F5] border-gray-300 rounded-3xl shadow-sm">
+                            <div className="card-body p-6 sm:p-8">
                                 <div className="flex justify-between items-start mb-6">
                                     <h3 className="text-2xl font-semibold text-gray-900 leading-tight">
                                         Pertumbuhan<br />Penduduk
@@ -234,7 +263,7 @@ const StatistikDesa = () => {
                                             <li>
                                                 <a
                                                     onClick={() => setTimeRange('3months')}
-                                                    className={`rounded-lg ${timeRange === '3months' ? 'bg-[#5B903A]/10 text-[#5B903A]' : ''}`}
+                                                    className={`rounded-lg cursor-pointer ${timeRange === '3months' ? 'bg-[#5B903A]/10 text-[#5B903A]' : ''}`}
                                                 >
                                                     Last 3 Months
                                                 </a>
@@ -242,7 +271,7 @@ const StatistikDesa = () => {
                                             <li>
                                                 <a
                                                     onClick={() => setTimeRange('6months')}
-                                                    className={`rounded-lg ${timeRange === '6months' ? 'bg-[#5B903A]/10 text-[#5B903A]' : ''}`}
+                                                    className={`rounded-lg cursor-pointer ${timeRange === '6months' ? 'bg-[#5B903A]/10 text-[#5B903A]' : ''}`}
                                                 >
                                                     Last 6 Months
                                                 </a>
@@ -250,7 +279,7 @@ const StatistikDesa = () => {
                                             <li>
                                                 <a
                                                     onClick={() => setTimeRange('1year')}
-                                                    className={`rounded-lg ${timeRange === '1year' ? 'bg-[#5B903A]/10 text-[#5B903A]' : ''}`}
+                                                    className={`rounded-lg cursor-pointer ${timeRange === '1year' ? 'bg-[#5B903A]/10 text-[#5B903A]' : ''}`}
                                                 >
                                                     Last 1 Year
                                                 </a>
@@ -273,8 +302,8 @@ const StatistikDesa = () => {
                         </div>
 
                         {/* Tourism Stats Card - UPDATED */}
-                        <div className="card w-2/5 bg-[#F5F5F5] border-2 border-gray-300 rounded-3xl shadow-sm overflow-hidden relative">
-                            <div className="card-body p-10">
+                        <div className="card w-full lg:w-2/5 bg-[#F5F5F5] border-2 border-gray-300 rounded-3xl shadow-sm overflow-hidden relative">
+                            <div className="card-body p-6 sm:p-8 lg:p-10">
                                 {/* Decorative cards grid - with overflow effect (di atas) */}
                                 <div className="absolute -right-4 -top-24 left-6 w-[90%] h-max">
                                     <div className="grid grid-rows-2 gap-3 w-full h-full bg-[#CCDDC2] border-2 border-[#C0C0C0] px-2 py-5 rounded-xl">
@@ -321,8 +350,8 @@ const StatistikDesa = () => {
                                 <div className="relative z-10 mt-auto">
                                     <div className="flex justify-between items-start gap-6">
                                         <div className="flex-1">
-                                            <h2 className="text-4xl font-bold text-gray-900 mb-0 leading-tight">
-                                                50.000+
+                                            <h2 ref={touristCountUp.ref} className="text-4xl font-bold text-gray-900 mb-0 leading-tight">
+                                                {touristCountUp.count}+
                                             </h2>
                                             <p className="text-2xl font-semibold text-gray-900">
                                                 Wisatawan/Tahun
