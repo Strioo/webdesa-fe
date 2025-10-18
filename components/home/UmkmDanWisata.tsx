@@ -2,13 +2,19 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
 import { useCountUp } from '@/hooks/useCountUp'
+import { useScrollParallax } from '@/lib/animation'
 
 const UmkmDanWisata = () => {
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation(0.1)
   const { ref: umkmRef, isVisible: umkmVisible } = useScrollAnimation(0.1)   
   const { ref: wisataRef, isVisible: wisataVisible } = useScrollAnimation(0.1)
+
+  // Parallax effects
+  const { ref: umkmImageRef, y: umkmImageY } = useScrollParallax({ speed: 0.3 })
+  const { ref: wisataImageRef, y: wisataImageY } = useScrollParallax({ speed: 0.3 })
 
   // Count-up animations
   const umkmCountUp = useCountUp({ end: 120, duration: 2500, suffix: '+' })
@@ -46,16 +52,34 @@ const UmkmDanWisata = () => {
           }`}
         >
           {/* UMKM Image - Left (Lebih lebar) */}
-          <div className="lg:col-span-7 relative rounded-3xl overflow-hidden h-[400px] sm:h-[450px] lg:h-[500px] shadow-xl">
-            <Image
-              src="/assets/images/umkm-showcase.png"
-              alt="UMKM Baturaden"
-              fill
-              className="object-cover"
-            />
+          <motion.div 
+            ref={umkmImageRef as any}
+            className="lg:col-span-7 relative rounded-3xl overflow-hidden h-[400px] sm:h-[450px] lg:h-[500px] shadow-xl"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: umkmVisible ? 1 : 0, y: umkmVisible ? 0 : 40 }}
+            transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+            whileHover={{ 
+              scale: 1.02, 
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              transition: { duration: 0.3 }
+            }}
+          >
+            <motion.div style={{ y: umkmImageY }}>
+              <Image
+                src="/assets/images/umkm-showcase.png"
+                alt="UMKM Baturaden"
+                fill
+                className="object-cover"
+              />
+            </motion.div>
 
             {/* Glass Badge - Top Right */}
-            <div className="absolute top-12 right-14 bg-gray-300/10 backdrop-blur-xs border border-gray-300/50 rounded-lg p-4 pt-2">
+            <motion.div 
+              className="absolute top-12 right-14 bg-gray-300/10 backdrop-blur-xs border border-gray-300/50 rounded-lg p-4 pt-2"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: umkmVisible ? 1 : 0, scale: umkmVisible ? 1 : 0.8 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+            >
               <Image className="mx-auto" src="/assets/icons/top-widget.svg" alt="" width={45} height={45} />
               <div className="flex items-center gap-2 my-2">
                 <span className="text-md font-medium text-white">UMKM Aktif</span>
@@ -66,11 +90,16 @@ const UmkmDanWisata = () => {
               </div>
               <p ref={umkmCountUp.ref} className="text-5xl font-medium text-white mb-2">{umkmCountUp.count}</p>
               <p className="text-sm text-white">Terdaftar tahun ini</p>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* UMKM Content - Right (Lebih sempit) */}
-          <div className="lg:col-span-5 bg-[#F5F5F5] rounded-3xl p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between h-[400px] sm:h-[450px] lg:h-[500px]">
+          <motion.div 
+            className="lg:col-span-5 bg-[#F5F5F5] rounded-3xl p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between h-[400px] sm:h-[450px] lg:h-[500px]"
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: umkmVisible ? 1 : 0, x: umkmVisible ? 0 : 40 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+          >
             <div className="relative z-10">
               <p className="text-lg sm:text-xl lg:text-[28px] font-medium text-gray-900 leading-snug mb-4">
                 Dari tangan kreatif warga Baturaden lahir produk unggulan yang penuh nilai budaya dan kualitas. Temukan beragam kuliner khas, kerajinan, hingga inovasi lokal yang siap menemani aktivitas Anda. Mari dukung UMKM desa dan tumbuh bersama!
@@ -79,13 +108,31 @@ const UmkmDanWisata = () => {
 
             {/* Button - Mepet Bawah */}
             <div className="relative z-10">
-              <Link href="/umkm" className="cursor-pointer">
-                <button className="bg-[#5B903A] text-white font-medium ps-4 pe-2 py-2 rounded-full flex items-center gap-3 transition-all duration-500 shadow-lg cursor-pointer">
-                  Belanja Sekarang
-                  <div className="bg-white rounded-full w-12 h-12 flex items-center justify-center transition-transform duration-500">
+              <Link href="/umkm">
+                <motion.button 
+                  className="inline-flex items-center whitespace-nowrap bg-gradient-to-r from-[#5B903A] to-[#4a7a2f] text-white font-medium ps-4 pe-2 py-2 rounded-full gap-3 cursor-pointer will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B903A] focus-visible:ring-offset-2"
+                  style={{ boxShadow: '0 8px 20px -8px rgba(91, 144, 58, 0.5)' }}
+                  whileHover={{ 
+                    scale: 1.02,
+                    boxShadow: '0 12px 24px -8px rgba(91, 144, 58, 0.6)',
+                    filter: 'brightness(1.05)',
+                    transition: { duration: 0.2 }
+                  }}
+                  whileTap={{ 
+                    scale: 0.98,
+                    y: 1,
+                    transition: { duration: 0.1 }
+                  }}
+                >
+                  <span className="shrink-0">Belanja Sekarang</span>
+                  <motion.div 
+                    className="bg-white rounded-full w-12 h-12 flex items-center justify-center shrink-0"
+                    whileHover={{ rotate: 45, scale: 1.05 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                  >
                     <Image src="/assets/icons/arrow.svg" alt="Arrow" width={12} height={12} className="w-3" />
-                  </div>
-                </button>
+                  </motion.div>
+                </motion.button>
               </Link>
             </div>
 
@@ -118,7 +165,7 @@ const UmkmDanWisata = () => {
                 <div className="bg-gradient-to-tl from-50% to-100% from-[#F5F5F5] to-[#CCDDC2] rounded-lg"></div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Wisata Section - Bottom Row */}
@@ -141,13 +188,31 @@ const UmkmDanWisata = () => {
 
             {/* Button - Mepet Kanan Bawah */}
             <div className="relative z-10 flex justify-end">
-              <Link href="/wisata" className="cursor-pointer">
-                <button className="bg-[#5B903A] text-white font-medium ps-4 pe-2 py-2 rounded-full flex items-center gap-3 transition-all duration-500 shadow-lg cursor-pointer">
-                  Jelajahi Sekarang
-                  <div className="bg-white rounded-full w-12 h-12 flex items-center justify-center transition-transform duration-500">
+              <Link href="/wisata">
+                <motion.button 
+                  className="inline-flex items-center whitespace-nowrap bg-gradient-to-r from-[#5B903A] to-[#4a7a2f] text-white font-medium ps-4 pe-2 py-2 rounded-full gap-3 cursor-pointer will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B903A] focus-visible:ring-offset-2"
+                  style={{ boxShadow: '0 8px 20px -8px rgba(91, 144, 58, 0.5)' }}
+                  whileHover={{ 
+                    scale: 1.02,
+                    boxShadow: '0 12px 24px -8px rgba(91, 144, 58, 0.6)',
+                    filter: 'brightness(1.05)',
+                    transition: { duration: 0.2 }
+                  }}
+                  whileTap={{ 
+                    scale: 0.98,
+                    y: 1,
+                    transition: { duration: 0.1 }
+                  }}
+                >
+                  <span className="shrink-0">Jelajahi Sekarang</span>
+                  <motion.div 
+                    className="bg-white rounded-full w-12 h-12 flex items-center justify-center shrink-0"
+                    whileHover={{ rotate: 45, scale: 1.05 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                  >
                     <Image src="/assets/icons/arrow.svg" alt="Arrow" width={12} height={12} className="w-3" />
-                  </div>
-                </button>
+                  </motion.div>
+                </motion.button>
               </Link>
             </div>
 
@@ -183,16 +248,37 @@ const UmkmDanWisata = () => {
           </div>
 
           {/* Wisata Image - Right (Lebih lebar) */}
-          <div className="lg:col-span-7 relative rounded-3xl overflow-hidden h-[500px] shadow-xl">
-            <Image
-              src="/assets/images/wisata-showcase.jpg"
-              alt="Wisata Baturaden"
-              fill
-              className="object-cover"
-            />
+          <motion.div 
+            ref={wisataImageRef as any}
+            className="lg:col-span-7 relative rounded-3xl overflow-hidden h-[500px] shadow-xl"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: wisataVisible ? 1 : 0, y: wisataVisible ? 0 : 40 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] as any }}
+            whileHover={{ 
+              scale: 1.02, 
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3)',
+              transition: { duration: 0.3 }
+            }}
+          >
+            <motion.div style={{ y: wisataImageY }} className="w-full h-full">
+              <Image
+                src="/assets/images/wisata-showcase.jpg"
+                alt="Wisata Baturaden"
+                fill
+                className="object-cover"
+              />
+            </motion.div>
 
             {/* Glass Badge - Top Left */}
-            <div className="absolute top-8 left-8 bg-gray-300/10 backdrop-blur-xs border border-gray-300/50 rounded-lg p-4 pt-2">
+            <motion.div 
+              className="absolute top-8 left-8 bg-gray-300/10 backdrop-blur-xs border border-gray-300/50 rounded-lg p-4 pt-2"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ 
+                opacity: wisataVisible ? 1 : 0, 
+                scale: wisataVisible ? 1 : 0.8 
+              }}
+              transition={{ duration: 0.6, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] as any }}
+            >
               <Image className="mx-auto" src="/assets/icons/top-widget.svg" alt="" width={45} height={45} />
               <div className="flex items-center gap-2 my-2">
                 <span className="text-md font-medium text-white">Destinasi</span>
@@ -203,8 +289,8 @@ const UmkmDanWisata = () => {
               </div>
               <p ref={wisataVisitorCountUp.ref} className="text-5xl font-medium text-white mb-2">{wisataVisitorCountUp.count}</p>
               <p className="text-sm text-white">Kunjungan tahun ini</p>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </section>

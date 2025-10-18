@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Lato, Raleway } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
+import { AnimationProvider } from "@/lib/animation";
+import DockNavbar from "@/components/DockNavbar";
 
 const lato = Lato({
   variable: "--font-lato",
@@ -31,9 +33,12 @@ export default function RootLayout({
         className={`${lato.variable} ${raleway.variable} antialiased`}
         style={{ fontFamily: 'var(--font-lato)' }}
       >
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <AnimationProvider>
+          <AuthProvider>
+            {children}
+            <DockNavbar />
+          </AuthProvider>
+        </AnimationProvider>
       </body>
     </html>
   );

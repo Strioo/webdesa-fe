@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import { useEffect, useRef, useMemo } from 'react'
+import { motion } from 'framer-motion'
 import PopulationChart from '@/components/ui/PopulationChart'
 import { useCountUp } from '@/hooks/useCountUp'
 import { LayoutTextFlip } from '@/components/ui/TextFlip'
@@ -85,7 +86,24 @@ const HeroSection = () => {
         <div className="container max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-full min-h-screen flex items-end pb-10 sm:pb-16 lg:pb-20">
           <div className="flex flex-col lg:flex-row gap-6 w-full justify-between items-end">
             {/* Weather & Population Card */}
-            <div className="bg-[rgba(0,0,0,0.215)] backdrop-blur-xs border border-gray-400 shadow-xl rounded-3xl w-full lg:w-[30%] animate-on-scroll animate-fade-in-left">
+            <motion.div 
+              className="bg-[rgba(0,0,0,0.215)] backdrop-blur-xs border border-gray-400 shadow-xl rounded-3xl w-full lg:w-[30%]"
+              initial={{ x: -24, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ 
+                type: 'spring', 
+                stiffness: 100, 
+                damping: 15,
+                duration: 0.8
+              }}
+              whileHover={{ 
+                y: -2, 
+                scale: 1.02,
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)',
+                transition: { duration: 0.2 }
+              }}
+              whileTap={{ scale: 0.98 }}
+            >
               <div className="bg-gradient-to-t from-0% to-30% from-[#ffffff7b] to-transparent rounded-3xl space-y-4 p-5">
                 <Image 
                   className="mx-auto" 
@@ -178,15 +196,38 @@ const HeroSection = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Hero Content */}
-            <div className="w-full lg:w-[48%] flex flex-col justify-end animate-on-scroll animate-fade-in-right animation-delay-300">
-              <div className="mb-4">
-                <span className="inline-block bg-white/10 backdrop-blur-md border border-white/30 text-white px-4 py-2 sm:px-5 sm:py-3 rounded-full text-xs sm:text-sm font-medium shadow-lg hover:bg-white/20 transition-all duration-300 hover:scale-105">
+            <motion.div 
+              className="w-full lg:w-[48%] flex flex-col justify-end"
+              initial={{ x: 24, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ 
+                type: 'spring',
+                stiffness: 80,
+                damping: 15,
+                delay: 0.3,
+                duration: 0.8
+              }}
+            >
+              <motion.div 
+                className="mb-4"
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+              >
+                <motion.span 
+                  className="inline-block bg-white/10 backdrop-blur-md border border-white/30 text-white px-4 py-2 sm:px-5 sm:py-3 rounded-full text-xs sm:text-sm font-medium shadow-lg cursor-default"
+                  whileHover={{ 
+                    scale: 1.05,
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    transition: { duration: 0.2 }
+                  }}
+                >
                   Pesona Alam Banyumas
-                </span>
-              </div>
+                </motion.span>
+              </motion.div>
 
               <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight mb-4 sm:mb-6">
                 <LayoutTextFlip 
@@ -203,12 +244,29 @@ const HeroSection = () => {
                 Banyumas yang menenangkan.
               </p>
 
-              <button
-                className="w-max bg-white text-black font-medium ps-4 pe-2 py-2 rounded-full flex items-center gap-3 transition-all duration-500 hover:gap-4 cursor-pointer"
+              <motion.button
+                className="inline-flex items-center justify-center w-max bg-white text-black font-medium pl-5 pr-2 py-2 rounded-full gap-3 cursor-pointer relative will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
                 aria-label="Kunjungi Sekarang"
+                whileHover={{ 
+                  scale: 1.03,
+                  boxShadow: '0 12px 28px -8px rgba(0, 0, 0, 0.35)',
+                }}
+                whileTap={{ 
+                  scale: 0.98,
+                }}
+                transition={{ 
+                  type: 'spring', 
+                  stiffness: 400, 
+                  damping: 25,
+                  duration: 0.15
+                }}
               >
-                Kunjungi Sekarang
-                <div className="bg-[#5B903A] rounded-full w-12 h-12 flex items-center justify-center transition-transform duration-500">
+                <span className="shrink-0 select-none">Kunjungi Sekarang</span>
+                <motion.div 
+                  className="bg-[#5B903A] rounded-full w-12 h-12 flex items-center justify-center shrink-0"
+                  whileHover={{ rotate: 45, scale: 1.08 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                >
                   <Image 
                     src="/assets/icons/arrow.svg" 
                     alt="Arrow" 
@@ -216,9 +274,9 @@ const HeroSection = () => {
                     height={12} 
                     className="w-3 invert" 
                   />
-                </div>
-              </button>
-            </div>
+                </motion.div>
+              </motion.button>
+            </motion.div>
           </div>
         </div>
       </section>

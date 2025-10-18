@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface Testimonial {
   id: number
@@ -16,6 +17,7 @@ const TestimonialSection = () => {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [direction, setDirection] = useState<'next' | 'prev'>('next')
   const [isVisible, setIsVisible] = useState(false)
+  const [isPaused, setIsPaused] = useState(false)
   const sectionRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -75,22 +77,45 @@ const TestimonialSection = () => {
     }
   ]
 
-  // Auto slide every 5 seconds
+  // Auto slide with pause on hover using RAF for smooth animation
   useEffect(() => {
-    const interval = setInterval(() => {
-      handleNext()
-    }, 5000)
-
-    return () => clearInterval(interval)
+    if (isPaused) return
+    
+    let rafId: number
+    let lastTime = Date.now()
+    const interval = 5000 // 5 seconds
+    
+    const animate = () => {
+      if (isPaused) return
+      
+      const currentTime = Date.now()
+      const elapsed = currentTime - lastTime
+      
+      if (elapsed >= interval && !isTransitioning) {
+        handleNext()
+        lastTime = currentTime
+      }
+      
+      rafId = requestAnimationFrame(animate)
+    }
+    
+    // Start animation only if not paused and not transitioning
+    if (!isPaused && !isTransitioning) {
+      rafId = requestAnimationFrame(animate)
+    }
+    
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeIndex])
+  }, [activeIndex, isTransitioning, isPaused])
 
   const handleNext = () => {
     if (isTransitioning) return
     setDirection('next')
     setIsTransitioning(true)
     setActiveIndex((prev) => (prev + 1) % testimonials.length)
-    setTimeout(() => setIsTransitioning(false), 700)
+    setTimeout(() => setIsTransitioning(false), 500)
   }
 
   const handlePrev = () => {
@@ -98,7 +123,7 @@ const TestimonialSection = () => {
     setDirection('prev')
     setIsTransitioning(true)
     setActiveIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length)
-    setTimeout(() => setIsTransitioning(false), 700)
+    setTimeout(() => setIsTransitioning(false), 500)
   }
 
   const handleThumbnailClick = (index: number) => {
@@ -106,7 +131,7 @@ const TestimonialSection = () => {
     setDirection(index > activeIndex ? 'next' : 'prev')
     setIsTransitioning(true)
     setActiveIndex(index)
-    setTimeout(() => setIsTransitioning(false), 700)
+    setTimeout(() => setIsTransitioning(false), 500)
   }
 
   // Get thumbnails that exclude the active/main image
@@ -118,6 +143,26 @@ const TestimonialSection = () => {
     }
     return visible
   }
+
+  // Keyboard navigation support - after function definitions
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        handlePrev()
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault()
+        handleNext()
+      } else if (e.key === ' ') {
+        e.preventDefault()
+        setIsPaused(prev => !prev)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeIndex, isTransitioning])
 
   return (
     <section ref={sectionRef} className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">
@@ -138,35 +183,79 @@ const TestimonialSection = () => {
 
         {/* Content Grid */}
         <div className={`flex flex-col lg:flex-row gap-6 sm:gap-8 animate-on-scroll ${isVisible ? 'animate-fade-in-up animation-delay-200' : ''}`}>
-          {/* Left Side - Main Image (Person) with slide animation */}
-          <div className="h-[400px] sm:h-[500px] lg:h-[552px] w-full lg:w-2/5 rounded-3xl overflow-hidden shadow-xl bg-[#F8F8F8]">
+          {/* Left Side - Main Image (Person) with smooth drag interaction */}
+          <motion.div 
+            className="h-[400px] sm:h-[500px] lg:h-[552px] w-full lg:w-2/5 rounded-3xl overflow-hidden shadow-xl bg-[#F8F8F8] cursor-grab active:cursor-grabbing will-change-transform"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.15}
+            dragTransition={{ 
+              power: 0.3,
+              timeConstant: 200,
+              bounceStiffness: 400, 
+              bounceDamping: 35,
+              min: -100,
+              max: 100
+            }}
+            onDragEnd={(e, { offset, velocity }) => {
+              const swipe = offset.x * velocity.x
+              const swipeThreshold = 800
+              
+              if (swipe > swipeThreshold || offset.x > 100) {
+                handlePrev()
+              } else if (swipe < -swipeThreshold || offset.x < -100) {
+                handleNext()
+              }
+            }}
+            whileHover={{ scale: 1.015 }}
+            onHoverStart={() => setIsPaused(true)}
+            onHoverEnd={() => setIsPaused(false)}
+            transition={{ 
+              type: 'spring',
+              stiffness: 300,
+              damping: 30,
+              duration: 0.25
+            }}
+          >
             <div className="relative w-full h-full">
-              {testimonials.map((testimonial, index) => {
-                const isActive = index === activeIndex
-                const isPrev = direction === 'prev'
-
-                return (
-                  <div
-                    key={testimonial.id}
-                    className={`absolute inset-0 transition-all duration-700 ease-out bg-transparent ${isActive
-                      ? 'opacity-100 translate-x-0 scale-100 z-10'
-                      : isPrev
-                        ? 'opacity-0 translate-x-full scale-95 z-0'
-                        : 'opacity-0 -translate-x-full scale-95 z-0'
-                      }`}
-                  >
-                    <Image
-                      src={testimonial.image}
-                      alt={testimonial.name}
-                      fill
-                      className="object-contain"
-                      priority={index === 0}
-                    />
-                  </div>
-                )
-              })}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeIndex}
+                  initial={{
+                    opacity: 0,
+                    x: direction === 'next' ? 60 : -60,
+                    y: 12,
+                    scale: 0.96
+                  }}
+                  animate={{
+                    opacity: 1,
+                    x: 0,
+                    y: 0,
+                    scale: 1
+                  }}
+                  exit={{
+                    opacity: 0,
+                    x: direction === 'next' ? -60 : 60,
+                    y: 12,
+                    scale: 0.96
+                  }}
+                  transition={{
+                    duration: 0.4,
+                    ease: [0.32, 0.72, 0, 1]
+                  }}
+                  className="absolute inset-0"
+                >
+                  <Image
+                    src={testimonials[activeIndex].image}
+                    alt={testimonials[activeIndex].name}
+                    fill
+                    className="object-contain"
+                    priority={activeIndex === 0}
+                  />
+                </motion.div>
+              </AnimatePresence>
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Side - Testimonial Content */}
           <div className="space-y-14 w-full lg:w-3/5">
@@ -180,29 +269,34 @@ const TestimonialSection = () => {
 
                 {/* Quote Text */}
                 <div className="relative z-10 mt-8">
-                  {testimonials.map((testimonial, index) => (
-                    <p
-                      key={testimonial.id}
-                      className={`text-white text-lg md:text-2xl leading-relaxed transition-opacity duration-500 ${index === activeIndex ? 'opacity-100' : 'opacity-0 absolute inset-0'
-                        }`}
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key={activeIndex}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as any }}
+                      className="text-white text-lg md:text-2xl leading-relaxed"
                     >
-                      "{testimonial.quote}"
-                    </p>
-                  ))}
+                      "{testimonials[activeIndex].quote}"
+                    </motion.p>
+                  </AnimatePresence>
                 </div>
 
                 {/* Author Info */}
                 <div className="relative z-10 mt-6">
-                  {testimonials.map((testimonial, index) => (
-                    <div
-                      key={testimonial.id}
-                      className={`transition-opacity duration-500 ${index === activeIndex ? 'opacity-100' : 'opacity-0 absolute bottom-0'
-                        }`}
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={`author-${activeIndex}`}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.4, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] as any }}
                     >
-                      <p className="text-white font-medium text-2xl">{testimonial.name}</p>
-                      <p className="text-white/90 text-lg">{testimonial.role}</p>
-                    </div>
-                  ))}
+                      <p className="text-white font-medium text-2xl">{testimonials[activeIndex].name}</p>
+                      <p className="text-white/90 text-lg">{testimonials[activeIndex].role}</p>
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
 
                 {/* Quote Icon Bottom */}
@@ -213,45 +307,66 @@ const TestimonialSection = () => {
 
               {/* Desktop Navigation Arrows */}
               <div className="hidden lg:flex gap-4 justify-center items-center">
-                <button
+                <motion.button
                   onClick={handlePrev}
                   disabled={isTransitioning}
-                  className="w-10 h-10 rounded-full bg-transparent border hover:bg-gray-100 flex items-center justify-center transition-all duration-300 disabled:opacity-50 cursor-pointer"
+                  className="w-10 h-10 rounded-full bg-transparent border flex items-center justify-center disabled:opacity-50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B903A] focus-visible:ring-offset-2"
+                  whileHover={{ scale: 1.1, backgroundColor: 'rgba(0, 0, 0, 0.05)' }}
+                  whileTap={{ scale: 0.95 }}
                   aria-label="Previous testimonial"
+                  aria-controls="testimonial-carousel"
                 >
-                  <Image src="/assets/icons/arrowright.png" alt="Arrow" width={12} height={12} className="w-5 rotate-180" />
-                </button>
+                  <Image src="/assets/icons/arrowright.png" alt="" width={12} height={12} className="w-5 rotate-180" />
+                </motion.button>
 
-                <button
+                <motion.button
                   onClick={handleNext}
                   disabled={isTransitioning}
-                  className="w-10 h-10 rounded-full bg-gray-900 hover:bg-gray-800 flex items-center justify-center transition-all duration-300 disabled:opacity-50 cursor-pointer"
+                  className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center disabled:opacity-50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B903A] focus-visible:ring-offset-2"
+                  whileHover={{ scale: 1.1, backgroundColor: 'rgb(31, 41, 55)' }}
+                  whileTap={{ scale: 0.95 }}
                   aria-label="Next testimonial"
+                  aria-controls="testimonial-carousel"
                 >
-                  <Image src="/assets/icons/arrowright.png" alt="Arrow" width={12} height={12} className="w-5 invert" />
-                </button>
+                  <Image src="/assets/icons/arrowright.png" alt="" width={12} height={12} className="w-5 invert" />
+                </motion.button>
               </div>
             </div>
 
-            {/* Thumbnails - Larger size to fill space (266px height = 552 - 280 - 6px gap) */}
-            <div className="flex gap-5 justify-between items-center overflow-hidden h-[166px]">
+            {/* Thumbnails - Fixed clipping with overflow-visible and proper height */}
+            <div className="flex gap-5 justify-between items-center overflow-visible min-h-[190px] pt-3 pb-3">
               {getVisibleThumbnails().map((testimonial, idx) => (
-                <button
+                <motion.button
                   key={`${testimonial.id}-${idx}`}
                   onClick={() => handleThumbnailClick(testimonial.originalIndex)}
                   disabled={isTransitioning}
-                  className="relative rounded-2xl overflow-hidden flex-1 h-full transition-all duration-700 ease-out bg-[#F8F8F8] opacity-60 hover:opacity-100 hover:scale-105 cursor-pointer"
-                  style={{
-                    transform: `translateX(${isTransitioning ? (direction === 'next' ? '-24px' : '24px') : '0'})`
+                  className="relative rounded-2xl overflow-hidden flex-1 h-[166px] bg-[#F8F8F8] cursor-pointer will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B903A] focus-visible:ring-offset-2 transition-shadow"
+                  initial={{ opacity: 0.6 }}
+                  whileHover={{ 
+                    opacity: 1, 
+                    scale: 1.08,
+                    y: -8,
+                    boxShadow: '0 16px 32px -8px rgba(0, 0, 0, 0.25)',
                   }}
+                  whileTap={{ scale: 0.96 }}
+                  animate={{
+                    x: isTransitioning ? (direction === 'next' ? -24 : 24) : 0,
+                  }}
+                  transition={{ 
+                    type: 'spring',
+                    stiffness: 300,
+                    damping: 25,
+                    duration: 0.3
+                  }}
+                  aria-label={`View testimonial from ${testimonial.name}`}
                 >
                   <Image
                     src={testimonial.image}
                     alt={testimonial.name}
                     fill
-                    className="object-contain"
+                    className="object-contain pointer-events-none"
                   />
-                </button>
+                </motion.button>
               ))}
             </div>
 
