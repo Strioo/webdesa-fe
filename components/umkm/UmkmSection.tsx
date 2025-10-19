@@ -43,11 +43,10 @@ const data = [
 
 export default function UmkmSection() {
   return (
-    <section className="w-full py-16" style={{ backgroundColor: "#F8F8F8" }}>
-      <div
-        className="mx-auto"
-        style={{ marginLeft: "34px", marginRight: "34px" }}
-      >
+    <section
+      className="w-full py-16 bg-[#F8F8F8]"
+    >
+      <div className="mx-auto px-[34px] max-w-[1280px] mt-10">
         {/* Grid Responsive */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[24px] justify-items-center">
           {data.map((item, index) => (
