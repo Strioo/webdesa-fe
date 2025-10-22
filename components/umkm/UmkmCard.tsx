@@ -1,60 +1,89 @@
-"use client";
+'use client'
 
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion'
+import Image from 'next/image'
+import Link from 'next/link'
 
-interface UmkmCardProps {
-  title: string;
-  description: string;
-  image: string;
+export interface UmkmProduct {
+  id: string
+  title: string
+  description: string
+  price: number
+  image: string
+  category?: string
 }
 
-export default function UmkmCard({ title, description, image }: UmkmCardProps) {
+interface UmkmCardProps {
+  product: UmkmProduct
+  index: number
+}
+
+export default function UmkmCard({ product, index }: UmkmCardProps) {
+  const { id, title, description, price, image } = product
+
   return (
     <motion.div
-      className="rounded-[16px] border border-[#C0C0C0]/50 bg-transparent flex flex-col items-center justify-between overflow-hidden transition-all duration-500 w-full max-w-[440px] mx-auto"
-      style={{ height: "390px" }}
-      whileHover={{
-        scale: 1.02,
-        backgroundColor: "#FFFFFF",
-        borderColor: "#EBEBEB",
-        boxShadow: "0px 4px 40px 1px rgba(0, 0, 0, 0.08)",
-      }}
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ 
+        duration: 0.35, 
+        delay: index * 0.08,
+        ease: [0.16, 1, 0.3, 1]
+      }}
+      className="group h-full"
     >
-      <img
-        src={image}
-        alt={title}
-        className="object-cover rounded-t-[16px] mt-3"
-        style={{
-          width: "94%",
-          height: "180px",
+      <motion.div
+        className="h-full bg-white rounded-2xl shadow-md overflow-hidden flex flex-col cursor-pointer will-change-transform"
+        whileHover={{ 
+          y: -2,
+          boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.12)'
         }}
-      />
-
-      <div className="flex flex-col justify-between flex-grow text-left w-full px-4 pt-3 pb-4">
-        <div>
-          <h3 className="font-semibold text-[#000000] text-lg mb-2">{title}</h3>
-          <p className="text-[#767676] text-sm leading-relaxed">
-            {description}
-          </p>
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+      >
+        {/* Image */}
+        <div className="relative aspect-[4/3] overflow-hidden">
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.3 }}
+            className="w-full h-full"
+          >
+            <Image
+              src={image}
+              alt={title}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover"
+            />
+          </motion.div>
         </div>
 
-        <motion.button
-          whileHover={{
-            backgroundColor: "#5B903A",
-            borderColor: "#CCDCC2",
-            color: "#FFFFFF",
-            scale: 1.03,
-          }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="mt-4 w-full border border-[#C0C0C0] text-[#000000] rounded-[100px] bg-white font-medium text-base py-2.5"
-        >
-          Beli Sekarang
-        </motion.button>
-      </div>
+        {/* Content */}
+        <div className="flex-1 p-6 flex flex-col text-center sm:text-left items-center sm:items-start">
+          {/* Title */}
+          <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
+            {title}
+          </h3>
+
+          {/* Description */}
+          <p className="text-sm text-gray-600 mb-6 line-clamp-3 leading-relaxed flex-1">
+            {description}
+          </p>
+
+          {/* CTA Button */}
+          <Link href={`/umkm/${id}`} className="w-full block">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              className="w-full py-3 bg-[#5B903A] text-white font-semibold rounded-full hover:bg-[#4a7a2f] hover:shadow-md transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B903A] focus-visible:ring-offset-2 min-h-[44px] cursor-pointer will-change-transform"
+              suppressHydrationWarning
+            >
+              Detail UMKM
+            </motion.button>
+          </Link>
+        </div>
+      </motion.div>
     </motion.div>
-  );
+  )
 }
