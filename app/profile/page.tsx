@@ -1,7 +1,10 @@
-import HeroProfile from '@/components/profile/HeroProfile'
-import TimelineSection from '@/components/profile/TimelineSection'
-import VisiMisiSection from '@/components/profile/VisiMisiSection'
-import PejabatDesaSection from '@/components/profile/PejabatDesaSection'
+import ProfileHeroSection from '@/components/profile/HeroProfile'
+import ProfileTimelineSection from '@/components/profile/TimelineSectionAceternity'
+import ProfileVisiMisiSection from '@/components/profile/VisiMisiSection'
+import ProfileOfficialsSection from '@/components/profile/OfficialsSection'
+import Navbar from '@/components/Navbar'
+import DockNavbar from '@/components/DockNavbar'
+import Footer from '@/components/Footer'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -11,11 +14,16 @@ export const metadata: Metadata = {
 
 export default function ProfilePage() {
   return (
-    <main className="min-h-screen bg-white overflow-x-hidden">
-      <HeroProfile />
-      <TimelineSection />
-      <VisiMisiSection />
-      <PejabatDesaSection />
-    </main>
+    <>
+      <Navbar />
+      <DockNavbar />
+      <main className="min-h-screen bg-white overflow-x-hidden">
+        <ProfileHeroSection />
+        <ProfileTimelineSection />
+        <ProfileVisiMisiSection />
+        <ProfileOfficialsSection />
+      </main>
+      <Footer />
+    </>
   )
 }

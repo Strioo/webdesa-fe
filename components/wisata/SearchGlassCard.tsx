@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
+import { useSmoothScroll } from '@/hooks/useSmoothScroll'
 
 /**
  * SearchGlassCard - Smart Search with AI Recommendation
@@ -16,6 +17,7 @@ interface SearchGlassCardProps {
 
 export default function SearchGlassCard({ onAIRecommend }: SearchGlassCardProps) {
   const router = useRouter()
+  const { scrollTo } = useSmoothScroll({ offset: 80, duration: 1000, easing: 'easeInOut' })
   const [location, setLocation] = useState('')
   const [numPeople, setNumPeople] = useState('2')
   const [maxPrice, setMaxPrice] = useState('')
@@ -30,7 +32,7 @@ export default function SearchGlassCard({ onAIRecommend }: SearchGlassCardProps)
     if (params.toString()) {
       router.push(`/wisata?${params.toString()}#destinations`)
     } else {
-      document.getElementById('destinations')?.scrollIntoView({ behavior: 'smooth' })
+      scrollTo('destinations')
     }
   }
 
