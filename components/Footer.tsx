@@ -1,11 +1,36 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
+import { useState, useEffect, useRef } from 'react'
 
 const Footer = () => {
+    const [isVisible, setIsVisible] = useState(false)
+    const footerRef = useRef<HTMLElement>(null)
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setIsVisible(entry.isIntersecting)
+            },
+            { threshold: 0.1 }
+        )
+
+        if (footerRef.current) {
+            observer.observe(footerRef.current)
+        }
+
+        return () => {
+            if (footerRef.current) {
+                observer.unobserve(footerRef.current)
+            }
+        }
+    }, [])
+
     return (
-        <footer className="bg-[#F5F5F5] py-16 pb-3 px-4 sm:px-6 lg:px-8">
+        <footer ref={footerRef} className="bg-[#F5F5F5] py-12 sm:py-16 pb-3 px-4 sm:px-6 lg:px-8">
             <div className="max-w-[1400px] mx-auto">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-50 mb-12">
+                <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-12 mb-8 sm:mb-12 animate-on-scroll ${isVisible ? 'animate-fade-in-up' : ''}`}>
                     {/* Brand Section */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-3">
@@ -26,7 +51,7 @@ const Footer = () => {
                             <Link
                                 href="https://instagram.com"
                                 target="_blank"
-                                className="w-10 h-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center transition-all duration-300 shadow-sm"
+                                className="w-10 h-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center transition-all duration-300 shadow-sm cursor-pointer"
                                 aria-label="Instagram"
                             >
                                 <svg className="w-5 h-5 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
@@ -36,7 +61,7 @@ const Footer = () => {
                             <Link
                                 href="https://facebook.com"
                                 target="_blank"
-                                className="w-10 h-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center transition-all duration-300 shadow-sm"
+                                className="w-10 h-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center transition-all duration-300 shadow-sm cursor-pointer"
                                 aria-label="Facebook"
                             >
                                 <svg className="w-5 h-5 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
@@ -46,7 +71,7 @@ const Footer = () => {
                             <Link
                                 href="https://twitter.com"
                                 target="_blank"
-                                className="w-10 h-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center transition-all duration-300 shadow-sm"
+                                className="w-10 h-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center transition-all duration-300 shadow-sm cursor-pointer"
                                 aria-label="Twitter"
                             >
                                 <svg className="w-5 h-5 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
@@ -56,7 +81,7 @@ const Footer = () => {
                             <Link
                                 href="https://google.com"
                                 target="_blank"
-                                className="w-10 h-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center transition-all duration-300 shadow-sm"
+                                className="w-10 h-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center transition-all duration-300 shadow-sm cursor-pointer"
                                 aria-label="Google"
                             >
                                 <svg className="w-5 h-5 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
@@ -74,27 +99,27 @@ const Footer = () => {
                         <h4 className="text-lg font-semibold text-gray-900 mb-4">Jelajahi Lebih Lanjut:</h4>
                         <ul className="space-y-3">
                             <li>
-                                <Link href="/profil-desa" className="text-gray-600 hover:text-gray-900 transition-colors duration-300">
+                                <Link href="/profil-desa" className="text-gray-600 hover:text-gray-900 transition-colors duration-300 cursor-pointer">
                                     Profil Desa
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/umkm" className="text-gray-600 hover:text-gray-900 transition-colors duration-300">
+                                <Link href="/umkm" className="text-gray-600 hover:text-gray-900 transition-colors duration-300 cursor-pointer">
                                     UMKM
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/wisata" className="text-gray-600 hover:text-gray-900 transition-colors duration-300">
+                                <Link href="/wisata" className="text-gray-600 hover:text-gray-900 transition-colors duration-300 cursor-pointer">
                                     Wisata
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/pembangunan" className="text-gray-600 hover:text-gray-900 transition-colors duration-300">
+                                <Link href="/pembangunan" className="text-gray-600 hover:text-gray-900 transition-colors duration-300 cursor-pointer">
                                     Pembangunan
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/laporan" className="text-gray-600 hover:text-gray-900 transition-colors duration-300">
+                                <Link href="/laporan" className="text-gray-600 hover:text-gray-900 transition-colors duration-300 cursor-pointer">
                                     Laporan
                                 </Link>
                             </li>

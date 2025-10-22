@@ -6,7 +6,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const publicRoutes = ['/', '/login', '/register'];
-  const protectedRoutes = ['/dashboard', '/profile'];
+  const protectedRoutes = ['/dashboard'];
 
   const isProtectedRoute = protectedRoutes.some(route => 
     pathname.startsWith(route)
