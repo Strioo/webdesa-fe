@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
-import { MOCK_DESTINATIONS } from '@/lib/types'
-import WisataDetailClient from './WisataDetailClient'
+import WisataDetailClientNew from './WisataDetailClient'
 
 interface PageProps {
   params: {
@@ -9,44 +8,30 @@ interface PageProps {
   }
 }
 
-// Generate static params for SSG (optional)
-export async function generateStaticParams() {
-  return Object.keys(MOCK_DESTINATIONS).map((slug) => ({
-    slug,
-  }))
-}
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
 
-// Metadata generation
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const destination = MOCK_DESTINATIONS[params.slug]
-
-  if (!destination) {
-    return {
-      title: 'Destinasi Tidak Ditemukan',
+// Server Component - Fetch data
+export default async function WisataDetailPage({ params }: PageProps) {
+  try {
+    // Fetch wisata data from API using native fetch (server-side)
+    const response = await fetch(`${API_BASE_URL}/wisata/slug/${params.slug}`, {
+      cache: 'no-store', // Disable caching for dynamic data
+    })
+    
+    if (!response.ok) {
+      notFound()
     }
-  }
 
-  return {
-    title: `${destination.name} - Wisata Baturaden`,
-    description: destination.description.substring(0, 160),
-    openGraph: {
-      title: destination.name,
-      description: destination.description,
-      images: [destination.images[0].src],
-    },
-  }
-}
+    const result = await response.json()
+    
+    if (!result.success || !result.data) {
+      notFound()
+    }
 
-// Server Component
-export default function WisataDetailPage({ params }: PageProps) {
-  // Get destination data from mock
-  const destination = MOCK_DESTINATIONS[params.slug]
-
-  // 404 if destination not found
-  if (!destination) {
+    // Pass data to client component
+    return <WisataDetailClientNew wisataData={result.data} />
+  } catch (error) {
+    console.error('Error fetching wisata:', error)
     notFound()
   }
-
-  // Pass data to client component
-  return <WisataDetailClient destination={destination} />
 }

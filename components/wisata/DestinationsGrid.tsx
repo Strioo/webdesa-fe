@@ -2,7 +2,8 @@
 
 import { motion } from 'framer-motion'
 import DestinationCard, { type Destination } from './DestinationCard'
-import { useMemo } from 'react'
+import { useMemo, useEffect, useState } from 'react'
+import { wisataApi } from '@/lib/api'
 
 interface DestinationsGridProps {
   searchParams?: {
@@ -12,62 +13,48 @@ interface DestinationsGridProps {
   }
 }
 
-// Sample data - sesuai dengan gambar desain
-const DESTINATIONS: Destination[] = [
-  {
-    id: 'lokawisata',
-    name: 'Lokawisata Baturaden',
-    description: 'Destinasi utama di Baturaden dengan panorama alam pegunungan, air terjun, dan tempat rekreasi keluarga dengan fasilitas lengkap.',
-    price: 25000,
-    image: '/assets/images/bg-hero.png',
-    location: 'Baturaden',
-  },
-  {
-    id: 'bukit-bintang',
-    name: 'Bukit Bintang Baturaden',
-    description: 'Nikmati keindahan langit malam dan ketenangan dengan pemandangan lampu kota Purwokerto. Cocok untuk bersenang-senang.',
-    price: 15000,
-    image: '/assets/images/bg-hero.png',
-    location: 'Baturaden',
-  },
-  {
-    id: 'adventure-forest',
-    name: 'Baturaden Adventure Forest',
-    description: 'Tempat ideal untuk pecinta alam dan tantangan. Nikmati aktivitas seperti trekking, flying fox, dan edukasi konservasi lingkungan.',
-    price: 30000,
-    image: '/assets/images/bg-hero.png',
-    location: 'Baturaden',
-  },
-  {
-    id: 'gurau',
-    name: 'Gurau Baturaden',
-    description: 'Spot wisata dengan suasana pedesaan, area camping, dan pemandangan sawah yang menenangkan - cocok untuk healing dan foto estetik.',
-    price: 10000,
-    image: '/assets/images/bg-hero.png',
-    location: 'Baturaden',
-  },
-  {
-    id: 'bhumi-bambu',
-    name: 'Bhumi Bambu Baturaden',
-    description: 'Wisata dengan konsep bambu alami dan arsitektur unik. Dilengkapi spot foto, taman bambu, serta kuliner khas pegunungan.',
-    price: 20000,
-    image: '/assets/images/bg-hero.png',
-    location: 'Baturaden',
-  },
-  {
-    id: 'taman-botani',
-    name: 'Taman Botani Baturaden',
-    description: 'Surga bagi pecinta tanaman dan fotografi. Ratusan koleksi flora tropis dan bunga warna-warni menciptakan suasana taman yang sejuk dan indah.',
-    price: 20000,
-    image: '/assets/images/bg-hero.png',
-    location: 'Baturaden',
-  },
-]
-
 export default function DestinationsGrid({ searchParams }: DestinationsGridProps) {
+  const [destinations, setDestinations] = useState<Destination[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchWisata = async () => {
+      try {
+        setLoading(true)
+        const response = await wisataApi.getAll()
+        
+        if (response.success && Array.isArray(response.data)) {
+          // Transform backend data ke format frontend
+          const transformedData: Destination[] = response.data
+            .filter((w: any) => w.isAktif)
+            .map((wisata: any) => ({
+              id: wisata.id,
+              slug: wisata.slug,
+              name: wisata.nama,
+              description: wisata.deskripsi,
+              price: wisata.harga || 0,
+              image: wisata.foto 
+                ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${wisata.foto}` 
+                : '/assets/images/bg-hero.png',
+              location: wisata.lokasi || 'Baturaden',
+            }))
+          
+          setDestinations(transformedData)
+        }
+      } catch (error) {
+        console.error('Error fetching wisata:', error)
+        setDestinations([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchWisata()
+  }, [])
+  
   // Filter destinations based on search params
   const filteredDestinations = useMemo(() => {
-    let filtered = [...DESTINATIONS]
+    let filtered = [...destinations]
 
     // Filter by query (nama wisata)
     if (searchParams?.q) {
@@ -97,7 +84,7 @@ export default function DestinationsGrid({ searchParams }: DestinationsGridProps
     }
 
     return filtered
-  }, [searchParams])
+  }, [destinations, searchParams])
 
   const hasFilters = searchParams?.q || searchParams?.loc || searchParams?.max
   const hasResults = filteredDestinations.length > 0
@@ -123,7 +110,7 @@ export default function DestinationsGrid({ searchParams }: DestinationsGridProps
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
             </svg>
             <span>
-              Menampilkan {filteredDestinations.length} dari {DESTINATIONS.length} destinasi
+              Menampilkan {filteredDestinations.length} dari {destinations.length} destinasi
             </span>
           </motion.div>
         )}

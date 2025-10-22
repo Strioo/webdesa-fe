@@ -150,7 +150,6 @@ export const laporanApi = {
   create: (data: any) => apiClient.post('/laporan/create', data),
   update: (id: string, data: any) => apiClient.put(`/laporan/update/${id}`, data),
   delete: (id: string) => apiClient.delete(`/laporan/delete/${id}`),
-  // FIX: Kirim langsung sebagai object flat, bukan nested
   updateStatus: (id: string, data: { status: string; tanggapan?: string }) => 
     apiClient.patch(`/laporan/status/${id}`, data),
 };
@@ -158,6 +157,7 @@ export const laporanApi = {
 export const wisataApi = {
   getAll: () => apiClient.get('/wisata/getall'),
   getById: (id: string) => apiClient.get(`/wisata/get/${id}`),
+  getBySlug: (slug: string) => apiClient.get(`/wisata/slug/${slug}`),
   create: (data: any) => apiClient.post('/wisata/create', data),
   update: (id: string, data: any) => apiClient.put(`/wisata/update/${id}`, data),
   delete: (id: string) => apiClient.delete(`/wisata/delete/${id}`),
@@ -171,11 +171,13 @@ export const umkmApi = {
   delete: (id: string) => apiClient.delete(`/umkm/delete/${id}`),
 };
 
+
 export const transactionApi = {
-  getAll: () => apiClient.get('/transactions/getall'),
-  getById: (id: string) => apiClient.get(`/transactions/${id}`),
-  getMy: () => apiClient.get('/transactions/my-transactions'),
   create: (data: any) => apiClient.post('/transactions/create', data),
+  getById: (id: string) => apiClient.get(`/transactions/${id}`),
+  getByOrderId: (orderId: string) => apiClient.get(`/transactions/order/${orderId}`),
+  getAll: () => apiClient.get('/transactions/getall'),
+  getMyTransactions: () => apiClient.get('/transactions/my-transactions'),
 };
 
 export const userApi = {

@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    // Izinkan Next.js untuk load gambar dari domain berikut
+    domains: ["localhost", "api.qrserver.com"],
+  },
 };
 
 export default nextConfig;

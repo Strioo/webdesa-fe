@@ -6,6 +6,7 @@ import Link from 'next/link'
 
 export interface Destination {
   id: string
+  slug?: string
   name: string
   description: string
   price: number
@@ -19,7 +20,8 @@ interface DestinationCardProps {
 }
 
 export default function DestinationCard({ destination, index }: DestinationCardProps) {
-  const { id, name, description, price, image } = destination
+  const { id, slug, name, description, price, image } = destination
+  const detailUrl = `/wisata/${slug || id}` // Gunakan slug jika ada, fallback ke ID
 
   return (
     <motion.div
@@ -89,7 +91,7 @@ export default function DestinationCard({ destination, index }: DestinationCardP
           </div>
 
           {/* CTA Button - Rounded Full, Micro-bounce Scale 1.02 */}
-          <Link href={`/wisata/${id}`} className="block">
+          <Link href={detailUrl} className="block">
             <motion.button
               whileHover={{ scale: 1.02 }} // Micro-bounce for tactile feel
               whileTap={{ scale: 0.98 }}

@@ -1,11 +1,60 @@
 ﻿'use client'
 
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
 import SearchGlassCard from './SearchGlassCard'
+import AIRecommendationModal from './AIRecommendationModal'
 
 export default function HeroWisata() {
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState('')
+  const [aiData, setAiData] = useState<any>(null)
+
+  const handleAIRecommend = async (preferences: { location: string; numPeople: number; maxPrice: number }) => {
+    setIsAIModalOpen(true)
+    setAiLoading(true)
+    setAiError('')
+    setAiData(null)
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/wisata/recommend`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(preferences),
+      })
+
+      const result = await response.json()
+
+      // ✅ FIXED: Check response.ok first, but don't throw if success is true
+      if (!response.ok) {
+        throw new Error(result.message || `Server error: ${response.status}`)
+      }
+
+      // ✅ ALWAYS set data if success is true, even with empty recommendations
+      if (result.success) {
+        setAiData(result)
+      } else {
+        throw new Error(result.message || 'Failed to get AI recommendation')
+      }
+    } catch (error: any) {
+      console.error('AI Recommendation Error:', error)
+      setAiError(error.message || 'Gagal mendapatkan rekomendasi. Silakan coba lagi.')
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
+  const handleCloseAIModal = () => {
+    setIsAIModalOpen(false)
+    setAiData(null)
+    setAiError('')
+  }
+
   return (
     <section className="relative w-full min-h-[900px] md:h-[900px] overflow-hidden">
       {/* Background Image - BRIGHT, NO DARK OVERLAY */}
@@ -140,12 +189,21 @@ export default function HeroWisata() {
             </div>
 
             <div className="lg:w-[380px] xl:w-[420px] flex-shrink-0">
-              <SearchGlassCard />
+              <SearchGlassCard onAIRecommend={handleAIRecommend} />
             </div>
 
           </div>
         </div>
       </div>
+
+      {/* AI Recommendation Modal */}
+      <AIRecommendationModal
+        isOpen={isAIModalOpen}
+        onClose={handleCloseAIModal}
+        loading={aiLoading}
+        error={aiError}
+        data={aiData}
+      />
     </section>
   )
 }
