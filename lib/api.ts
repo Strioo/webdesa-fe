@@ -166,11 +166,11 @@ export const wisataApi = {
 export const umkmApi = {
   getAll: () => apiClient.get('/umkm/getall'),
   getById: (id: string) => apiClient.get(`/umkm/get/${id}`),
+  getBySlug: (slug: string) => apiClient.get(`/umkm/slug/${slug}`),
   create: (data: any) => apiClient.post('/umkm/create', data),
   update: (id: string, data: any) => apiClient.put(`/umkm/update/${id}`, data),
   delete: (id: string) => apiClient.delete(`/umkm/delete/${id}`),
 };
-
 
 export const transactionApi = {
   create: (data: any) => apiClient.post('/transactions/create', data),

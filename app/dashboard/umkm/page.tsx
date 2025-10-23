@@ -25,6 +25,7 @@ import {
 interface UMKM {
   id: string;
   nama: string;
+  slug?: string;
   pemilik: string;
   deskripsi: string;
   kategori: string;
@@ -107,6 +108,7 @@ const CreateEditModal = ({
 }) => {
   const [formData, setFormData] = useState({
     nama: "",
+    slug: "",
     pemilik: "",
     deskripsi: "",
     kategori: "",
@@ -125,6 +127,7 @@ const CreateEditModal = ({
     if (umkm && isEdit) {
       setFormData({
         nama: umkm.nama,
+        slug: umkm.slug || "",
         pemilik: umkm.pemilik,
         deskripsi: umkm.deskripsi,
         kategori: umkm.kategori,
@@ -140,6 +143,7 @@ const CreateEditModal = ({
     } else {
       setFormData({
         nama: "",
+        slug: "",
         pemilik: "",
         deskripsi: "",
         kategori: "",
@@ -195,11 +199,39 @@ const CreateEditModal = ({
                 type="text"
                 required
                 value={formData.nama}
-                onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
+                onChange={(e) => {
+                  const nama = e.target.value;
+                  const slug = nama
+                    .toLowerCase()
+                    .replace(/[^a-z0-9\s-]/g, '')
+                    .trim()
+                    .replace(/\s+/g, '-')
+                    .replace(/-+/g, '-');
+                  setFormData({ ...formData, nama, slug });
+                }}
                 className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 placeholder="Masukkan nama UMKM"
               />
             </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Slug (URL) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.slug}
+                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="contoh: warung-makan-bu-siti"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                URL akan menjadi: /umkm/{formData.slug || "slug-anda"}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Nama Pemilik <span className="text-red-500">*</span>
@@ -213,23 +245,6 @@ const CreateEditModal = ({
                 placeholder="Nama pemilik"
               />
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Deskripsi <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              required
-              rows={4}
-              value={formData.deskripsi}
-              onChange={(e) => setFormData({ ...formData, deskripsi: e.target.value })}
-              className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
-              placeholder="Deskripsikan UMKM ini..."
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Kategori <span className="text-red-500">*</span>
@@ -262,6 +277,20 @@ const CreateEditModal = ({
                 placeholder="081234567890"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Deskripsi <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              required
+              rows={4}
+              value={formData.deskripsi}
+              onChange={(e) => setFormData({ ...formData, deskripsi: e.target.value })}
+              className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+              placeholder="Deskripsikan UMKM ini..."
+            />
           </div>
 
           <div>
@@ -395,6 +424,14 @@ const DetailModal = ({
 }) => {
   if (!isOpen || !umkm) return null;
 
+  // Helper to format image URL
+  const getImageUrl = (foto: string | null | undefined): string => {
+    if (!foto) return '/assets/images/placeholder.jpg';
+    if (foto.startsWith('http')) return foto;
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.18.3:5000';
+    return `${baseUrl}${foto}`;
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
@@ -411,18 +448,16 @@ const DetailModal = ({
         </div>
 
         <div className="p-6 space-y-6">
-          {umkm.foto && (
-            <div className="bg-gray-50 rounded-xl p-4 border-2 border-gray-200">
-              <img
-                src={umkm.foto.startsWith('http') ? umkm.foto : `http://localhost:5000${umkm.foto}`}
-                alt={umkm.nama}
-                className="w-full h-80 object-cover rounded-lg shadow-md"
-                onError={(e) => {
-                  e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f3f4f6" width="100" height="100"/%3E%3Ctext fill="%239ca3af" x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14"%3EGambar tidak tersedia%3C/text%3E%3C/svg%3E';
-                }}
-              />
-            </div>
-          )}
+          <div className="bg-gray-50 rounded-xl p-4 border-2 border-gray-200">
+            <img
+              src={getImageUrl(umkm.foto)}
+              alt={umkm.nama}
+              className="w-full h-80 object-cover rounded-lg shadow-md"
+              onError={(e) => {
+                e.currentTarget.src = '/assets/images/placeholder.jpg';
+              }}
+            />
+          </div>
 
           <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-5">
             <div className="flex items-start justify-between mb-3">
@@ -782,20 +817,27 @@ export default function UMKMPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredUmkm.map((item) => (
-            <div key={item.id} className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden hover:shadow-xl hover:border-blue-300 transition-all duration-200">
-              {item.foto && (
+          {filteredUmkm.map((item) => {
+            // Helper to format image URL
+            const getImageUrl = (foto: string | null | undefined): string => {
+              if (!foto) return '/assets/images/placeholder.jpg';
+              if (foto.startsWith('http')) return foto;
+              const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.18.3:5000';
+              return `${baseUrl}${foto}`;
+            };
+
+            return (
+              <div key={item.id} className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden hover:shadow-xl hover:border-blue-300 transition-all duration-200">
                 <div className="h-48 bg-gray-200 overflow-hidden">
                   <img
-                    src={item.foto.startsWith('http') ? item.foto : `http://localhost:5000${item.foto}`}
+                    src={getImageUrl(item.foto)}
                     alt={item.nama}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
                     onError={(e) => {
-                      e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f3f4f6" width="100" height="100"/%3E%3Ctext fill="%239ca3af" x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14"%3EGambar tidak tersedia%3C/text%3E%3C/svg%3E';
+                      e.currentTarget.src = '/assets/images/placeholder.jpg';
                     }}
                   />
                 </div>
-              )}
               <div className="p-5">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-lg font-bold text-gray-900 truncate flex-1">
@@ -869,7 +911,8 @@ export default function UMKMPage() {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {filteredUmkm.length === 0 && (

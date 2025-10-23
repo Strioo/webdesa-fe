@@ -1,26 +1,46 @@
 'use client'
 
 import { motion, useInView, useMotionValue, useAnimationFrame } from 'framer-motion'
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import Image from 'next/image'
-import { dummyProyekPembangunan } from '@/types/pembangunan'
-
-// Use data from table - only take projects with photos
-const galleryImages = dummyProyekPembangunan.map(proyek => ({
-  id: proyek.id,
-  src: proyek.foto,
-  alt: proyek.nama,
-  title: proyek.nama,
-  kategori: proyek.kategori
-}))
-
-// Duplicate images for infinite loop effect
-const infiniteImages = [...galleryImages, ...galleryImages, ...galleryImages]
+import { ProyekPembangunan, dummyProyekPembangunan, getImageUrl } from '@/types/pembangunan'
+import { programApi } from '@/lib/api'
 
 export default function GalleryPembangunan() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
   const [isPaused, setIsPaused] = useState(false)
+  const [proyekData, setProyekData] = useState<ProyekPembangunan[]>(dummyProyekPembangunan)
+
+  useEffect(() => {
+    const fetchPembangunan = async () => {
+      try {
+        const response = await programApi.getAll()
+        if (response.success && response.data) {
+          setProyekData(response.data as ProyekPembangunan[])
+        }
+      } catch (error) {
+        console.error('Error fetching pembangunan:', error)
+        // Keep using dummy data as fallback
+      }
+    }
+
+    fetchPembangunan()
+  }, [])
+
+  // Use data from API - only take projects with photos
+  const galleryImages = proyekData
+    .filter(proyek => proyek.foto) // Only projects with photos
+    .map(proyek => ({
+      id: proyek.id,
+      src: getImageUrl(proyek.foto),
+      alt: proyek.nama,
+      title: proyek.nama,
+      kategori: proyek.kategori
+    }))
+
+  // Duplicate images for infinite loop effect
+  const infiniteImages = [...galleryImages, ...galleryImages, ...galleryImages]
   
   const x = useMotionValue(0)
   const baseVelocity = -0.5 // Speed of scroll (negative = left to right)

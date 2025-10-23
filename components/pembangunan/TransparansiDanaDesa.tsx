@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, useInView, AnimatePresence } from 'framer-motion'
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import Image from 'next/image'
 import {
   Table,
@@ -11,12 +11,34 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { ProyekPembangunan, dummyProyekPembangunan } from '@/types/pembangunan'
+import { ProyekPembangunan, dummyProyekPembangunan, getImageUrl, parseTimeline } from '@/types/pembangunan'
+import { programApi } from '@/lib/api'
 
 export default function TransparansiDanaDesa() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [proyekData, setProyekData] = useState<ProyekPembangunan[]>(dummyProyekPembangunan)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchPembangunan = async () => {
+      try {
+        setIsLoading(true)
+        const response = await programApi.getAll()
+        if (response.success && response.data) {
+          setProyekData(response.data as ProyekPembangunan[])
+        }
+      } catch (error) {
+        console.error('Error fetching pembangunan:', error)
+        // Keep using dummy data as fallback
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchPembangunan()
+  }, [])
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -47,6 +69,12 @@ export default function TransparansiDanaDesa() {
     }
     return colors[kategori]
   }
+
+  // Calculate statistics from data
+  const totalAnggaran = proyekData.reduce((sum, proyek) => sum + (proyek.anggaran || 0), 0)
+  const totalProyek = proyekData.length
+  const proyekSelesai = proyekData.filter(p => p.status === 'Selesai').length
+  const proyekBerjalan = proyekData.filter(p => p.status === 'Berlangsung').length
 
   return (
     <>
@@ -106,7 +134,7 @@ export default function TransparansiDanaDesa() {
                   </svg>
                 </div>
                 <div className="text-4xl sm:text-5xl font-bold mb-2 text-gray-900">
-                  {dummyProyekPembangunan.length}
+                  {totalProyek}
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold mb-2 text-gray-900">
                   Total Proyek
@@ -139,7 +167,7 @@ export default function TransparansiDanaDesa() {
                   </svg>
                 </div>
                 <div className="text-4xl sm:text-5xl font-bold mb-2 text-gray-900">
-                  {dummyProyekPembangunan.filter(p => p.status === 'Berlangsung').length}
+                  {proyekBerjalan}
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold mb-2 text-gray-900">
                   Sedang Berlangsung
@@ -172,7 +200,7 @@ export default function TransparansiDanaDesa() {
                   </svg>
                 </div>
                 <div className="text-4xl sm:text-5xl font-bold mb-2 text-gray-900">
-                  {dummyProyekPembangunan.filter(p => p.status === 'Selesai').length}
+                  {proyekSelesai}
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold mb-2 text-gray-900">
                   Proyek Selesai
@@ -205,7 +233,7 @@ export default function TransparansiDanaDesa() {
                   </svg>
                 </div>
                 <div className="text-2xl sm:text-3xl font-bold mb-2 text-gray-900 leading-tight">
-                  {formatCurrency(dummyProyekPembangunan.reduce((sum, p) => sum + p.anggaran, 0)).replace('Rp', 'Rp ')}
+                  {formatCurrency(totalAnggaran).replace('Rp', 'Rp ')}
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold mb-2 text-gray-900">
                   Total Anggaran
@@ -261,35 +289,39 @@ export default function TransparansiDanaDesa() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {dummyProyekPembangunan.map((proyek, index) => (
-                    <motion.tr
-                      key={proyek.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: isInView ? 1 : 0, y: isInView ? 0 : 20 }}
-                      transition={{ duration: 0.4, delay: 0.3 + index * 0.05 }}
-                      className="hover:bg-gray-50/50 transition-colors border-b border-gray-100"
-                    >
-                      <TableCell className="font-semibold text-gray-900">
-                        {proyek.nama}
-                      </TableCell>
-                      <TableCell className="text-gray-600 text-sm">
-                        {proyek.deskripsi}
-                      </TableCell>
-                      <TableCell>
-                        <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${getKategoriColor(proyek.kategori)}`}>
-                          {proyek.kategori}
-                        </span>
-                      </TableCell>
-                      <TableCell className="font-semibold text-gray-900 text-sm">
-                        {formatCurrency(proyek.anggaran)}
-                      </TableCell>
-                      <TableCell className="text-gray-600 text-sm">
-                        {proyek.sumberDana}
-                      </TableCell>
-                      <TableCell className="text-gray-600 text-sm">
-                        <div>{proyek.timeline.mulai}</div>
-                        <div className="text-xs text-gray-500">s/d {proyek.timeline.selesai}</div>
-                      </TableCell>
+                  {proyekData.map((proyek, index) => {
+                    const timeline = parseTimeline(proyek.timeline)
+                    const imageUrl = getImageUrl(proyek.foto)
+                    
+                    return (
+                      <motion.tr
+                        key={proyek.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: isInView ? 1 : 0, y: isInView ? 0 : 20 }}
+                        transition={{ duration: 0.4, delay: 0.3 + index * 0.05 }}
+                        className="hover:bg-gray-50/50 transition-colors border-b border-gray-100"
+                      >
+                        <TableCell className="font-semibold text-gray-900">
+                          {proyek.nama}
+                        </TableCell>
+                        <TableCell className="text-gray-600 text-sm">
+                          {proyek.deskripsi}
+                        </TableCell>
+                        <TableCell>
+                          <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${getKategoriColor(proyek.kategori)}`}>
+                            {proyek.kategori}
+                          </span>
+                        </TableCell>
+                        <TableCell className="font-semibold text-gray-900 text-sm">
+                          {formatCurrency(proyek.anggaran || 0)}
+                        </TableCell>
+                        <TableCell className="text-gray-600 text-sm">
+                          {proyek.sumberDana}
+                        </TableCell>
+                        <TableCell className="text-gray-600 text-sm">
+                          <div>{timeline.mulai}</div>
+                          <div className="text-xs text-gray-500">s/d {timeline.selesai}</div>
+                        </TableCell>
                       <TableCell>
                         <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(proyek.status)}`}>
                           {proyek.status}
@@ -312,7 +344,7 @@ export default function TransparansiDanaDesa() {
                       </TableCell>
                       <TableCell>
                         <button
-                          onClick={() => setSelectedImage(proyek.foto)}
+                          onClick={() => setSelectedImage(imageUrl)}
                           className="group flex items-center justify-center w-10 h-10 rounded-lg 
                                    bg-gray-100 hover:bg-[#5B903A] transition-colors duration-200"
                         >
@@ -341,7 +373,7 @@ export default function TransparansiDanaDesa() {
                         {proyek.penanggungJawab}
                       </TableCell>
                     </motion.tr>
-                  ))}
+                  )})}
                 </TableBody>
               </Table>
             </div>

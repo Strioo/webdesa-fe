@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 export interface UmkmProduct {
-  id: string
+  id: string // This is the slug
   title: string
   description: string
   price: number
@@ -70,7 +70,7 @@ export default function UmkmCard({ product, index }: UmkmCardProps) {
             {description}
           </p>
 
-          {/* CTA Button */}
+          {/* CTA Button - Using slug in URL */}
           <Link href={`/umkm/${id}`} className="w-full block">
             <motion.button
               whileHover={{ scale: 1.02 }}
