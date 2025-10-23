@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 import { AnimationProvider } from "@/lib/animation";
 import DockNavbar from "@/components/DockNavbar";
+import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
 
 const lato = Lato({
   variable: "--font-lato",
@@ -14,7 +15,7 @@ const lato = Lato({
 const raleway = Raleway({
   variable: "--font-raleway",
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -35,6 +36,7 @@ export default function RootLayout({
       >
         <AnimationProvider>
           <AuthProvider>
+            <SmoothScrollProvider />
             {children}
             <DockNavbar />
           </AuthProvider>

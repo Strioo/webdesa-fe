@@ -212,16 +212,20 @@ const HeroSection = () => {
               }}
             >
               <motion.div 
-                className="mb-4"
-                initial={{ y: 10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5, duration: 0.5 }}
+                className="mb-4 flex justify-center sm:justify-start"
+                initial={{ opacity: 0, filter: 'blur(4px)' }}
+                animate={{ opacity: 1, filter: 'blur(0px)' }}
+                transition={{ 
+                  delay: 0.5, 
+                  duration: 0.4,
+                  ease: [0.16, 1, 0.3, 1]
+                }}
               >
                 <motion.span 
-                  className="inline-block bg-white/10 backdrop-blur-md border border-white/30 text-white px-4 py-2 sm:px-5 sm:py-3 rounded-full text-xs sm:text-sm font-medium shadow-lg cursor-default"
+                  className="inline-block bg-white/10 backdrop-blur-sm border border-white/15 text-white px-4 py-2 sm:px-5 sm:py-3 rounded-full text-xs sm:text-sm font-medium shadow-lg cursor-default"
                   whileHover={{ 
                     scale: 1.05,
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.15)',
                     transition: { duration: 0.2 }
                   }}
                 >
@@ -229,7 +233,7 @@ const HeroSection = () => {
                 </motion.span>
               </motion.div>
 
-              <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight mb-4 sm:mb-6">
+              <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight mb-4 sm:mb-6 text-center sm:text-left">
                 <LayoutTextFlip 
                   text="Baturaden, " 
                   words={['Harmoni', 'Keindahan', 'Nuansa', 'Kesejukan']} 
@@ -239,43 +243,45 @@ const HeroSection = () => {
                 Alam dan Kehangatan
               </h1>
 
-              <p className="text-[#A1A1A1] text-sm sm:text-base md:text-lg mb-6 sm:mb-8 max-w-2xl opacity-90 leading-relaxed">
+              <p className="text-[#A1A1A1] text-sm sm:text-base md:text-lg mb-6 sm:mb-8 max-w-2xl opacity-90 leading-relaxed text-center sm:text-left mx-auto sm:mx-0">
                 Tempat terbaik untuk liburan keluarga, melepas penat, dan menikmati keindahan
                 Banyumas yang menenangkan.
               </p>
 
-              <motion.button
-                className="inline-flex items-center justify-center w-max bg-white text-black font-medium pl-5 pr-2 py-2 rounded-full gap-3 cursor-pointer relative will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
-                aria-label="Kunjungi Sekarang"
-                whileHover={{ 
-                  scale: 1.03,
-                  boxShadow: '0 12px 28px -8px rgba(0, 0, 0, 0.35)',
-                }}
-                whileTap={{ 
-                  scale: 0.98,
-                }}
-                transition={{ 
-                  type: 'spring', 
-                  stiffness: 400, 
-                  damping: 25,
-                  duration: 0.15
-                }}
-              >
-                <span className="shrink-0 select-none">Kunjungi Sekarang</span>
-                <motion.div 
-                  className="bg-[#5B903A] rounded-full w-12 h-12 flex items-center justify-center shrink-0"
-                  whileHover={{ rotate: 45, scale: 1.08 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              <div className="flex justify-center sm:justify-start">
+                <motion.button
+                  className="inline-flex items-center justify-center w-max bg-white text-black font-medium pl-5 pr-2 py-2 rounded-full gap-3 cursor-pointer relative will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+                  aria-label="Kunjungi Sekarang"
+                  whileHover={{ 
+                    scale: 1.03,
+                    boxShadow: '0 12px 28px -8px rgba(0, 0, 0, 0.35)',
+                  }}
+                  whileTap={{ 
+                    scale: 0.98,
+                  }}
+                  transition={{ 
+                    type: 'spring', 
+                    stiffness: 400, 
+                    damping: 25,
+                    duration: 0.15
+                  }}
                 >
-                  <Image 
-                    src="/assets/icons/arrow.svg" 
-                    alt="Arrow" 
-                    width={12} 
-                    height={12} 
-                    className="w-3 invert" 
-                  />
-                </motion.div>
-              </motion.button>
+                  <span className="shrink-0 select-none">Kunjungi Sekarang</span>
+                  <motion.div 
+                    className="bg-[#5B903A] rounded-full w-12 h-12 flex items-center justify-center shrink-0"
+                    whileHover={{ rotate: 45, scale: 1.08 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                  >
+                    <Image 
+                      src="/assets/icons/arrow.svg" 
+                      alt="Arrow" 
+                      width={12} 
+                      height={12} 
+                      className="w-3 invert" 
+                    />
+                  </motion.div>
+                </motion.button>
+              </div>
             </motion.div>
           </div>
         </div>
