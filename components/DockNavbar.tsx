@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { memo } from 'react'
 import { 
   HomeIcon, 
   UserIcon, 
@@ -51,7 +52,7 @@ const DOCK_ITEMS = [
   },
 ]
 
-export default function DockNavbar() {
+const DockNavbar = memo(function DockNavbar() {
   const pathname = usePathname()
 
   return (
@@ -145,4 +146,6 @@ export default function DockNavbar() {
       </motion.nav>
     </>
   )
-}
+})
+
+export default DockNavbar

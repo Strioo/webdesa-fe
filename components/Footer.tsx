@@ -2,9 +2,9 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, memo } from 'react'
 
-const Footer = () => {
+const Footer = memo(function Footer() {
     const [isVisible, setIsVisible] = useState(false)
     const footerRef = useRef<HTMLElement>(null)
 
@@ -181,6 +181,6 @@ const Footer = () => {
             </div>
         </footer>
     )
-}
+})
 
 export default Footer

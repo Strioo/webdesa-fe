@@ -18,7 +18,7 @@ export default function ProfileHeroSection() {
   }
 
   return (
-    <section className="relative w-full h-screen flex items-center overflow-hidden">
+    <section className="relative w-full h-screen flex items-center overflow-hidden -mt-[88px] pt-[88px]">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <Image

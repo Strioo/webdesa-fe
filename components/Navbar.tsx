@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, memo } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
@@ -22,7 +22,7 @@ interface NavbarProps {
   }
 }
 
-export default function Navbar({ 
+const Navbar = memo(function Navbar({ 
   siteName = 'Baturraden',
   logoSrc = '/assets/icons/logo.png',
   menuItems = [
@@ -148,7 +148,7 @@ export default function Navbar({
     <nav className="fixed inset-x-0 top-0 z-50">
       <div className="w-full px-4 sm:px-6 lg:px-8 pt-3">
         <motion.div 
-          className="navbar max-w-[1400px] mx-auto rounded-full px-4 md:px-6 flex items-center justify-between will-change-transform"
+          className="navbar max-w-[1400px] mx-auto w-full rounded-full px-4 md:px-6 flex items-center justify-between will-change-transform"
           animate={{
             backgroundColor: isScrolled ? 'rgba(255, 255, 255, 0.7)' : 'rgb(255, 255, 255)',
             boxShadow: isScrolled 
@@ -205,7 +205,7 @@ export default function Navbar({
 
         {/* Desktop Actions */}
         {!isLoggedIn ? (
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3">
             <motion.button 
               className="text-sm rounded-full px-4 py-2 font-normal text-gray-600 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B903A] focus-visible:ring-offset-2"
               whileHover={{ scale: 1.03, color: '#5B903A' }}
@@ -227,7 +227,7 @@ export default function Navbar({
             </motion.button>
           </div>
         ) : (
-          <div className="hidden md:flex items-center gap-3 relative">
+          <div className="hidden lg:flex items-center gap-3 relative">
             <motion.button
               ref={userMenuButtonRef}
               onClick={toggleUserMenu}
@@ -447,4 +447,6 @@ export default function Navbar({
       </div>
     </nav>
   )
-}
+})
+
+export default Navbar

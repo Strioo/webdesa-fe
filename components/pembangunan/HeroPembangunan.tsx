@@ -6,7 +6,7 @@ import Image from 'next/image'
 
 export default function HeroPembangunan() {
   return (
-    <section className="relative w-full min-h-[900px] md:h-[900px] overflow-hidden">
+    <section className="relative w-full min-h-[900px] md:h-[900px] overflow-hidden -mt-[88px] pt-[88px]">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <Image

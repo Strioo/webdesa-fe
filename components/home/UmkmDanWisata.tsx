@@ -5,16 +5,11 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
 import { useCountUp } from '@/hooks/useCountUp'
-import { useScrollParallax } from '@/lib/animation'
 
 const UmkmDanWisata = () => {
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation(0.1)
   const { ref: umkmRef, isVisible: umkmVisible } = useScrollAnimation(0.1)   
   const { ref: wisataRef, isVisible: wisataVisible } = useScrollAnimation(0.1)
-
-  // Parallax effects
-  const { ref: umkmImageRef, y: umkmImageY } = useScrollParallax({ speed: 0.3 })
-  const { ref: wisataImageRef, y: wisataImageY } = useScrollParallax({ speed: 0.3 })
 
   // Count-up animations
   const umkmCountUp = useCountUp({ end: 120, duration: 2500, suffix: '+' })
@@ -24,7 +19,7 @@ const UmkmDanWisata = () => {
 
   return (
     <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-white">
-      <div className="max-w-[1400px] mx-auto">
+      <div className="max-w-[1400px] mx-auto w-full">
         {/* Section Header */}
         <div 
           ref={headerRef}
@@ -53,7 +48,6 @@ const UmkmDanWisata = () => {
         >
           {/* UMKM Image - Left (Lebih lebar) */}
           <motion.div 
-            ref={umkmImageRef as any}
             className="lg:col-span-7 relative rounded-3xl overflow-hidden h-[400px] sm:h-[450px] lg:h-[500px] shadow-xl"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: umkmVisible ? 1 : 0, y: umkmVisible ? 0 : 40 }}
@@ -64,14 +58,12 @@ const UmkmDanWisata = () => {
               transition: { duration: 0.3 }
             }}
           >
-            <motion.div style={{ y: umkmImageY }}>
-              <Image
-                src="/assets/images/umkm-showcase.png"
-                alt="UMKM Baturaden"
-                fill
-                className="object-cover"
-              />
-            </motion.div>
+            <Image
+              src="/assets/images/umkm-showcase.png"
+              alt="UMKM Baturaden"
+              fill
+              className="object-cover object-[center_30%]"
+            />
 
             {/* Glass Badge - Top Right */}
             <motion.div 
@@ -136,8 +128,8 @@ const UmkmDanWisata = () => {
               </Link>
             </div>
 
-            {/* Decorative Icon Box - Bottom Right */}
-            <div className="absolute -right-6 top-3/4 -translate-y-1/2 w-[300px] h-[300px]">
+            {/* Decorative Icon Box - Bottom Right (Hidden on mobile & tablet) */}
+            <div className="absolute -right-6 top-3/4 -translate-y-1/2 w-[300px] h-[300px] hidden xl:block">
               <div className="grid grid-cols-3 grid-rows-3 gap-3 w-full h-full">
                 {/* Row 1 */}
                 <div className="bg-gradient-to-br from-50% to-100% from-[#F5F5F5] to-[#CCDDC2] rounded-lg"></div>
@@ -176,7 +168,7 @@ const UmkmDanWisata = () => {
           }`}
         >
           {/* Wisata Content - Left (Lebih sempit) */}
-          <div className="lg:col-span-5 bg-[#f5f5f5] rounded-3xl p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between h-[400px] sm:h-[450px] lg:h-[500px]">
+          <div className="order-2 lg:order-1 lg:col-span-5 bg-[#f5f5f5] rounded-3xl p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between h-[400px] sm:h-[450px] lg:h-[500px]">
             <div className="relative z-10">
               <h3 className="text-2xl sm:text-3xl font-semibold text-gray-900 leading-snug mb-4">
                 Nikmati keindahan alam, kesejukan udara pegunungan, dan keramahan warga.
@@ -216,8 +208,8 @@ const UmkmDanWisata = () => {
               </Link>
             </div>
 
-            {/* Decorative Icon Box - Bottom Left */}
-            <div className="absolute -left-2 top-3/4 -translate-y-1/2 w-[300px] h-[300px]">
+            {/* Decorative Icon Box - Bottom Left (Hidden on mobile & tablet) */}
+            <div className="absolute -left-2 top-3/4 -translate-y-1/2 w-[300px] h-[300px] hidden xl:block">
               <div className="grid grid-cols-3 grid-rows-3 gap-3 w-full h-full">
                 {/* Row 1 */}
                 <div className="bg-gradient-to-br from-50% to-100% from-[#F5F5F5] to-[#CCDDC2] rounded-lg"></div>
@@ -249,8 +241,7 @@ const UmkmDanWisata = () => {
 
           {/* Wisata Image - Right (Lebih lebar) */}
           <motion.div 
-            ref={wisataImageRef as any}
-            className="lg:col-span-7 relative rounded-3xl overflow-hidden h-[500px] shadow-xl"
+            className="order-1 lg:order-2 lg:col-span-7 relative rounded-3xl overflow-hidden h-[500px] shadow-xl"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: wisataVisible ? 1 : 0, y: wisataVisible ? 0 : 40 }}
             transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] as any }}
@@ -260,14 +251,12 @@ const UmkmDanWisata = () => {
               transition: { duration: 0.3 }
             }}
           >
-            <motion.div style={{ y: wisataImageY }} className="w-full h-full">
-              <Image
-                src="/assets/images/wisata-showcase.jpg"
-                alt="Wisata Baturaden"
-                fill
-                className="object-cover"
-              />
-            </motion.div>
+            <Image
+              src="/assets/images/wisata-showcase.jpg"
+              alt="Wisata Baturaden"
+              fill
+              className="object-cover"
+            />
 
             {/* Glass Badge - Top Left */}
             <motion.div 

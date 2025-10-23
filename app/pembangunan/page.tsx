@@ -1,11 +1,20 @@
+import { Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import HeroPembangunan from '@/components/pembangunan/HeroPembangunan'
-import GalleryPembangunan from '@/components/pembangunan/GalleryPembangunan'
 import TransparansiDanaDesa from '@/components/pembangunan/TransparansiDanaDesa'
 import AspirasiBanner from '@/components/pembangunan/AspirasiBanner'
-import Navbar from '@/components/Navbar'
-import DockNavbar from '@/components/DockNavbar'
 import Footer from '@/components/Footer'
+import { SectionSkeleton } from '@/components/ui/skeletons'
 import type { Metadata } from 'next'
+
+// Lazy load gallery component
+const GalleryPembangunan = dynamic(
+  () => import('@/components/pembangunan/GalleryPembangunan'),
+  {
+    loading: () => <SectionSkeleton />,
+    ssr: true,
+  }
+)
 
 export const metadata: Metadata = {
   title: 'Pembangunan Desa | Baturaden',
@@ -15,14 +24,12 @@ export const metadata: Metadata = {
 export default function PembangunanPage() {
   return (
     <>
-      <Navbar />
-      <DockNavbar />
-      <main className="min-h-screen bg-white overflow-x-hidden">
-        <HeroPembangunan />
-        <TransparansiDanaDesa />
+      <HeroPembangunan />
+      <TransparansiDanaDesa />
+      <Suspense fallback={<SectionSkeleton />}>
         <GalleryPembangunan />
-        <AspirasiBanner />
-      </main>
+      </Suspense>
+      <AspirasiBanner />
       <Footer />
     </>
   )

@@ -1,13 +1,18 @@
 'use client'
 
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
 import Navbar from '@/components/Navbar'
 import DockNavbar from '@/components/DockNavbar'
 import Footer from '@/components/Footer'
 import HeroLapor from '@/components/lapor/HeroLapor'
-import LaporanModal from '@/components/lapor/LaporanModal'
 import InfoSection from '@/components/lapor/InfoSection'
 import AspirasiBanner from '@/components/lapor/AspirasiBanner'
+
+// Lazy load modal component - only loaded when needed
+const LaporanModal = dynamic(() => import('@/components/lapor/LaporanModal'), {
+  ssr: false,
+})
 
 export default function LaporPageClient() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -25,8 +30,10 @@ export default function LaporPageClient() {
 
       <Footer />
 
-      {/* Modal */}
-      <LaporanModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      {/* Modal - lazy loaded */}
+      {isModalOpen && (
+        <LaporanModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      )}
     </>
   )
 }

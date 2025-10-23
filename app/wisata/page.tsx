@@ -1,8 +1,10 @@
+import { Suspense } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import HeroWisata from '@/components/wisata/HeroWisata'
 import DestinationsIntro from '@/components/wisata/DestinationsIntro'
 import DestinationsGrid from '@/components/wisata/DestinationsGrid'
+import { SectionSkeleton } from '@/components/ui/skeletons'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -24,7 +26,9 @@ export default function WisataPage({ searchParams }: WisataPageProps) {
       <Navbar />
       <HeroWisata />
       <DestinationsIntro />
-      <DestinationsGrid searchParams={searchParams} />
+      <Suspense fallback={<SectionSkeleton />}>
+        <DestinationsGrid searchParams={searchParams} />
+      </Suspense>
       <Footer />
     </main>
   )
