@@ -11,7 +11,8 @@ import {
   Grid3x3,
   List,
   AlertCircle,
-  DollarSign
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { transactionApi } from "@/lib/api";
 import DetailModal from "@/components/transaksi/DetailModal";
@@ -49,6 +50,8 @@ interface Transaction {
   };
 }
 
+const ITEMS_PER_PAGE = 12;
+
 export default function TransaksiPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
@@ -60,6 +63,10 @@ export default function TransaksiPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     fetchTransactions();
@@ -68,6 +75,16 @@ export default function TransaksiPage() {
   useEffect(() => {
     filterTransactions();
   }, [transactions, searchTerm, statusFilter, paymentFilter]);
+
+  useEffect(() => {
+    // Reset to page 1 when filters change
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, paymentFilter]);
+
+  useEffect(() => {
+    // Calculate total pages
+    setTotalPages(Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE));
+  }, [filteredTransactions]);
 
   const fetchTransactions = async () => {
     try {
@@ -115,6 +132,16 @@ export default function TransaksiPage() {
     setFilteredTransactions(filtered);
   };
 
+  const getPaginatedTransactions = () => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return filteredTransactions.slice(startIndex, endIndex);
+  };
+
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+
   const openDetailModal = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
     setIsDetailModalOpen(true);
@@ -136,6 +163,7 @@ export default function TransaksiPage() {
   };
 
   const stats = getTransactionStats();
+  const paginatedData = getPaginatedTransactions();
 
   if (loading) {
     return (
@@ -312,9 +340,9 @@ export default function TransaksiPage() {
           <div className="mt-4 flex items-center space-x-4 text-sm text-gray-600">
             <span>Total: <span className="font-semibold text-gray-900">{transactions.length}</span></span>
             <span>•</span>
-            <span>Ditampilkan: <span className="font-semibold text-gray-900">{filteredTransactions.length}</span></span>
+            <span>Ditampilkan: <span className="font-semibold text-gray-900">{paginatedData.length}</span> dari {filteredTransactions.length}</span>
             <span>•</span>
-            <span>Pendapatan: <span className="font-semibold text-green-600">Rp {getTotalRevenue().toLocaleString('id-ID')}</span></span>
+            <span>Halaman: <span className="font-semibold text-gray-900">{currentPage} / {totalPages}</span></span>
           </div>
         </div>
 
@@ -322,16 +350,78 @@ export default function TransaksiPage() {
         <div className="p-6">
           {viewMode === "grid" ? (
             <TransactionGridView
-              transactions={filteredTransactions}
+              transactions={paginatedData}
               onView={openDetailModal}
             />
           ) : (
             <TransactionTableView
-              transactions={filteredTransactions}
+              transactions={paginatedData}
               onView={openDetailModal}
             />
           )}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="p-6 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-600">
+                Menampilkan {((currentPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, filteredTransactions.length)} dari {filteredTransactions.length} transaksi
+              </p>
+              
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+
+                <div className="flex items-center space-x-1">
+                  {[...Array(totalPages)].map((_, index) => {
+                    const page = index + 1;
+                    
+                    // Show first page, last page, current page, and pages around current
+                    if (
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => goToPage(page)}
+                          className={`px-3 py-1 rounded-lg transition-colors ${
+                            currentPage === page
+                              ? "bg-blue-600 text-white"
+                              : "hover:bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      );
+                    } else if (
+                      page === currentPage - 2 ||
+                      page === currentPage + 2
+                    ) {
+                      return <span key={page} className="px-2">...</span>;
+                    }
+                    return null;
+                  })}
+                </div>
+
+                <button
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Detail Modal */}

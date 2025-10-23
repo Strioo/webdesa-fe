@@ -122,7 +122,7 @@ export default function TransactionTableView({ transactions, onView }: Transacti
                       alt={transaction.wisata.nama}
                       className="w-12 h-12 object-cover rounded-lg border border-gray-200"
                       onError={(e) => {
-                        e.currentTarget.src = '/placeholder-wisata.jpg';
+                        e.currentTarget.src = '/assets/images/placeholder.jpg';
                       }}
                     />
                   ) : (

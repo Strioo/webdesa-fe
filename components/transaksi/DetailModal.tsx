@@ -100,7 +100,7 @@ export default function DetailModal({ transaction, isOpen, onClose }: DetailModa
                   alt={transaction.wisata.nama}
                   className="w-24 h-24 object-cover rounded-lg"
                   onError={(e) => {
-                    e.currentTarget.src = '/placeholder-wisata.jpg';
+                    e.currentTarget.src = '/assets/images/placeholder.jpg';
                   }}
                 />
               )}

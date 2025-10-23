@@ -38,24 +38,6 @@ interface TransactionGridViewProps {
   onView: (transaction: Transaction) => void;
 }
 
-const StatusBadge = ({ status }: { status: string }) => {
-  const configs = {
-    PENDING: { color: "bg-yellow-500", icon: Clock, label: "Pending" },
-    PAID: { color: "bg-green-500", icon: CheckCircle, label: "Lunas" },
-    CANCELLED: { color: "bg-red-500", icon: XCircle, label: "Batal" }
-  };
-  
-  const config = configs[status as keyof typeof configs] || configs.PENDING;
-  const Icon = config.icon;
-  
-  return (
-    <div className="flex items-center">
-      <span className={`w-2 h-2 rounded-full ${config.color} mr-2`}></span>
-      <span className="text-sm font-medium text-gray-700">{config.label}</span>
-    </div>
-  );
-};
-
 export default function TransactionGridView({ transactions, onView }: TransactionGridViewProps) {
   if (transactions.length === 0) {
     return (
@@ -81,7 +63,7 @@ export default function TransactionGridView({ transactions, onView }: Transactio
                 alt={transaction.wisata.nama}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 onError={(e) => {
-                  e.currentTarget.src = '/placeholder-wisata.jpg';
+                  e.currentTarget.src = '/assets/images/placeholder.jpg';
                 }}
               />
               <div className="absolute top-3 right-3">
