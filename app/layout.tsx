@@ -3,10 +3,11 @@ import { Lato, Raleway } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 import { AnimationProvider } from "@/lib/animation";
-import ConditionalNavbar from "@/components/ConditionalNavbar";
+import FloatingChatButton from "@/components/chatbot/FloatingChatButton";
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
 import PageTransitionProvider from "@/components/providers/PageTransitionProvider";
 import TopLoader from "@/components/ui/TopLoader";
+import { ConditionalNavbar } from "@/components/providers/ConditionalNavbar";
 
 export const dynamic = 'force-dynamic'
 export const dynamicParams = true
@@ -64,12 +65,15 @@ export default function RootLayout({
             <TopLoader color="#5B903A" height={3} showSpinner={false} />
             <SmoothScrollProvider />
             
-            {/* Conditional Navbar - tidak muncul di dashboard */}
+            {/* Conditional Navbar - hidden on /chatbot */}
             <ConditionalNavbar />
             
             <PageTransitionProvider>
               {children}
             </PageTransitionProvider>
+            
+            {/* Floating Chat Button - shows on homepage only */}
+            <FloatingChatButton />
           </AuthProvider>
         </AnimationProvider>
       </body>
