@@ -32,7 +32,7 @@ const infoCards = [
 
 export default function InfoSection() {
   return (
-    <section className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gray-50">
+    <section id="info-section" className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gray-50">
       <div className="max-w-screen-xl mx-auto">
         {/* Section Header */}
         <motion.div

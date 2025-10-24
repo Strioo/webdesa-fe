@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import PopulationChart from '@/components/ui/PopulationChart'
 import { useCountUp } from '@/hooks/useCountUp'
+import { useSmoothScroll } from '@/hooks/useSmoothScroll'
 import { fetchWeatherData } from '@/lib/weatherApi'
 import { dashboardApi } from '@/lib/api'
 
@@ -32,6 +33,7 @@ interface PopulationData {
 
 const HeroSection = () => {
   const sectionRef = useRef<HTMLDivElement>(null)
+  const { scrollTo } = useSmoothScroll({ offset: 80, duration: 1000, easing: 'easeInOut' })
   
   const [weatherData, setWeatherData] = useState<WeatherData>({
     location: 'Baturaden, Banyumas',
@@ -142,9 +144,13 @@ const HeroSection = () => {
 
   return (
     <div ref={sectionRef}>
-      <section className="relative bg-[url('/assets/images/bg-hero.png')] bg-cover bg-center min-h-screen w-full overflow-hidden pt-20 sm:pt-24">
+      <section className="relative bg-[url('/assets/images/bg-hero.png')] bg-cover bg-center min-h-screen w-full overflow-hidden -mt-[120px] pt-[140px]">
         <div className="container max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-full min-h-screen flex items-end pb-10 sm:pb-16 lg:pb-20">
-          <div className="flex flex-col lg:flex-row gap-6 w-full justify-between items-end">
+          {/* Responsive Layout: 
+              Mobile/Tablet: flex-col-reverse (Hero Content on top, Weather Card on bottom)
+              Desktop: flex-row (Weather Card left, Hero Content right) 
+          */}
+          <div className="flex flex-col-reverse lg:flex-row gap-6 w-full justify-between items-end lg:items-end">
             {/* Weather & Population Card */}
             <motion.div
               className="bg-[rgba(0,0,0,0.215)] backdrop-blur-xs border border-gray-400 shadow-xl rounded-3xl w-full lg:w-[30%]"
@@ -287,7 +293,7 @@ const HeroSection = () => {
               }}
             >
               <motion.div
-                className="mb-4 flex justify-center sm:justify-start"
+                className="mb-4 flex justify-center lg:justify-start"
                 initial={{ opacity: 0, filter: 'blur(4px)' }}
                 animate={{ opacity: 1, filter: 'blur(0px)' }}
                 transition={{
@@ -308,18 +314,19 @@ const HeroSection = () => {
                 </motion.span>
               </motion.div>
 
-              <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight mb-4 sm:mb-6 text-center sm:text-left">
+              <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight mb-4 sm:mb-6 text-center lg:text-left">
                 Baturaden, Harmoni<br />
                 Alam dan Kehangatan
               </h1>
 
-              <p className="text-[#A1A1A1] text-sm sm:text-base md:text-lg mb-6 sm:mb-8 max-w-2xl opacity-90 leading-relaxed text-center sm:text-left mx-auto sm:mx-0">
+              <p className="text-[#A1A1A1] text-sm sm:text-base md:text-lg mb-6 sm:mb-8 max-w-2xl opacity-90 leading-relaxed text-center lg:text-left mx-auto lg:mx-0">
                 Tempat terbaik untuk liburan keluarga, melepas penat, dan menikmati keindahan
                 Banyumas yang menenangkan.
               </p>
 
-              <div className="flex justify-center sm:justify-start">
+              <div className="flex justify-center lg:justify-start">
                 <motion.button
+                  onClick={() => scrollTo('statistik-section')}
                   className="inline-flex items-center justify-center w-max bg-white text-black font-medium pl-5 pr-2 py-2 rounded-full gap-3 cursor-pointer relative will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
                   aria-label="Kunjungi Sekarang"
                   whileHover={{

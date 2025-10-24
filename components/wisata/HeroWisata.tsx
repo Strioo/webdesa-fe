@@ -4,10 +4,12 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useSmoothScroll } from '@/hooks/useSmoothScroll'
 import SearchGlassCard from './SearchGlassCard'
 import AIRecommendationModal from './AIRecommendationModal'
 
 export default function HeroWisata() {
+  const { scrollTo } = useSmoothScroll({ offset: 80, duration: 1000, easing: 'easeInOut' })
   const [isAIModalOpen, setIsAIModalOpen] = useState(false)
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState('')
@@ -56,7 +58,7 @@ export default function HeroWisata() {
   }
 
   return (
-    <section className="relative w-full min-h-[900px] md:h-[900px] overflow-hidden">
+    <section className="relative w-full min-h-[900px] md:h-[900px] overflow-hidden -mt-[88px] pt-[88px]">
       {/* Background Image - BRIGHT, NO DARK OVERLAY */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -143,19 +145,19 @@ export default function HeroWisata() {
                 }}
                 className="flex justify-center sm:justify-start"
               >
-                <Link href="#destinations">
-                  <motion.button
-                    className="inline-flex items-center justify-center w-max bg-white text-black font-medium pl-5 pr-2 py-2 rounded-full gap-3 cursor-pointer relative will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
-                    aria-label="Jelajahi Sekarang"
-                    whileHover={{
-                      scale: 1.03,
-                      boxShadow: '0 12px 28px -8px rgba(0, 0, 0, 0.35)',
-                    }}
-                    whileTap={{
-                      scale: 0.98,
-                    }}
-                    transition={{
-                      type: 'spring',
+                <motion.button
+                  onClick={() => scrollTo('destinations')}
+                  className="inline-flex items-center justify-center w-max bg-white text-black font-medium pl-5 pr-2 py-2 rounded-full gap-3 cursor-pointer relative will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+                  aria-label="Jelajahi Sekarang"
+                  whileHover={{
+                    scale: 1.03,
+                    boxShadow: '0 12px 28px -8px rgba(0, 0, 0, 0.35)',
+                  }}
+                  whileTap={{
+                    scale: 0.98,
+                  }}
+                  transition={{
+                    type: 'spring',
                       stiffness: 400,
                       damping: 25,
                       duration: 0.15
@@ -185,7 +187,6 @@ export default function HeroWisata() {
                       />
                     </motion.div>
                   </motion.button>
-                </Link>
               </motion.div>
             </div>
 

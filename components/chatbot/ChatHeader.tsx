@@ -46,9 +46,9 @@ export default function ChatHeader({ onReset }: ChatHeaderProps) {
             />
           </div>
           <div className="flex flex-col">
-            <h1 className="text-base sm:text-lg font-semibold text-neutral-900">
-              Chat AI Desa Baturaden
-            </h1>
+            <p className="text-sm sm:text-base md:text-lg font-semibold text-neutral-900 leading-tight">
+              Chat AI Desa
+            </p>
             <p className="text-xs text-neutral-500 hidden sm:block">
               Powered by AI • Real-time Data ✨
             </p>

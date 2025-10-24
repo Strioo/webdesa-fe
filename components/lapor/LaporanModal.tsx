@@ -399,7 +399,7 @@ export default function LaporanModal({ isOpen, onClose }: LaporanModalProps) {
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/50"
+        className="fixed inset-0 z-50 flex items-center justify-center px-4 pt-24 pb-4 sm:pt-28 sm:pb-6 backdrop-blur-md bg-black/50"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -411,14 +411,14 @@ export default function LaporanModal({ isOpen, onClose }: LaporanModalProps) {
       >
         <motion.div
           ref={modalRef}
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl h-full max-h-full overflow-hidden flex flex-col"
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
           transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
         >
           {/* Header */}
-          <div className="sticky top-0 bg-white border-b border-gray-200 px-6 sm:px-8 py-4 flex items-center justify-between rounded-t-2xl z-10">
+          <div className="flex-shrink-0 bg-white border-b border-gray-200 px-6 sm:px-8 py-4 flex items-center justify-between rounded-t-2xl">
             <h2 id="modal-title" className="text-2xl font-bold text-gray-900">
               Form Laporan Warga
             </h2>
@@ -432,8 +432,8 @@ export default function LaporanModal({ isOpen, onClose }: LaporanModalProps) {
             </button>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="px-6 sm:px-8 py-6 space-y-6">
+          {/* Form - Scrollable */}
+          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-6">
             {/* Judul Laporan */}
             <div>
               <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-2">

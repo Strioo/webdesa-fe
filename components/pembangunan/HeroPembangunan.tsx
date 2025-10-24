@@ -3,8 +3,11 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useSmoothScroll } from '@/hooks/useSmoothScroll'
 
 export default function HeroPembangunan() {
+  const { scrollTo } = useSmoothScroll({ offset: 80, duration: 1000, easing: 'easeInOut' })
+
   return (
     <section className="relative w-full min-h-[900px] md:h-[900px] overflow-hidden -mt-[88px] pt-[88px]">
       {/* Background Image */}
@@ -90,31 +93,31 @@ export default function HeroPembangunan() {
                 }}
                 className="flex justify-center sm:justify-start"
               >
-                <Link href="#statistik-section">
-                  <motion.button
-                    className="inline-flex items-center justify-center w-max bg-white text-black font-medium pl-5 pr-2 py-2 rounded-full gap-3 cursor-pointer relative will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
-                    aria-label="Lihat Proyek Pembangunan"
+                <motion.button
+                  onClick={() => scrollTo('statistik-section')}
+                  className="inline-flex items-center justify-center w-max bg-white text-black font-medium pl-5 pr-2 py-2 rounded-full gap-3 cursor-pointer relative will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+                  aria-label="Lihat Proyek Pembangunan"
+                  whileHover={{
+                    scale: 1.03,
+                    boxShadow: '0 12px 28px -8px rgba(0, 0, 0, 0.35)',
+                  }}
+                  whileTap={{
+                    scale: 0.98,
+                  }}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 400,
+                    damping: 25,
+                    duration: 0.15
+                  }}
+                >
+                  <span className="text-sm sm:text-base font-medium">
+                    Lihat Proyek Pembangunan
+                  </span>
+                  <motion.div
+                    className="flex items-center justify-center bg-[#5B903A] rounded-full w-12 h-12"
                     whileHover={{
-                      scale: 1.03,
-                      boxShadow: '0 12px 28px -8px rgba(0, 0, 0, 0.35)',
-                    }}
-                    whileTap={{
-                      scale: 0.98,
-                    }}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 400,
-                      damping: 25,
-                      duration: 0.15
-                    }}
-                  >
-                    <span className="text-sm sm:text-base font-medium">
-                      Lihat Proyek Pembangunan
-                    </span>
-                    <motion.div
-                      className="flex items-center justify-center bg-[#5B903A] rounded-full w-12 h-12"
-                      whileHover={{
-                        rotate: 45,
+                      rotate: 45,
                         scale: 1.08,
                       }}
                       transition={{
@@ -132,7 +135,6 @@ export default function HeroPembangunan() {
                       />
                     </motion.div>
                   </motion.button>
-                </Link>
               </motion.div>
             </div>
 

@@ -132,11 +132,11 @@ const Navbar = memo(function Navbar({
 
   return (
     <nav className="fixed inset-x-0 top-0 z-50">
-      <div className="w-full px-4 sm:px-6 lg:px-8 pt-3">
+      <div className="w-full px-4 sm:px-6 lg:px-8 pt-4">
         <motion.div 
           className="navbar max-w-[1400px] mx-auto w-full rounded-full px-4 md:px-6 flex items-center justify-between will-change-transform"
           animate={{
-            backgroundColor: isScrolled ? 'rgba(255, 255, 255, 0.7)' : 'rgb(255, 255, 255)',
+            backgroundColor: isScrolled ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 255, 255, 0.95)',
             boxShadow: isScrolled 
               ? '0 0 0 1px rgba(0, 0, 0, 0.05)' 
               : '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
@@ -148,8 +148,8 @@ const Navbar = memo(function Navbar({
           style={{ 
             paddingTop: isScrolled ? '0.5rem' : '0.75rem',
             paddingBottom: isScrolled ? '0.5rem' : '0.75rem',
-            backdropFilter: isScrolled ? 'blur(12px)' : 'none',
-            WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
           }}
         >
           {/* Logo */}
@@ -189,9 +189,9 @@ const Navbar = memo(function Navbar({
             </ul>
           </div>
 
-          {/* Desktop Actions */}
+          {/* Desktop Actions (lg and above) */}
           {!user ? (
-            <div className="hidden md:flex items-center gap-3">
+            <div className="hidden lg:flex items-center gap-3">
               <motion.button 
                 onClick={() => router.push('/register')}
                 className="text-sm rounded-full px-4 py-2 font-normal text-gray-600 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B903A] focus-visible:ring-offset-2"
@@ -215,7 +215,7 @@ const Navbar = memo(function Navbar({
               </motion.button>
             </div>
           ) : (
-            <div className="hidden md:flex items-center gap-3 relative">
+            <div className="hidden lg:flex items-center gap-3 relative">
               <motion.button
                 ref={userMenuButtonRef}
                 onClick={toggleUserMenu}
@@ -318,7 +318,7 @@ const Navbar = memo(function Navbar({
             </div>
           )}
 
-          {/* Mobile & Tablet Actions */}
+          {/* Mobile & Tablet Actions (below lg) */}
           {!user ? (
             <div className="flex lg:hidden items-center gap-2">
               <motion.button 

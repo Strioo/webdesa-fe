@@ -139,7 +139,7 @@ const StatistikDesa = () => {
 
     return (
         <div ref={sectionRef}>
-            <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+            <section id="statistik-section" className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
                 <div className="max-w-[1400px] mx-auto w-full">
                     {/* Header Section */}
                     <div className={`flex flex-col lg:flex-row justify-between items-start gap-6 sm:gap-8 mb-8 sm:mb-12 animate-on-scroll ${isVisible ? 'animate-fade-in-up' : ''}`}>
@@ -345,12 +345,6 @@ const StatistikDesa = () => {
                                         <h3 className="text-2xl font-semibold text-gray-900 leading-tight mb-2">
                                             Pertumbuhan<br />Penduduk
                                         </h3>
-                                        <div className="flex items-center gap-2">
-                                            <span ref={populationCountUp.ref} className="text-lg font-bold text-[#5B903A]">
-                                                {populationCountUp.count}
-                                            </span>
-                                            <span className="text-sm text-gray-500">Warga Terdaftar</span>
-                                        </div>
                                     </div>
 
                                     {/* Time Range Filter */}
@@ -394,27 +388,6 @@ const StatistikDesa = () => {
                                         </ul>
                                     </div>
                                 </div>
-
-                                {/* Growth Rate Badge */}
-                                {statsData.population.growthRate !== 0 && (
-                                    <div className="mb-4">
-                                        <span ref={growthRateCountUp.ref} className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
-                                            statsData.population.growthRate >= 0 
-                                                ? 'bg-green-100 text-green-700' 
-                                                : 'bg-red-100 text-red-700'
-                                        }`}>
-                                            {growthRateCountUp.count}
-                                            <svg 
-                                                className={`w-4 h-4 ${statsData.population.growthRate < 0 ? 'rotate-180' : ''}`} 
-                                                fill="none" 
-                                                stroke="currentColor" 
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                                            </svg>
-                                        </span>
-                                    </div>
-                                )}
 
                                 {/* Area Chart */}
                                 <div className="relative -mx-2">

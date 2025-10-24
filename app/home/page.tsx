@@ -27,7 +27,6 @@ const Footer = dynamic(() => import('@/components/Footer'), {
 export default function Home() {
   return (
     <div>
-      {/* Navbar sudah ada di root layout, tidak perlu duplikat */}
       <HeroSection />
       <StatistikDesa />
       <UmkmDanWisata />
