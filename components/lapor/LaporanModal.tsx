@@ -4,8 +4,9 @@ import { useState, useEffect, useRef, ChangeEvent, FormEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Upload, Camera, Trash2, Loader2, File } from 'lucide-react'
 import Image from 'next/image'
-import { LAPORAN_CATEGORIES, LaporanFormData, LaporanValidationError } from '@/types/laporan'
+import { LAPORAN_CATEGORIES, LAPORAN_CATEGORY_LABELS, LaporanFormData, LaporanValidationError } from '@/types/laporan'
 import { isFormValid, validateLaporan } from '@/lib/validateLaporan'
+import { laporanApi } from '@/lib/api'
 
 
 interface LaporanModalProps {
@@ -320,23 +321,38 @@ export default function LaporanModal({ isOpen, onClose }: LaporanModalProps) {
     setIsSubmitting(true)
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // ✅ Prepare FormData for API
+      const submitData = new FormData()
+      submitData.append('judul', formData.title)
+      submitData.append('deskripsi', formData.description)
+      submitData.append('kategori', formData.category)
+      if (formData.location) {
+        submitData.append('lokasi', formData.location)
+      }
+      if (formData.photo) {
+        submitData.append('foto', formData.photo)
+      }
 
-      // TODO: Replace with actual API call
-      console.log('Laporan submitted:', formData)
+      // ✅ Call API
+      const response = await laporanApi.create(submitData)
 
-      // Success notification
-      setNotification({
-        type: 'success',
-        message: 'Laporan berhasil dikirim! Terima kasih atas partisipasi Anda.'
-      })
+      console.log('Laporan response:', response)
 
-      // Auto dismiss after 5 seconds and close modal
-      setTimeout(() => {
-        setNotification(null)
-        handleClose()
-      }, 5000)
+      if (response.success) {
+        // Success notification
+        setNotification({
+          type: 'success',
+          message: 'Laporan berhasil dikirim! Terima kasih atas partisipasi Anda.'
+        })
+
+        // Auto dismiss after 5 seconds and close modal
+        setTimeout(() => {
+          setNotification(null)
+          handleClose()
+        }, 5000)
+      } else {
+        throw new Error(response.message || 'Gagal mengirim laporan')
+      }
     } catch (error) {
       console.error('Error submitting laporan:', error)
       
@@ -470,7 +486,7 @@ export default function LaporanModal({ isOpen, onClose }: LaporanModalProps) {
                   <option value="" disabled>Pilih Kategori Laporan</option>
                   {LAPORAN_CATEGORIES.map((cat: string) => (
                     <option key={cat} value={cat} className="py-2">
-                      {cat}
+                      {LAPORAN_CATEGORY_LABELS[cat] || cat}
                     </option>
                   ))}
                 </select>

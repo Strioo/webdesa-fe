@@ -5,23 +5,25 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get('auth-token')?.value;
   const { pathname } = request.nextUrl;
 
-  const publicRoutes = ['/', '/login', '/register'];
-  const protectedRoutes = ['/dashboard'];
+  // Public routes that don't require authentication
+  const publicRoutes = ['/', '/login', '/register', '/profile', '/umkm', '/wisata', '/pembangunan', '/lapor'];
+  
+  // Admin-only routes
+  const adminRoutes = ['/dashboard'];
 
-  const isProtectedRoute = protectedRoutes.some(route => 
-    pathname.startsWith(route)
-  );
+  const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route));
+  const isAuthPage = pathname === '/login' || pathname === '/register';
 
-  const isPublicRoute = publicRoutes.includes(pathname);
-
-  if (isProtectedRoute && !token) {
+  // Redirect to login if accessing admin route without token
+  if (isAdminRoute && !token) {
     const url = new URL('/login', request.url);
     url.searchParams.set('from', pathname);
     return NextResponse.redirect(url);
   }
 
-  if (token && (pathname === '/login' || pathname === '/register')) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+  // Redirect to home if logged in and trying to access auth pages
+  if (token && isAuthPage) {
+    return NextResponse.redirect(new URL('/', request.url));
   }
 
   return NextResponse.next();

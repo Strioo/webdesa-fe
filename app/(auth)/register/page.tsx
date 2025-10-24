@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, AlertCircle, UserPlus } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, AlertCircle, UserPlus, Info } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
 export default function RegisterPage() {
@@ -12,7 +12,7 @@ export default function RegisterPage() {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "VISITOR" as "VISITOR" | "WARGA",
+    role: "VISITOR" as "VISITOR", // ✅ Auto VISITOR only
     noTelp: "",
     alamat: "",
   });
@@ -78,7 +78,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-50 flex items-center justify-center p-4 py-12">
       <div className="w-full max-w-2xl">
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
           <div className="text-center mb-8">
@@ -86,7 +86,22 @@ export default function RegisterPage() {
               <UserPlus className="w-8 h-8 text-green-600" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Daftar Akun Baru</h1>
-            <p className="text-gray-600">Bergabung dengan sistem administrasi desa</p>
+            <p className="text-gray-600">Bergabung dengan sistem informasi desa</p>
+          </div>
+
+          {/* ✅ Info Box untuk Role Warga */}
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex gap-3">
+              <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-blue-800">
+                <p className="font-semibold mb-2">Informasi Pendaftaran:</p>
+                <ul className="list-disc list-inside space-y-1 text-blue-700">
+                  <li>Registrasi ini untuk <strong>Pengunjung Umum</strong></li>
+                  <li>Untuk akun <strong>Warga Desa</strong>, silakan hubungi RT/RW setempat atau Kantor Kepala Desa</li>
+                  <li>Pendaftaran warga dilakukan oleh staff desa untuk verifikasi data kependudukan</li>
+                </ul>
+              </div>
+            </div>
           </div>
 
           {error && (
@@ -216,23 +231,6 @@ export default function RegisterPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
-                  Status *
-                </label>
-                <select
-                  id="role"
-                  name="role"
-                  required
-                  value={formData.role}
-                  onChange={handleInputChange}
-                  className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
-                >
-                  <option value="VISITOR">Pengunjung</option>
-                  <option value="WARGA">Warga Desa</option>
-                </select>
-              </div>
-
-              <div>
                 <label htmlFor="noTelp" className="block text-sm font-medium text-gray-700 mb-2">
                   No. Telepon
                 </label>
@@ -249,6 +247,16 @@ export default function RegisterPage() {
                     className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-400 transition-colors"
                     placeholder="081234567890"
                   />
+                </div>
+              </div>
+
+              {/* ✅ Role Display Only - Auto VISITOR */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Status Akun
+                </label>
+                <div className="px-4 py-3 border-2 border-green-200 bg-green-50 rounded-lg">
+                  <span className="text-green-800 font-medium">Pengunjung Umum</span>
                 </div>
               </div>
             </div>

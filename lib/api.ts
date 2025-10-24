@@ -147,7 +147,40 @@ export const apiClient = {
 export const laporanApi = {
   getAll: () => apiClient.get('/laporan/getall'),
   getById: (id: string) => apiClient.get(`/laporan/get/${id}`),
-  create: (data: any) => apiClient.post('/laporan/create', data),
+  getByUserId: (userId: string) => apiClient.get(`/laporan/user/get/${userId}`),
+  create: async (formData: FormData) => {
+    const token = getAuthToken();
+    
+    try {
+      const url = `${API_BASE_URL}/laporan/create`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new ApiError(
+          errorData.message || 'Failed to create laporan',
+          response.status,
+          errorData
+        );
+      }
+
+      return await response.json();
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(
+        error instanceof Error ? error.message : 'Network error',
+        0
+      );
+    }
+  },
   update: (id: string, data: any) => apiClient.put(`/laporan/update/${id}`, data),
   delete: (id: string) => apiClient.delete(`/laporan/delete/${id}`),
   updateStatus: (id: string, data: { status: string; tanggapan?: string }) => 

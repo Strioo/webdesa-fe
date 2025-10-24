@@ -18,7 +18,8 @@ export default function LoginPage() {
   const { login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const from = searchParams.get('from') || '/dashboard';
+  // ✅ Remove default '/dashboard' redirect - handled by auth context based on role
+  const from = searchParams.get('from');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,13 +29,12 @@ export default function LoginPage() {
     try {
       const result = await login(formData.email, formData.password);
       
-      if (result.success) {
-        router.push(from);
-      } else {
-        setError(result.message || "Login failed");
+      if (!result.success) {
+        setError(result.message || "Login gagal");
       }
+      // ✅ Redirect handled by auth context based on role
     } catch (error) {
-      setError("An unexpected error occurred");
+      setError("Terjadi kesalahan yang tidak terduga");
     } finally {
       setLoading(false);
     }

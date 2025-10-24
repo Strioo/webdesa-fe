@@ -17,7 +17,8 @@ import {
   FileText,
   X,
   AlertCircleIcon,
-  Loader2
+  Loader2,
+  UserX
 } from "lucide-react";
 
 interface Laporan {
@@ -31,11 +32,11 @@ interface Laporan {
   tanggapan?: string;
   createdAt: string;
   updatedAt?: string;
-  user: {
+  user?: {
     id: string;
     name: string;
     email: string;
-  };
+  } | null; // ✅ Make user optional and nullable
 }
 
 const StatusBadge = ({ status }: { status: string }) => {
@@ -212,9 +213,19 @@ const DetailModal = ({
             <h4 className="text-xl font-bold text-gray-900 mb-3">{laporan.judul}</h4>
             
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
+              {/* ✅ Handle guest user */}
               <div className="flex items-center">
-                <User className="w-4 h-4 mr-1.5" />
-                <span className="font-medium">{laporan.user.name}</span>
+                {laporan.user ? (
+                  <>
+                    <User className="w-4 h-4 mr-1.5" />
+                    <span className="font-medium">{laporan.user.name}</span>
+                  </>
+                ) : (
+                  <>
+                    <UserX className="w-4 h-4 mr-1.5 text-gray-400" />
+                    <span className="font-medium text-gray-500 italic">Guest User</span>
+                  </>
+                )}
               </div>
               <div className="flex items-center">
                 <Calendar className="w-4 h-4 mr-1.5" />
@@ -370,26 +381,7 @@ export default function LaporanPage() {
     } catch (error: any) {
       console.error("Error fetching laporan:", error);
       toast.error(error.message || 'Gagal memuat data laporan');
-      
-      // Set mock data jika fetch gagal (untuk development)
-      const mockData: Laporan[] = [
-        {
-          id: "1",
-          judul: "Jalan Rusak di RT 01",
-          deskripsi: "Jalan di depan rumah pak RT mengalami kerusakan parah akibat hujan deras minggu lalu. Banyak lubang yang membahayakan pengendara motor.",
-          kategori: "INFRASTRUKTUR",
-          status: "PENDING",
-          lokasi: "Jl. Merdeka RT 01/RW 02",
-          foto: "/uploads/laporan1.jpg",
-          createdAt: "2025-10-01T10:30:00.000Z",
-          user: {
-            id: "user1",
-            name: "Budi Santoso",
-            email: "budi@gmail.com"
-          }
-        }
-      ];
-      setLaporan(mockData);
+      setLaporan([]);
     } finally {
       setLoading(false);
     }
@@ -402,7 +394,8 @@ export default function LaporanPage() {
       filtered = filtered.filter(item =>
         item.judul.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.deskripsi.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.user.name.toLowerCase().includes(searchTerm.toLowerCase())
+        item.user?.name.toLowerCase().includes(searchTerm.toLowerCase()) || // ✅ Safe navigation
+        (item.lokasi && item.lokasi.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
@@ -624,10 +617,18 @@ export default function LaporanPage() {
                     </div>
                   </td>
                   <td className="py-4 px-4">
-                    <div>
-                      <p className="font-medium text-gray-900">{item.user.name}</p>
-                      <p className="text-sm text-gray-500">{item.user.email}</p>
-                    </div>
+                    {/* ✅ Handle guest user in table */}
+                    {item.user ? (
+                      <div>
+                        <p className="font-medium text-gray-900">{item.user.name}</p>
+                        <p className="text-sm text-gray-500">{item.user.email}</p>
+                      </div>
+                    ) : (
+                      <div className="flex items-center text-gray-500">
+                        <UserX className="w-4 h-4 mr-2" />
+                        <span className="text-sm italic">Guest User</span>
+                      </div>
+                    )}
                   </td>
                   <td className="py-4 px-4">
                     <KategoriBadge kategori={item.kategori} />
