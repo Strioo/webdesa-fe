@@ -8,7 +8,8 @@ export function ConditionalNavbar() {
   const pathname = usePathname()
   
   // Hide navbar and dock navbar on chatbot page
-  const shouldHideNav = pathname === '/chatbot'
+  const shouldHideNav = pathname === '/chatbot' || pathname.startsWith('/dashboard') ||
+                       pathname.startsWith('/login') || pathname.startsWith('/register')
   
   if (shouldHideNav) {
     return null
