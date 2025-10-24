@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Search,
   CreditCard,
@@ -15,7 +16,6 @@ import {
   ChevronRight
 } from "lucide-react";
 import { transactionApi } from "@/lib/api";
-import DetailModal from "@/components/transaksi/DetailModal";
 import TransactionGridView from "@/components/transaksi/TransactionGridView";
 import TransactionTableView from "@/components/transaksi/TransactionTableView";
 
@@ -53,13 +53,12 @@ interface Transaction {
 const ITEMS_PER_PAGE = 12;
 
 export default function TransaksiPage() {
+  const router = useRouter();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [paymentFilter, setPaymentFilter] = useState("ALL");
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
@@ -143,8 +142,7 @@ export default function TransaksiPage() {
   };
 
   const openDetailModal = (transaction: Transaction) => {
-    setSelectedTransaction(transaction);
-    setIsDetailModalOpen(true);
+    router.push(`/dashboard/transaksi/${transaction.id}`);
   };
 
   const getTotalRevenue = () => {
@@ -423,13 +421,6 @@ export default function TransaksiPage() {
           </div>
         )}
       </div>
-
-      {/* Detail Modal */}
-      <DetailModal
-        transaction={selectedTransaction}
-        isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
-      />
     </div>
   );
 }

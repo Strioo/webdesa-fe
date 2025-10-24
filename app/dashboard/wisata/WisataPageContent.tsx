@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Search, Grid3x3, List, AlertCircle } from "lucide-react";
 import { wisataApi } from "@/lib/api";
-import CreateEditModal from "@/components/wisata/CreateEditModal";
-import DetailModal from "@/components/wisata/DetailModal";
 import WisataGridView from "@/components/wisata/WisataGridView";
 import WisataTableView from "@/components/wisata/WisataTableView";
 
@@ -25,16 +24,12 @@ interface Wisata {
 }
 
 export default function WisataPageContent() {
+  const router = useRouter();
   const [wisata, setWisata] = useState<Wisata[]>([]);
   const [filteredWisata, setFilteredWisata] = useState<Wisata[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [kategoriFilter, setKategoriFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
-  const [selectedWisata, setSelectedWisata] = useState<Wisata | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingWisata, setEditingWisata] = useState<Wisata | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
@@ -93,43 +88,6 @@ export default function WisataPageContent() {
     setFilteredWisata(filtered);
   };
 
-  const handleCreate = async (data: Partial<Wisata>) => {
-    try {
-      const response = await wisataApi.create(data);
-      console.log('Create wisata response:', response);
-      
-      if (response.success) {
-        await fetchWisata();
-        setIsCreateModalOpen(false);
-      } else {
-        alert(response.message || 'Gagal menambahkan wisata');
-      }
-    } catch (error: any) {
-      console.error("Error creating wisata:", error);
-      alert(error.message || 'Terjadi kesalahan saat menambahkan wisata');
-    }
-  };
-
-  const handleEdit = async (data: Partial<Wisata>) => {
-    try {
-      if (editingWisata) {
-        const response = await wisataApi.update(editingWisata.id, data);
-        console.log('Update wisata response:', response);
-        
-        if (response.success) {
-          await fetchWisata();
-          setIsEditModalOpen(false);
-          setEditingWisata(null);
-        } else {
-          alert(response.message || 'Gagal mengupdate wisata');
-        }
-      }
-    } catch (error: any) {
-      console.error("Error updating wisata:", error);
-      alert(error.message || 'Terjadi kesalahan saat mengupdate wisata');
-    }
-  };
-
   const handleDelete = async (id: string) => {
     if (confirm("Apakah Anda yakin ingin menghapus wisata ini?")) {
       try {
@@ -149,13 +107,11 @@ export default function WisataPageContent() {
   };
 
   const openDetailModal = (wisata: Wisata) => {
-    setSelectedWisata(wisata);
-    setIsDetailModalOpen(true);
+    router.push(`/dashboard/wisata/${wisata.id}`);
   };
 
   const openEditModal = (wisata: Wisata) => {
-    setEditingWisata(wisata);
-    setIsEditModalOpen(true);
+    router.push(`/dashboard/wisata/edit/${wisata.id}`);
   };
 
   if (loading) {
@@ -178,7 +134,7 @@ export default function WisataPageContent() {
           <p className="text-gray-600 mt-2">Kelola destinasi wisata desa</p>
         </div>
         <button
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={() => router.push("/dashboard/wisata/create")}
           className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -303,30 +259,6 @@ export default function WisataPageContent() {
           )}
         </div>
       </div>
-
-      {/* Modals */}
-      <CreateEditModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSave={handleCreate}
-      />
-
-      <CreateEditModal
-        wisata={editingWisata || undefined}
-        isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setEditingWisata(null);
-        }}
-        onSave={handleEdit}
-        isEdit={true}
-      />
-
-      <DetailModal
-        wisata={selectedWisata}
-        isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
-      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { umkmApi } from "@/lib/api";
 import {
@@ -11,7 +12,6 @@ import {
   Trash2,
   Store,
   MapPin,
-  DollarSign,
   User,
   X,
   CheckCircle,
@@ -444,179 +444,13 @@ const CreateEditModal = ({
   );
 };
 
-const DetailModal = ({
-  umkm,
-  isOpen,
-  onClose,
-}: {
-  umkm: UMKM | null;
-  isOpen: boolean;
-  onClose: () => void;
-}) => {
-  if (!isOpen || !umkm) return null;
-
-  const getImageUrl = (foto: string | null | undefined): string => {
-    if (!foto) return "/assets/images/placeholder.jpg";
-    if (foto.startsWith("http")) return foto;
-    const baseUrl =
-      process.env.NEXT_PUBLIC_API_URL || "http://192.168.18.3:5000";
-    return `${baseUrl}${foto}`;
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-xl max-w-3xl w-full my-8">
-        <div className="sticky top-0 bg-white p-6 border-b border-gray-200 z-10 rounded-t-xl">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold text-gray-900">Detail UMKM</h3>
-            <button
-              onClick={onClose}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        <div className="p-6 space-y-6 max-h-[calc(90vh-120px)] overflow-y-auto">
-          <div className="bg-gray-50 rounded-xl p-4 border-2 border-gray-200">
-            <img
-              src={getImageUrl(umkm.foto)}
-              alt={umkm.nama}
-              className="w-full h-80 object-cover rounded-lg shadow-md"
-              onError={(e) => {
-                e.currentTarget.src = "/assets/images/placeholder.jpg";
-              }}
-            />
-          </div>
-
-          <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-5">
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex-1">
-                <h4 className="text-2xl font-bold text-gray-900 mb-2">
-                  {umkm.nama}
-                </h4>
-                <span className="inline-block px-3 py-1 bg-blue-600 text-white text-sm rounded-full font-medium">
-                  {umkm.kategori}
-                </span>
-              </div>
-              <span
-                className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center shadow-sm ${
-                  umkm.isAktif
-                    ? "bg-green-500 text-white"
-                    : "bg-red-500 text-white"
-                }`}
-              >
-                {umkm.isAktif ? (
-                  <>
-                    <CheckCircle className="w-4 h-4 mr-1.5" />
-                    Aktif
-                  </>
-                ) : (
-                  <>
-                    <XCircle className="w-4 h-4 mr-1.5" />
-                    Tidak Aktif
-                  </>
-                )}
-              </span>
-            </div>
-            <p className="text-gray-700 leading-relaxed">{umkm.deskripsi}</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="bg-gray-50 rounded-xl p-5 border-2 border-gray-200 space-y-4">
-              <h5 className="font-bold text-gray-900 text-lg mb-3">
-                Informasi Kontak
-              </h5>
-              <div className="flex items-center text-gray-700">
-                <User className="w-5 h-5 mr-3 text-blue-600 flex-shrink-0" />
-                <div>
-                  <p className="text-xs text-gray-500">Pemilik</p>
-                  <p className="font-medium">{umkm.pemilik}</p>
-                </div>
-              </div>
-              <div className="flex items-center text-gray-700">
-                <MapPin className="w-5 h-5 mr-3 text-blue-600 flex-shrink-0" />
-                <div>
-                  <p className="text-xs text-gray-500">Alamat</p>
-                  <p className="font-medium">{umkm.alamat}</p>
-                </div>
-              </div>
-              {umkm.kontak && (
-                <div className="flex items-center text-gray-700">
-                  <Phone className="w-5 h-5 mr-3 text-blue-600 flex-shrink-0" />
-                  <div>
-                    <p className="text-xs text-gray-500">Kontak</p>
-                    <p className="font-medium">{umkm.kontak}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="bg-gray-50 rounded-xl p-5 border-2 border-gray-200 space-y-4">
-              <h5 className="font-bold text-gray-900 text-lg mb-3">
-                Informasi Operasional
-              </h5>
-              {(umkm.jamBuka || umkm.jamTutup) && (
-                <div className="flex items-center text-gray-700">
-                  <Clock className="w-5 h-5 mr-3 text-blue-600 flex-shrink-0" />
-                  <div>
-                    <p className="text-xs text-gray-500">Jam Operasional</p>
-                    <p className="font-medium">
-                      {umkm.jamBuka || "00:00"} - {umkm.jamTutup || "23:59"}
-                    </p>
-                  </div>
-                </div>
-              )}
-              {umkm.harga && (
-                <div className="flex items-center text-gray-700">
-                  <DollarSign className="w-5 h-5 mr-3 text-blue-600 flex-shrink-0" />
-                  <div>
-                    <p className="text-xs text-gray-500">Range Harga</p>
-                    <p className="font-medium">{umkm.harga}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {umkm.produk && (
-            <div className="bg-green-50 border-2 border-green-200 rounded-xl p-5">
-              <h5 className="font-bold text-gray-900 mb-3">Produk/Layanan</h5>
-              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                {umkm.produk}
-              </p>
-            </div>
-          )}
-
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-            <p className="text-xs text-gray-500">
-              Terdaftar sejak:{" "}
-              {new Date(umkm.createdAt).toLocaleDateString("id-ID", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 export default function UMKMPageContent() {
+  const router = useRouter();
   const [umkm, setUmkm] = useState<UMKM[]>([]);
   const [filteredUmkm, setFilteredUmkm] = useState<UMKM[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [kategoriFilter, setKategoriFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
-  const [selectedUmkm, setSelectedUmkm] = useState<UMKM | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingUmkm, setEditingUmkm] = useState<UMKM | null>(null);
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
     id: string | null;
@@ -639,7 +473,6 @@ export default function UMKMPageContent() {
 
       if (response.success && response.data) {
         setUmkm(response.data as UMKM[]);
-        toast.success("Data UMKM berhasil dimuat");
       } else {
         throw new Error(response.message || "Gagal memuat data UMKM");
       }
@@ -676,41 +509,6 @@ export default function UMKMPageContent() {
     setFilteredUmkm(filtered);
   };
 
-  const handleCreate = async (data: Partial<UMKM>) => {
-    try {
-      const response = await umkmApi.create(data);
-
-      if (response.success) {
-        toast.success("UMKM berhasil ditambahkan!");
-        await fetchUmkm();
-      } else {
-        throw new Error(response.message || "Gagal menambahkan UMKM");
-      }
-    } catch (error: any) {
-      console.error("Error creating UMKM:", error);
-      toast.error(error.message || "Gagal menambahkan UMKM");
-    }
-  };
-
-  const handleEdit = async (data: Partial<UMKM>) => {
-    try {
-      if (!editingUmkm) return;
-
-      const response = await umkmApi.update(editingUmkm.id, data);
-
-      if (response.success) {
-        toast.success("UMKM berhasil diperbarui!");
-        await fetchUmkm();
-        setEditingUmkm(null);
-      } else {
-        throw new Error(response.message || "Gagal memperbarui UMKM");
-      }
-    } catch (error: any) {
-      console.error("Error updating UMKM:", error);
-      toast.error(error.message || "Gagal memperbarui UMKM");
-    }
-  };
-
   const handleDelete = async () => {
     if (!deleteModal.id) return;
 
@@ -735,13 +533,11 @@ export default function UMKMPageContent() {
   };
 
   const openDetailModal = (umkm: UMKM) => {
-    setSelectedUmkm(umkm);
-    setIsDetailModalOpen(true);
+    router.push(`/dashboard/umkm/${umkm.id}`);
   };
 
   const openEditModal = (umkm: UMKM) => {
-    setEditingUmkm(umkm);
-    setIsEditModalOpen(true);
+    router.push(`/dashboard/umkm/edit/${umkm.id}`);
   };
 
   const openDeleteModal = (id: string) => {
@@ -784,7 +580,7 @@ export default function UMKMPageContent() {
           </p>
         </div>
         <button
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={() => router.push("/dashboard/umkm/create")}
           className="flex items-center px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm font-medium"
         >
           <Plus className="w-5 h-5 mr-2" />
@@ -928,7 +724,7 @@ export default function UMKMPageContent() {
                   </div>
                   {item.harga && (
                     <div className="flex items-center">
-                      <DollarSign className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" />
+                      <span className="mr-2 text-gray-400 flex-shrink-0 font-medium">Rp</span>
                       <span className="truncate text-green-600 font-medium">
                         {item.harga}
                       </span>
@@ -986,30 +782,7 @@ export default function UMKMPageContent() {
         )}
       </div>
 
-      {/* Modals */}
-      <CreateEditModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSave={handleCreate}
-      />
-
-      <CreateEditModal
-        umkm={editingUmkm || undefined}
-        isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setEditingUmkm(null);
-        }}
-        onSave={handleEdit}
-        isEdit={true}
-      />
-
-      <DetailModal
-        umkm={selectedUmkm}
-        isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
-      />
-
+      {/* Delete Modal */}
       <DeleteConfirmModal
         isOpen={deleteModal.isOpen}
         onClose={() => setDeleteModal({ isOpen: false, id: null })}

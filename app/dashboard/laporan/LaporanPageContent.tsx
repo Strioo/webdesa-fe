@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { laporanApi } from "@/lib/api";
 import {
@@ -15,7 +16,6 @@ import {
   Calendar,
   User,
   FileText,
-  X,
   AlertCircleIcon,
   Loader2,
   UserX
@@ -146,213 +146,13 @@ const DeleteConfirmModal = ({
   );
 };
 
-const DetailModal = ({ 
-  laporan, 
-  isOpen, 
-  onClose, 
-  onStatusUpdate 
-}: { 
-  laporan: Laporan | null;
-  isOpen: boolean;
-  onClose: () => void;
-  onStatusUpdate: (id: string, status: string, tanggapan: string) => void;
-}) => {
-  const [newStatus, setNewStatus] = useState("");
-  const [tanggapan, setTanggapan] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (laporan) {
-      setNewStatus(laporan.status);
-      setTanggapan(laporan.tanggapan || "");
-    }
-  }, [laporan]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (laporan) {
-      setLoading(true);
-      try {
-        await onStatusUpdate(laporan.id, newStatus, tanggapan);
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  if (!isOpen || !laporan) return null;
-
-  const statusConfig = {
-    PENDING: { color: "text-yellow-600", bgColor: "bg-yellow-50", borderColor: "border-yellow-200" },
-    PROSES: { color: "text-blue-600", bgColor: "bg-blue-50", borderColor: "border-blue-200" },
-    SELESAI: { color: "text-green-600", bgColor: "bg-green-50", borderColor: "border-green-200" },
-    DITOLAK: { color: "text-red-600", bgColor: "bg-red-50", borderColor: "border-red-200" }
-  };
-
-  const currentConfig = statusConfig[laporan.status] || statusConfig.PENDING;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-        {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-6 z-10">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold text-gray-900">Detail Laporan</h3>
-            <button
-              onClick={onClose}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        <div className="p-6 space-y-6">
-          {/* Info Card */}
-          <div className={`${currentConfig.bgColor} ${currentConfig.borderColor} border-2 rounded-xl p-5`}>
-            <h4 className="text-xl font-bold text-gray-900 mb-3">{laporan.judul}</h4>
-            
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
-              {/* ✅ Handle guest user */}
-              <div className="flex items-center">
-                {laporan.user ? (
-                  <>
-                    <User className="w-4 h-4 mr-1.5" />
-                    <span className="font-medium">{laporan.user.name}</span>
-                  </>
-                ) : (
-                  <>
-                    <UserX className="w-4 h-4 mr-1.5 text-gray-400" />
-                    <span className="font-medium text-gray-500 italic">Guest User</span>
-                  </>
-                )}
-              </div>
-              <div className="flex items-center">
-                <Calendar className="w-4 h-4 mr-1.5" />
-                {new Date(laporan.createdAt).toLocaleDateString('id-ID', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric'
-                })}
-              </div>
-              {laporan.lokasi && (
-                <div className="flex items-center">
-                  <MapPin className="w-4 h-4 mr-1.5" />
-                  {laporan.lokasi}
-                </div>
-              )}
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <StatusBadge status={laporan.status} />
-              <KategoriBadge kategori={laporan.kategori} />
-            </div>
-          </div>
-
-          {/* Deskripsi */}
-          <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
-            <h5 className="font-semibold text-gray-900 mb-3 flex items-center">
-              <FileText className="w-5 h-5 mr-2 text-gray-600" />
-              Deskripsi Laporan
-            </h5>
-            <p className="text-gray-700 leading-relaxed whitespace-pre-line">{laporan.deskripsi}</p>
-          </div>
-
-          {/* Foto */}
-          {laporan.foto && (
-            <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
-              <h5 className="font-semibold text-gray-900 mb-3">Dokumentasi</h5>
-              <img
-                src={laporan.foto.startsWith('http') ? laporan.foto : `http://localhost:5000${laporan.foto}`}
-                alt="Foto laporan"
-                className="w-full h-64 object-cover rounded-lg border-2 border-gray-300 shadow-sm"
-                onError={(e) => {
-                  e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f3f4f6" width="100" height="100"/%3E%3Ctext fill="%239ca3af" x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14"%3EGambar tidak tersedia%3C/text%3E%3C/svg%3E';
-                }}
-              />
-            </div>
-          )}
-
-          {/* Tanggapan Existing */}
-          {laporan.tanggapan && (
-            <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-5">
-              <h5 className="font-semibold text-blue-900 mb-3">Tanggapan Admin Sebelumnya</h5>
-              <p className="text-blue-800 leading-relaxed whitespace-pre-line">{laporan.tanggapan}</p>
-            </div>
-          )}
-
-          {/* Form Update Status */}
-          <form onSubmit={handleSubmit} className="bg-white border-2 border-gray-200 rounded-xl p-6 space-y-5">
-            <h5 className="font-semibold text-gray-900 text-lg mb-4">Update Status Laporan</h5>
-            
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Status Laporan
-              </label>
-              <select
-                value={newStatus}
-                onChange={(e) => setNewStatus(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              >
-                <option value="PENDING">Menunggu</option>
-                <option value="PROSES">Diproses</option>
-                <option value="SELESAI">Selesai</option>
-                <option value="DITOLAK">Ditolak</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Tanggapan Admin
-              </label>
-              <textarea
-                value={tanggapan}
-                onChange={(e) => setTanggapan(e.target.value)}
-                rows={5}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
-                placeholder="Berikan tanggapan terhadap laporan ini..."
-              />
-            </div>
-
-            <div className="flex justify-end space-x-3 pt-2">
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={loading}
-                className="px-6 py-2.5 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-medium disabled:opacity-50"
-              >
-                Batal
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-6 py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors font-medium disabled:opacity-50 flex items-center"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Memperbarui...
-                  </>
-                ) : (
-                  "Perbarui Status"
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 export default function LaporanPage() {
+  const router = useRouter();
   const [laporan, setLaporan] = useState<Laporan[]>([]);
   const [filteredLaporan, setFilteredLaporan] = useState<Laporan[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [kategoriFilter, setKategoriFilter] = useState("ALL");
-  const [selectedLaporan, setSelectedLaporan] = useState<Laporan | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: string | null }>({ isOpen: false, id: null });
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -410,33 +210,6 @@ export default function LaporanPage() {
     setFilteredLaporan(filtered);
   };
 
-  const handleStatusUpdate = async (id: string, status: string, tanggapan: string) => {
-    try {
-      console.log('Updating status:', { id, status, tanggapan });
-      
-      const response = await laporanApi.updateStatus(id, { status, tanggapan });
-      console.log('Update response:', response);
-
-      if (response.success) {
-        setLaporan(prev =>
-          prev.map(item =>
-            item.id === id
-              ? { ...item, status: status as any, tanggapan, updatedAt: new Date().toISOString() }
-              : item
-          )
-        );
-        
-        toast.success('Status laporan berhasil diperbarui!');
-        setIsDetailModalOpen(false);
-      } else {
-        throw new Error(response.message || 'Gagal memperbarui status');
-      }
-    } catch (error: any) {
-      console.error("Error updating status:", error);
-      toast.error(error.message || 'Gagal memperbarui status laporan');
-    }
-  };
-
   const handleDelete = async () => {
     if (!deleteModal.id) return;
 
@@ -463,8 +236,7 @@ export default function LaporanPage() {
   };
 
   const openDetailModal = (laporan: Laporan) => {
-    setSelectedLaporan(laporan);
-    setIsDetailModalOpen(true);
+    router.push(`/dashboard/laporan/${laporan.id}`);
   };
 
   const openDeleteModal = (id: string) => {
@@ -676,14 +448,7 @@ export default function LaporanPage() {
         )}
       </div>
 
-      {/* Modals */}
-      <DetailModal
-        laporan={selectedLaporan}
-        isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
-        onStatusUpdate={handleStatusUpdate}
-      />
-
+      {/* Delete Confirmation Modal */}
       <DeleteConfirmModal
         isOpen={deleteModal.isOpen}
         onClose={() => setDeleteModal({ isOpen: false, id: null })}

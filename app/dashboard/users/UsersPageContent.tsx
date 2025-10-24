@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Search, Grid3x3, List, AlertCircle, Users, Shield, UserCheck } from "lucide-react";
 import { userApi } from "@/lib/api";
-import CreateEditModal from "@/components/users/CreateEditModal";
-import DetailModal from "@/components/users/DetailModal";
 import UserGridView from "@/components/users/UserGridView";
 import UserTableView from "@/components/users/UserTableView";
 
@@ -20,15 +19,11 @@ interface User {
 
 export default function UsersPageContent() {
   // ... semua logic dari UsersPage sebelumnya, copy paste semua state dan function
+  const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
@@ -81,41 +76,6 @@ export default function UsersPageContent() {
     setFilteredUsers(filtered);
   };
 
-  const handleCreate = async (data: Partial<User> & { password?: string }) => {
-    try {
-      const response = await userApi.create(data);
-      
-      if (response.success) {
-        await fetchUsers();
-        setIsCreateModalOpen(false);
-      } else {
-        alert(response.message || 'Gagal menambahkan user');
-      }
-    } catch (error: any) {
-      console.error("Error creating user:", error);
-      alert(error.message || 'Terjadi kesalahan saat menambahkan user');
-    }
-  };
-
-  const handleEdit = async (data: Partial<User> & { password?: string }) => {
-    try {
-      if (editingUser) {
-        const response = await userApi.update(editingUser.id, data);
-        
-        if (response.success) {
-          await fetchUsers();
-          setIsEditModalOpen(false);
-          setEditingUser(null);
-        } else {
-          alert(response.message || 'Gagal mengupdate user');
-        }
-      }
-    } catch (error: any) {
-      console.error("Error updating user:", error);
-      alert(error.message || 'Terjadi kesalahan saat mengupdate user');
-    }
-  };
-
   const handleDelete = async (id: string) => {
     if (confirm("Apakah Anda yakin ingin menghapus user ini?")) {
       try {
@@ -134,13 +94,11 @@ export default function UsersPageContent() {
   };
 
   const openDetailModal = (user: User) => {
-    setSelectedUser(user);
-    setIsDetailModalOpen(true);
+    router.push(`/dashboard/users/${user.id}`);
   };
 
   const openEditModal = (user: User) => {
-    setEditingUser(user);
-    setIsEditModalOpen(true);
+    router.push(`/dashboard/users/edit/${user.id}`);
   };
 
   const getUserStats = () => {
@@ -174,7 +132,7 @@ export default function UsersPageContent() {
           <p className="text-gray-600 mt-2">Kelola pengguna sistem</p>
         </div>
         <button
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={() => router.push("/dashboard/users/create")}
           className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -326,29 +284,6 @@ export default function UsersPageContent() {
           )}
         </div>
       </div>
-
-      <CreateEditModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSave={handleCreate}
-      />
-
-      <CreateEditModal
-        user={editingUser || undefined}
-        isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setEditingUser(null);
-        }}
-        onSave={handleEdit}
-        isEdit={true}
-      />
-
-      <DetailModal
-        user={selectedUser}
-        isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
-      />
     </div>
   );
 }

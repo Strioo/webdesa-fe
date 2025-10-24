@@ -154,9 +154,16 @@ export default function TransactionTableView({ transactions, onView }: Transacti
                 </p>
               </td>
               <td className="py-4 px-4">
-                <span className="inline-flex items-center px-2.5 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                  {transaction.jumlahTiket} tiket
-                </span>
+                <div className="flex items-center space-x-2">
+                  <div className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-lg px-3 py-2 shadow-sm">
+                    <div className="flex items-center space-x-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                      </svg>
+                      <span className="font-bold text-sm">{transaction.jumlahTiket}</span>
+                    </div>
+                  </div>
+                </div>
               </td>
               <td className="py-4 px-4">
                 <div className="flex items-center">

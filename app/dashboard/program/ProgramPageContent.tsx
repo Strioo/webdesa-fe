@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Search, Grid3x3, List, AlertCircle, Building2, TrendingUp } from "lucide-react";
 import { programApi } from "@/lib/api";
-import CreateEditModal from "@/components/program/CreateEditModal";
-import DetailModal from "@/components/program/DetailModal";
 import ProgramGridView from "@/components/program/ProgramGridView";
 import ProgramTableView from "@/components/program/ProgramTableView";
 
@@ -24,16 +23,12 @@ interface ProgramPembangunan {
 }
 
 export default function ProgramPageContent() {
+  const router = useRouter();
   const [programs, setPrograms] = useState<ProgramPembangunan[]>([]);
   const [filteredPrograms, setFilteredPrograms] = useState<ProgramPembangunan[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [kategoriFilter, setKategoriFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
-  const [selectedProgram, setSelectedProgram] = useState<ProgramPembangunan | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingProgram, setEditingProgram] = useState<ProgramPembangunan | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
@@ -91,43 +86,6 @@ export default function ProgramPageContent() {
     setFilteredPrograms(filtered);
   };
 
-  const handleCreate = async (data: Partial<ProgramPembangunan>) => {
-    try {
-      const response = await programApi.create(data);
-      console.log('Create program response:', response);
-      
-      if (response.success) {
-        await fetchPrograms();
-        setIsCreateModalOpen(false);
-      } else {
-        alert(response.message || 'Gagal menambahkan program');
-      }
-    } catch (error: any) {
-      console.error("Error creating program:", error);
-      alert(error.message || 'Terjadi kesalahan saat menambahkan program');
-    }
-  };
-
-  const handleEdit = async (data: Partial<ProgramPembangunan>) => {
-    try {
-      if (editingProgram) {
-        const response = await programApi.update(editingProgram.id, data);
-        console.log('Update program response:', response);
-        
-        if (response.success) {
-          await fetchPrograms();
-          setIsEditModalOpen(false);
-          setEditingProgram(null);
-        } else {
-          alert(response.message || 'Gagal mengupdate program');
-        }
-      }
-    } catch (error: any) {
-      console.error("Error updating program:", error);
-      alert(error.message || 'Terjadi kesalahan saat mengupdate program');
-    }
-  };
-
   const handleDelete = async (id: string) => {
     if (confirm("Apakah Anda yakin ingin menghapus program ini?")) {
       try {
@@ -147,13 +105,11 @@ export default function ProgramPageContent() {
   };
 
   const openDetailModal = (program: ProgramPembangunan) => {
-    setSelectedProgram(program);
-    setIsDetailModalOpen(true);
+    router.push(`/dashboard/program/${program.id}`);
   };
 
   const openEditModal = (program: ProgramPembangunan) => {
-    setEditingProgram(program);
-    setIsEditModalOpen(true);
+    router.push(`/dashboard/program/edit/${program.id}`);
   };
 
   const getAverageProgress = () => {
@@ -186,7 +142,7 @@ export default function ProgramPageContent() {
           <p className="text-gray-600 mt-2">Kelola program pembangunan desa</p>
         </div>
         <button
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={() => router.push("/dashboard/program/create")}
           className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -376,30 +332,6 @@ export default function ProgramPageContent() {
           )}
         </div>
       </div>
-
-      {/* Modals */}
-      <CreateEditModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSave={handleCreate}
-      />
-
-      <CreateEditModal
-        program={editingProgram || undefined}
-        isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setEditingProgram(null);
-        }}
-        onSave={handleEdit}
-        isEdit={true}
-      />
-
-      <DetailModal
-        program={selectedProgram}
-        isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
-      />
     </div>
   );
 }
