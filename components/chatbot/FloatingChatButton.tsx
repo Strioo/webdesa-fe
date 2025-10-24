@@ -9,20 +9,23 @@ import Image from 'next/image'
  * FloatingChatButton (FAB)
  * 
  * Floating Action Button untuk membuka chatbot AI.
- * Muncul di kanan bawah homepage dengan animasi smooth.
+ * Muncul di kanan bawah dengan animasi smooth.
  * 
  * Features:
  * - Slide-in animation on page load
  * - Enhanced hover/tap interactions with glow effect
  * - Custom chatbot icon SVG
- * - Only visible on homepage
+ * - Visible on: home, profile, umkm, wisata, pembangunan, lapor
+ * - Responsive positioning: avoid collision with DockNavbar on mobile
  * - Accessible keyboard navigation
  */
 export default function FloatingChatButton() {
   const pathname = usePathname()
   
-  // Only show on homepage
-  if (pathname !== '/' && pathname !== '/home') {
+  // Show on specific pages (not on chatbot or dashboard)
+  const shouldShow = ['/', '/home', '/profile', '/umkm', '/wisata', '/pembangunan', '/lapor'].includes(pathname)
+  
+  if (!shouldShow) {
     return null
   }
 
@@ -35,7 +38,8 @@ export default function FloatingChatButton() {
         delay: 0.5,
         ease: [0.16, 1, 0.3, 1],
       }}
-      className="fixed bottom-6 right-6 z-50 md:bottom-8 md:right-8"
+      // Responsive positioning: above DockNavbar on mobile (<lg), normal on desktop
+      className="fixed right-6 z-50 md:right-8 bottom-[104px] lg:bottom-6 lg:right-6"
     >
       <Link
         href="/chatbot"

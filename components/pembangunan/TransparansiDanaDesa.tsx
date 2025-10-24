@@ -78,7 +78,7 @@ export default function TransparansiDanaDesa() {
 
   return (
     <>
-      <section ref={ref} className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      <section id="statistik-section" ref={ref} className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-screen-2xl mx-auto">
           {/* Header */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 sm:mb-12">

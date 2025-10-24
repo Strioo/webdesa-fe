@@ -2,8 +2,6 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import Navbar from '@/components/Navbar'
-import DockNavbar from '@/components/DockNavbar'
 import Footer from '@/components/Footer'
 import HeroLapor from '@/components/lapor/HeroLapor'
 import InfoSection from '@/components/lapor/InfoSection'
@@ -19,14 +17,11 @@ export default function LaporPageClient() {
 
   return (
     <>
-      <Navbar />
-      <DockNavbar />
+      {/* Navbar & DockNavbar sudah ada di ConditionalNavbar (root layout) */}
       
-      <main className="min-h-screen bg-white">
         <HeroLapor onOpenModal={() => setIsModalOpen(true)} />
         <InfoSection />
         <AspirasiBanner onOpenModal={() => setIsModalOpen(true)} />
-      </main>
 
       <Footer />
 

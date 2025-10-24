@@ -1,5 +1,4 @@
 import { Suspense } from 'react'
-import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import HeroWisata from '@/components/wisata/HeroWisata'
 import DestinationsIntro from '@/components/wisata/DestinationsIntro'
@@ -22,14 +21,13 @@ interface WisataPageProps {
 
 export default function WisataPage({ searchParams }: WisataPageProps) {
   return (
-    <main className="min-h-screen bg-white overflow-x-hidden pb-20 lg:pb-0">
-      <Navbar />
+    <div>
       <HeroWisata />
       <DestinationsIntro />
       <Suspense fallback={<SectionSkeleton />}>
         <DestinationsGrid searchParams={searchParams} />
       </Suspense>
       <Footer />
-    </main>
+    </div>
   )
 }
