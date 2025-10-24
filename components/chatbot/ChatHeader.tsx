@@ -50,7 +50,7 @@ export default function ChatHeader({ onReset }: ChatHeaderProps) {
               Chat AI Desa Baturaden
             </h1>
             <p className="text-xs text-neutral-500 hidden sm:block">
-              Selalu siap membantu Anda ✨
+              Powered by AI • Real-time Data ✨
             </p>
           </div>
         </div>

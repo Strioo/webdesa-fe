@@ -2,7 +2,7 @@
 
 import { type ChatMessage } from '@/services/chatbotService'
 import MessageBubble from './MessageBubble'
-import TypingIndicator from './TypingIndicator'
+import ThinkingIndicator from './ThinkingIndicator'
 import { Bot } from 'lucide-react'
 import { motion } from 'framer-motion'
 
@@ -72,13 +72,13 @@ export default function ChatMessages({
           <MessageBubble key={message.id} message={message} index={index} />
         ))}
 
-        {/* Typing indicator */}
+        {/* Thinking indicator with advanced animation */}
         {isLoading && (
           <div className="self-start flex items-end gap-2">
-            <div className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-[#5B903A] to-[#4a7530] mb-1">
+            <div className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-[#5B903A] to-[#4a7530] mb-1 shadow-sm">
               <Bot className="w-5 h-5 text-white" />
             </div>
-            <TypingIndicator />
+            <ThinkingIndicator />
           </div>
         )}
       </div>

@@ -1,18 +1,13 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { 
-  sendMessage as sendMessageAPI, 
-  saveChatHistory, 
-  loadChatHistory,
-  clearChatHistory as clearChatHistoryAPI,
-  type ChatMessage 
-} from '@/services/chatbotService'
+import { sendMessage as sendMessageAPI, type ChatMessage } from '@/services/chatbotService'
 
 /**
  * Custom hook for chatbot functionality
  * 
  * Manages chat state, messages, and API interactions
+ * Memory clears on refresh/close (no localStorage persistence)
  */
 export function useChatbot() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -20,29 +15,16 @@ export function useChatbot() {
   const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Load chat history on mount
+  // Show welcome message on mount (no persistence)
   useEffect(() => {
-    const history = loadChatHistory()
-    if (history.length > 0) {
-      setMessages(history)
-    } else {
-      // Add welcome message if no history
-      const welcomeMessage: ChatMessage = {
-        id: 'welcome',
-        role: 'assistant',
-        content: 'Halo! Selamat datang di Chat AI Desa Baturaden. 👋\n\nSaya siap membantu Anda dengan informasi tentang desa kami. Ada yang bisa saya bantu?',
-        timestamp: new Date(),
-      }
-      setMessages([welcomeMessage])
+    const welcomeMessage: ChatMessage = {
+      id: 'welcome',
+      role: 'assistant',
+      content: 'Halo! 👋 Selamat datang di Chat AI Desa Baturaden.\n\nSaya dapat membantu Anda dengan:\n🏞️ Informasi wisata desa\n🏪 UMKM lokal\n🏗️ Program pembangunan\n📊 Statistik desa\n📝 Cara menyampaikan laporan\n\nAda yang bisa saya bantu?',
+      timestamp: new Date(),
     }
+    setMessages([welcomeMessage])
   }, [])
-
-  // Save chat history whenever messages change
-  useEffect(() => {
-    if (messages.length > 0) {
-      saveChatHistory(messages)
-    }
-  }, [messages])
 
   // Auto-scroll to bottom when new message arrives
   const scrollToBottom = useCallback(() => {
@@ -57,7 +39,7 @@ export function useChatbot() {
   }, [messages, scrollToBottom])
 
   /**
-   * Send a message to the chatbot
+   * Send a message to the chatbot with conversation history
    */
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim() || isLoading) return
@@ -74,9 +56,13 @@ export function useChatbot() {
     setInput('')
     setIsLoading(true)
 
+    const startTime = Date.now()
+
     try {
-      // Call API (currently mocked)
-      const response = await sendMessageAPI(content)
+      // Call API with conversation history for context
+      const response = await sendMessageAPI(content, messages)
+
+      const elapsedSeconds = Math.round((Date.now() - startTime) / 1000)
 
       // Add bot response
       const botMessage: ChatMessage = {
@@ -84,6 +70,7 @@ export function useChatbot() {
         role: 'assistant',
         content: response.reply,
         timestamp: new Date(),
+        thinkingTime: elapsedSeconds,
       }
 
       setMessages(prev => [...prev, botMessage])
@@ -91,6 +78,67 @@ export function useChatbot() {
       console.error('Failed to send message:', error)
       
       // Add error message
+      const errorMessage: ChatMessage = {
+        id: `error-${Date.now()}`,
+        role: 'assistant',
+        content: 'Maaf, terjadi kesalahan. Silakan coba lagi dalam beberapa saat atau hubungi kantor desa untuk bantuan.',
+        timestamp: new Date(),
+      }
+      
+      setMessages(prev => [...prev, errorMessage])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [isLoading, messages])
+
+  /**
+   * Clear chat history (reset conversation)
+   */
+  const clearChat = useCallback(() => {
+    const welcomeMessage: ChatMessage = {
+      id: 'welcome-reset',
+      role: 'assistant',
+      content: 'Chat telah direset. 👋\n\nSaya siap membantu Anda dengan informasi tentang wisata, UMKM, program desa, dan lainnya. Ada yang bisa saya bantu?',
+      timestamp: new Date(),
+    }
+    setMessages([welcomeMessage])
+  }, [])
+
+  /**
+   * Handle quick action buttons
+   */
+  const sendQuickAction = useCallback(async (message: string) => {
+    if (isLoading) return
+
+    const userMessage: ChatMessage = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content: message,
+      timestamp: new Date(),
+    }
+
+    setMessages(prev => [...prev, userMessage])
+    setIsLoading(true)
+
+    const startTime = Date.now()
+
+    try {
+      const response = await sendMessageAPI(message, messages)
+
+      const elapsedSeconds = Math.round((Date.now() - startTime) / 1000)
+
+      const botMessage: ChatMessage = {
+        id: `bot-${Date.now()}`,
+        role: 'assistant',
+        content: response.reply,
+        timestamp: new Date(),
+        thinkingTime: elapsedSeconds,
+      }
+
+      setMessages(prev => [...prev, botMessage])
+    } catch (error) {
+      console.error('Failed to send quick action:', error)
+      
       const errorMessage: ChatMessage = {
         id: `error-${Date.now()}`,
         role: 'assistant',
@@ -102,31 +150,7 @@ export function useChatbot() {
     } finally {
       setIsLoading(false)
     }
-  }, [isLoading])
-
-  /**
-   * Clear all chat messages
-   */
-  const clearChat = useCallback(() => {
-    setMessages([])
-    clearChatHistoryAPI()
-    
-    // Add welcome message after clear
-    const welcomeMessage: ChatMessage = {
-      id: 'welcome',
-      role: 'assistant',
-      content: 'Chat telah direset. Ada yang bisa saya bantu?',
-      timestamp: new Date(),
-    }
-    setMessages([welcomeMessage])
-  }, [])
-
-  /**
-   * Quick action: send predefined message
-   */
-  const sendQuickAction = useCallback((message: string) => {
-    sendMessage(message)
-  }, [sendMessage])
+  }, [isLoading, messages])
 
   return {
     messages,

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Chat AI Desa Baturaden',
-  description: 'Chatbot AI untuk informasi dan layanan Desa Baturaden',
+  title: 'Chat AI Desa | Baturaden',
+  description: 'AI Assistant untuk informasi wisata, UMKM, program pembangunan, dan layanan Desa Baturaden',
 }
 
 export default function ChatbotLayout({

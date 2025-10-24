@@ -13,10 +13,10 @@ interface ChatInputProps {
 }
 
 const quickActions = [
-  { label: '🏞️ Info Wisata', message: 'Berikan informasi tentang wisata di Baturaden' },
-  { label: '🏪 Daftar UMKM', message: 'Tampilkan daftar UMKM di desa' },
-  { label: '📞 Kontak Desa', message: 'Bagaimana cara menghubungi kantor desa?' },
-  { label: '🏗️ Pembangunan', message: 'Info pembangunan desa terbaru' },
+  { label: '🏞️ Rekomendasi Wisata', message: 'Rekomendasi wisata terbaik di desa apa saja?' },
+  { label: '🏪 UMKM Lokal', message: 'UMKM apa saja yang ada di desa?' },
+  { label: '🏗️ Program Desa', message: 'Apa saja program pembangunan desa yang sedang berjalan?' },
+  { label: '📊 Statistik Desa', message: 'Berapa jumlah wisata, UMKM, dan program di desa?' },
 ]
 
 export default function ChatInput({
@@ -45,7 +45,6 @@ export default function ChatInput({
   }
 
   const handleQuickAction = (message: string) => {
-    setInput(message)
     setShowQuickActions(false)
     if (onQuickAction) {
       onQuickAction(message)
