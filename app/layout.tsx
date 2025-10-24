@@ -3,11 +3,11 @@ import { Lato, Raleway } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 import { AnimationProvider } from "@/lib/animation";
-import Navbar from "@/components/Navbar";
-import DockNavbar from "@/components/DockNavbar";
+import FloatingChatButton from "@/components/chatbot/FloatingChatButton";
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
 import PageTransitionProvider from "@/components/providers/PageTransitionProvider";
 import TopLoader from "@/components/ui/TopLoader";
+import { ConditionalNavbar } from "@/components/providers/ConditionalNavbar";
 
 const lato = Lato({
   variable: "--font-lato",
@@ -64,16 +64,16 @@ export default function RootLayout({
             <TopLoader color="#5B903A" height={3} showSpinner={false} />
             <SmoothScrollProvider />
             
-            {/* Navbar OUTSIDE transition - always visible */}
-            <Navbar />
+            {/* Conditional Navbar - hidden on /chatbot */}
+            <ConditionalNavbar />
             
             {/* Only page content transitions */}
             <PageTransitionProvider>
               {children}
             </PageTransitionProvider>
             
-            {/* DockNavbar OUTSIDE transition - always visible */}
-            <DockNavbar />
+            {/* Floating Chat Button - shows on homepage only */}
+            <FloatingChatButton />
           </AuthProvider>
         </AnimationProvider>
       </body>
