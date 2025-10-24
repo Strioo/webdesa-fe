@@ -105,7 +105,7 @@ const StatistikDesa = () => {
     return (
         <div ref={sectionRef}>
             <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-                <div className="max-w-[1400px] mx-auto">
+                <div className="max-w-[1400px] mx-auto w-full">
                     {/* Header Section */}
                     <div className={`flex flex-col lg:flex-row justify-between items-start gap-6 sm:gap-8 mb-8 sm:mb-12 animate-on-scroll ${isVisible ? 'animate-fade-in-up' : ''}`}>
                         <div>
@@ -151,8 +151,8 @@ const StatistikDesa = () => {
                                         </p>
                                     </div>
 
-                                    {/* Right Grid - 3x3 with consistent gradient pattern */}
-                                    <div className="absolute -right-6 top-1/2 -translate-y-1/2 w-[300px] h-[300px]">
+                                    {/* Right Grid - 3x3 with consistent gradient pattern (Hidden on mobile & tablet) */}
+                                    <div className="absolute -right-6 top-1/2 -translate-y-1/2 w-[300px] h-[300px] hidden xl:block">
                                         <div className="grid grid-cols-3 grid-rows-3 gap-3 w-full h-full">
                                             {/* Row 1 - Subtle gradient pattern */}
                                             <div className="bg-gradient-to-br from-[#F5F5F5] via-[#E8F0E1]/60 to-[#CCDDC2]/80 rounded-lg"></div>
@@ -218,8 +218,8 @@ const StatistikDesa = () => {
                                         </p>
                                     </div>
 
-                                    {/* Right Grid - 3 rows with consistent gradient pattern */}
-                                    <div className="absolute -right-2 -top-16 w-[360px] h-[400px]">
+                                    {/* Right Grid - 3 rows with consistent gradient pattern (Hidden on mobile & tablet) */}
+                                    <div className="absolute -right-2 -top-16 w-[360px] h-[400px] hidden xl:block">
                                         <div className="grid grid-rows-3 gap-6 w-full h-full">
                                             {/* Top Row - subtle gradient (terpotong atas) */}
                                             <div className="bg-gradient-to-l from-[#F5F5F5] via-[#E8F0E1]/60 to-[#CCDDC2]/80 rounded-lg flex items-center gap-3 px-6">
@@ -378,8 +378,8 @@ const StatistikDesa = () => {
                             aria-label="Tourism Statistics"
                         >
                             <div className="card-body p-6 sm:p-8 lg:p-10">
-                                {/* Decorative cards grid - with consistent gradient (di atas) */}
-                                <div className="absolute -right-4 -top-24 left-6 w-[90%] h-max">
+                                {/* Decorative cards grid - with consistent gradient (di atas) - Hidden on mobile & tablet */}
+                                <div className="absolute -right-4 -top-24 left-6 w-[90%] h-max hidden lg:block">
                                     <div className="grid grid-rows-2 gap-3 w-full h-full bg-gradient-to-br from-[#CCDDC2] to-[#B8D4A8]/80 border-2 border-[#C0C0C0] px-2 py-5 rounded-xl">
                                         {/* Top Row - Large card with subtle gradient (terpotong atas) */}
                                         <div className="bg-gradient-to-b from-[#F5F5F5] via-[#E8F0E1]/60 to-[#F5F5F5]/40 rounded-2xl flex gap-3 px-4 py-3">

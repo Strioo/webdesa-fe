@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 export interface UmkmProduct {
-  id: string // This is the slug
+  id: string // This is the slug for URL routing
   title: string
   description: string
   price: number

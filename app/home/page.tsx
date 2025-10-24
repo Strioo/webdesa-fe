@@ -1,15 +1,31 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import Navbar from '@/components/Navbar'
 import HeroSection from '@/components/home/HeroSection'
-import StatistikDesa from '@/components/home/StatistikDesa'
-import UmkmDanWisata from '@/components/home/UmkmDanWisata'
-import VisiMisiSection from '@/components/home/VisiMisiSection'
-import TestimonialSection from '@/components/home/TestimonialSection'
-import Footer from '@/components/Footer'
+
+// Lazy load components yang tidak immediately visible
+const StatistikDesa = dynamic(() => import('@/components/home/StatistikDesa'), {
+  loading: () => <div className="min-h-[400px]" />,
+})
+
+const UmkmDanWisata = dynamic(() => import('@/components/home/UmkmDanWisata'), {
+  loading: () => <div className="min-h-[400px]" />,
+})
+
+const VisiMisiSection = dynamic(() => import('@/components/home/VisiMisiSection'), {
+  loading: () => <div className="min-h-[400px]" />,
+})
+
+const TestimonialSection = dynamic(() => import('@/components/home/TestimonialSection'), {
+  loading: () => <div className="min-h-[400px]" />,
+})
+
+const Footer = dynamic(() => import('@/components/Footer'), {
+  loading: () => <div className="min-h-[200px]" />,
+})
 
 export default function Home() {
-
   return (
     <div>
       <Navbar />

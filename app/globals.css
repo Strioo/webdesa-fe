@@ -561,6 +561,87 @@ html {
   will-change: opacity;
 }
 
+/* Shimmer Animation for Skeletons */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.shimmer {
+  animation: shimmer 2s infinite;
+}
+
+/* ==========================================
+   View Transition API - Native Instant Transitions
+   ========================================== */
+
+/* Enable native view transitions - instant smooth */
+@view-transition {
+  navigation: auto;
+}
+
+/* INSTANT transition - minimal duration */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.2s; /* Super fast! */
+  animation-timing-function: ease-in-out;
+}
+
+/* Old page exit - simple fade only */
+::view-transition-old(root) {
+  animation-name: instant-fade-out;
+}
+
+/* New page enter - simple fade only */
+::view-transition-new(root) {
+  animation-name: instant-fade-in;
+}
+
+@keyframes instant-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes instant-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Prevent ANY white flash */
+::view-transition-group(root) {
+  animation-duration: 0.2s;
+  animation-timing-function: ease-in-out;
+}
+
+/* Ensure background stays consistent */
+::view-transition-image-pair(root) {
+  isolation: isolate;
+  background: #ffffff; /* Force white background */
+}
+
+/* GPU optimization for instant feel */
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+  will-change: opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
 /* Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -570,5 +651,11 @@ html {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  
+  /* Disable view transitions for reduced motion */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
   }
 }

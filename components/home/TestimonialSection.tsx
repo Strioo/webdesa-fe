@@ -166,7 +166,7 @@ const TestimonialSection = () => {
 
   return (
     <section ref={sectionRef} className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-[1400px] mx-auto">
+      <div className="max-w-[1400px] mx-auto w-full">
         {/* Header */}
         <div className={`flex flex-col lg:flex-row justify-between items-start gap-6 sm:gap-8 mb-12 sm:mb-16 animate-on-scroll ${isVisible ? 'animate-fade-in-up' : ''}`}>
           <div>
@@ -322,13 +322,13 @@ const TestimonialSection = () => {
                 <motion.button
                   onClick={handleNext}
                   disabled={isTransitioning}
-                  className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center disabled:opacity-50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B903A] focus-visible:ring-offset-2"
-                  whileHover={{ scale: 1.1, backgroundColor: 'rgb(31, 41, 55)' }}
+                  className="w-10 h-10 rounded-full bg-transparent border flex items-center justify-center disabled:opacity-50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B903A] focus-visible:ring-offset-2"
+                  whileHover={{ scale: 1.1, backgroundColor: 'rgba(0, 0, 0, 0.05)' }}
                   whileTap={{ scale: 0.95 }}
                   aria-label="Next testimonial"
                   aria-controls="testimonial-carousel"
                 >
-                  <Image src="/assets/icons/arrowright.png" alt="" width={12} height={12} className="w-5 invert" />
+                  <Image src="/assets/icons/arrowright.png" alt="" width={12} height={12} className="w-5" />
                 </motion.button>
               </div>
             </div>
@@ -384,10 +384,10 @@ const TestimonialSection = () => {
               <button
                 onClick={handleNext}
                 disabled={isTransitioning}
-                className="w-10 h-10 rounded-full bg-gray-900 hover:bg-gray-800 flex items-center justify-center transition-all duration-300 disabled:opacity-50 cursor-pointer"
+                className="w-10 h-10 rounded-full bg-transparent border hover:bg-gray-100 flex items-center justify-center transition-all duration-300 disabled:opacity-50 cursor-pointer"
                 aria-label="Next testimonial"
               >
-                <Image src="/assets/icons/arrowright.png" alt="Arrow" width={12} height={12} className="w-5 invert" />
+                <Image src="/assets/icons/arrowright.png" alt="Arrow" width={12} height={12} className="w-5" />
               </button>
             </div>
           </div>
