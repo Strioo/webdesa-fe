@@ -1,62 +1,123 @@
 'use client'
 
 import Image from 'next/image'
-import { useEffect, useRef, useMemo } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import PopulationChart from '@/components/ui/PopulationChart'
 import { useCountUp } from '@/hooks/useCountUp'
+import { fetchWeatherData } from '@/lib/weatherApi'
+import { dashboardApi } from '@/lib/api'
 
-// Constants - moved outside component for better performance
-const WEATHER_DATA = {
-  location: 'Baturaden, Banyumas',
-  temp: 22,
-  tempHigh: 25,
-  tempLow: 18,
-  humidity: 65,
-  rainfall: 2.3,
-  pressure: 1012
-} as const
+interface WeatherData {
+  location: string
+  temp: number
+  tempHigh: number
+  tempLow: number
+  humidity: number
+  rainfall: number
+  pressure: number
+}
 
-const POPULATION_GROWTH = 1.25 as const
+interface PopulationDataPoint {
+  month: string
+  value: number
+  date: string
+}
 
-const POPULATION_DATA = [
-  { month: 'Jan', value: 8500, date: '2024-01-01' },
-  { month: 'Feb', value: 7520, date: '2024-02-01' },
-  { month: 'Mar', value: 9545, date: '2024-03-01' },
-  { month: 'Apr', value: 10580, date: '2024-04-01' },
-  { month: 'May', value: 7610, date: '2024-05-01' },
-  { month: 'Jun', value: 8650, date: '2024-06-01' },
-  { month: 'Jul', value: 9685, date: '2024-07-01' },
-  { month: 'Aug', value: 6720, date: '2024-08-01' },
-  { month: 'Sep', value: 7760, date: '2024-09-01' },
-  { month: 'Oct', value: 9795, date: '2024-10-01' },
-  { month: 'Nov', value: 8830, date: '2024-11-01' },
-  { month: 'Dec', value: 6870, date: '2024-12-01' }
-] as const
+interface PopulationData {
+  total: number
+  growthRate: number
+  monthlyData: PopulationDataPoint[]
+}
 
 const HeroSection = () => {
   const sectionRef = useRef<HTMLDivElement>(null)
-
-  // Count-up animations for numbers
-  const tempCountUp = useCountUp({ end: WEATHER_DATA.temp, duration: 2000 })
-  const tempHighCountUp = useCountUp({ end: WEATHER_DATA.tempHigh, duration: 2000 })
-  const tempLowCountUp = useCountUp({ end: WEATHER_DATA.tempLow, duration: 2000 })
-  const humidityCountUp = useCountUp({ end: WEATHER_DATA.humidity, duration: 2000, suffix: '%' })
-  const rainfallCountUp = useCountUp({ end: WEATHER_DATA.rainfall, duration: 2000, decimals: 1 })
-  const pressureCountUp = useCountUp({ end: WEATHER_DATA.pressure, duration: 2000 })
-  const growthCountUp = useCountUp({ end: POPULATION_GROWTH, duration: 2000, decimals: 2, prefix: '+', suffix: '%' })
-
-  const latestPopulationValue = useMemo(() =>
-    POPULATION_DATA[POPULATION_DATA.length - 1].value,
-    []
-  )
-  const populationCountUp = useCountUp({
-    end: latestPopulationValue,
-    duration: 2500,
-    separator: '.'
+  
+  const [weatherData, setWeatherData] = useState<WeatherData>({
+    location: 'Baturaden, Banyumas',
+    temp: 22,
+    tempHigh: 25,
+    tempLow: 18,
+    humidity: 65,
+    rainfall: 0,
+    pressure: 1012
   })
 
-  // Intersection Observer for animations
+  const [populationData, setPopulationData] = useState<PopulationData>({
+    total: 0,
+    growthRate: 0,
+    monthlyData: []
+  })
+
+  const [isLoading, setIsLoading] = useState(true)
+  const [dataLoaded, setDataLoaded] = useState(false)
+
+  // Fetch data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true)
+        
+        // Fetch both data in parallel
+        const [weather, statsResponse] = await Promise.allSettled([
+          fetchWeatherData(),
+          dashboardApi.getHomeStats()
+        ])
+
+        // Handle weather data
+        if (weather.status === 'fulfilled') {
+          setWeatherData(weather.value)
+        } else {
+          console.warn('Weather data unavailable, using fallback')
+        }
+
+        // Handle population data
+        if (statsResponse.status === 'fulfilled' && statsResponse.value.success && statsResponse.value.data) {
+          const popData = statsResponse.value.data as { population: PopulationData }
+          setPopulationData(popData.population)
+        } else {
+          console.warn('Population data unavailable')
+        }
+
+        setDataLoaded(true)
+      } catch (error) {
+        console.error('Error fetching home data:', error)
+        setDataLoaded(true) // Still set to true to show fallback data
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+
+    // Refresh data every 30 minutes
+    const interval = setInterval(fetchData, 30 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Count-up animations
+  const tempCountUp = useCountUp({ end: weatherData.temp, duration: 2000, enabled: dataLoaded })
+  const tempHighCountUp = useCountUp({ end: weatherData.tempHigh, duration: 2000, enabled: dataLoaded })
+  const tempLowCountUp = useCountUp({ end: weatherData.tempLow, duration: 2000, enabled: dataLoaded })
+  const humidityCountUp = useCountUp({ end: weatherData.humidity, duration: 2000, suffix: '%', enabled: dataLoaded })
+  const rainfallCountUp = useCountUp({ end: weatherData.rainfall, duration: 2000, decimals: 1, enabled: dataLoaded })
+  const pressureCountUp = useCountUp({ end: weatherData.pressure, duration: 2000, enabled: dataLoaded })
+  const growthCountUp = useCountUp({ 
+    end: populationData.growthRate, 
+    duration: 2000, 
+    decimals: 2, 
+    prefix: populationData.growthRate >= 0 ? '+' : '', 
+    suffix: '%',
+    enabled: dataLoaded
+  })
+  const populationCountUp = useCountUp({
+    end: populationData.total,
+    duration: 2500,
+    separator: '.',
+    enabled: dataLoaded
+  })
+
+  // Intersection Observer
   useEffect(() => {
     const currentSection = sectionRef.current
     if (!currentSection) return
@@ -126,7 +187,7 @@ const HeroSection = () => {
 
                 {/* Weather Card */}
                 <div className="bg-white rounded-3xl p-3">
-                  <p className="text-black text-md opacity-90">{WEATHER_DATA.location}</p>
+                  <p className="text-black text-md opacity-90">{weatherData.location}</p>
                   <div className="flex justify-between items-start">
                     <div className="flex mt-5 justify-center items-center">
                       <span className="text-black text-2xl font-light">+</span>
@@ -134,8 +195,9 @@ const HeroSection = () => {
                       <span className="text-black text-2xl">°C</span>
                     </div>
                     <div className="text-black text-left my-auto">
-                      <p className="text-sm">H: <span ref={tempHighCountUp.ref}>{tempHighCountUp.count}</span>°C</p>
-                      <p className="text-sm">L: <span ref={tempLowCountUp.ref}>{tempLowCountUp.count}</span>°C</p>
+                      {/* ✅ Changed from <p> to <span> with display block */}
+                      <p className="text-sm">H: <span ref={tempHighCountUp.ref} className="inline">{tempHighCountUp.count}</span>°C</p>
+                      <p className="text-sm">L: <span ref={tempLowCountUp.ref} className="inline">{tempLowCountUp.count}</span>°C</p>
                     </div>
                     <Image
                       src="/assets/icons/cloud.svg"
@@ -151,15 +213,22 @@ const HeroSection = () => {
                   <div className="grid grid-cols-3 gap-4 mt-2 text-black text-center">
                     <div>
                       <p className="text-xs opacity-75">Kelembaban</p>
-                      <p ref={humidityCountUp.ref} className="text-sm font-medium">{humidityCountUp.count}</p>
+                      {/* ✅ Changed from <p> to <span> with display block */}
+                      <span ref={humidityCountUp.ref} className="text-sm font-medium block">{humidityCountUp.count}</span>
                     </div>
                     <div>
                       <p className="text-xs opacity-75">Curah Hujan</p>
-                      <p ref={rainfallCountUp.ref} className="text-sm font-medium">{rainfallCountUp.count} mm</p>
+                      {/* ✅ Changed to use inline span */}
+                      <span className="text-sm font-medium block">
+                        <span ref={rainfallCountUp.ref} className="inline">{rainfallCountUp.count}</span> mm
+                      </span>
                     </div>
                     <div>
                       <p className="text-xs opacity-75">Tekanan Udara</p>
-                      <p ref={pressureCountUp.ref} className="text-sm font-medium">{pressureCountUp.count} hPa</p>
+                      {/* ✅ Changed to use inline span */}
+                      <span className="text-sm font-medium block">
+                        <span ref={pressureCountUp.ref} className="inline">{pressureCountUp.count}</span> hPa
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -182,16 +251,23 @@ const HeroSection = () => {
                   </div>
 
                   <div className="mb-2">
-                    <p ref={populationCountUp.ref} className="text-2xl font-bold text-[#5B903A]">{populationCountUp.count}</p>
-                    <p className="text-xs text-gray-500">Total Penduduk (Des 2024)</p>
+                    {/* ✅ Changed from <p> to <span> with display block */}
+                    <span ref={populationCountUp.ref} className="text-2xl font-bold text-[#5B903A] block">{populationCountUp.count}</span>
+                    <p className="text-xs text-gray-500">Total Warga Terdaftar</p>
                   </div>
 
                   <div className="relative mt-2">
-                    <PopulationChart
-                      data={[...POPULATION_DATA]}
-                      color="#5B903A"
-                      height={100}
-                    />
+                    {populationData.monthlyData.length > 0 ? (
+                      <PopulationChart
+                        data={populationData.monthlyData}
+                        color="#5B903A"
+                        height={100}
+                      />
+                    ) : (
+                      <div className="h-[100px] flex items-center justify-center text-gray-400 text-xs">
+                        Loading data...
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

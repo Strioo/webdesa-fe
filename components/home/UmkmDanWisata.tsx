@@ -5,17 +5,101 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
 import { useCountUp } from '@/hooks/useCountUp'
+import { useState, useEffect } from 'react'
+import { dashboardApi } from '@/lib/api'
+
+interface UmkmWisataStatsData {
+  umkm: {
+    total: number
+    thisYear: number
+    growthRate: number
+  }
+  wisata: {
+    total: number
+    visitorsThisYear: number
+    visitorGrowthRate: number
+  }
+}
 
 const UmkmDanWisata = () => {
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation(0.1)
   const { ref: umkmRef, isVisible: umkmVisible } = useScrollAnimation(0.1)   
   const { ref: wisataRef, isVisible: wisataVisible } = useScrollAnimation(0.1)
 
-  // Count-up animations
-  const umkmCountUp = useCountUp({ end: 120, duration: 2500, suffix: '+' })
-  const umkmGrowthCountUp = useCountUp({ end: 12, duration: 2000, prefix: '+', suffix: '%' })
-  const wisataGrowthCountUp = useCountUp({ end: 20, duration: 2000, prefix: '+', suffix: '%' })
-  const wisataVisitorCountUp = useCountUp({ end: 8, duration: 2000, prefix: '+', suffix: '%' })
+  // State untuk data real-time
+  const [statsData, setStatsData] = useState<UmkmWisataStatsData>({
+    umkm: {
+      total: 120,
+      thisYear: 0,
+      growthRate: 12
+    },
+    wisata: {
+      total: 8,
+      visitorsThisYear: 0,
+      visitorGrowthRate: 20
+    }
+  })
+
+  const [isLoading, setIsLoading] = useState(true)
+  const [dataLoaded, setDataLoaded] = useState(false)
+
+  // Fetch data real-time
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setIsLoading(true)
+        
+        const response = await dashboardApi.getUmkmWisataStats()
+        
+        if (response.success && response.data) {
+          setStatsData(response.data as UmkmWisataStatsData)
+          setDataLoaded(true)
+        }
+      } catch (error) {
+        console.error('Error fetching UMKM & Wisata stats:', error)
+        // Keep using fallback data if error
+        setDataLoaded(true)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchStats()
+
+    // Refresh data every 5 minutes
+    const interval = setInterval(fetchStats, 5 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Count-up animations with real data
+  const umkmCountUp = useCountUp({ 
+    end: statsData.umkm.total, 
+    duration: 2500, 
+    suffix: '+',
+    enabled: dataLoaded 
+  })
+  
+  const umkmGrowthCountUp = useCountUp({ 
+    end: statsData.umkm.growthRate, 
+    duration: 2000, 
+    prefix: statsData.umkm.growthRate >= 0 ? '+' : '', 
+    suffix: '%',
+    enabled: dataLoaded 
+  })
+  
+  const wisataCountUp = useCountUp({ 
+    end: statsData.wisata.total, 
+    duration: 2000,
+    enabled: dataLoaded 
+  })
+  
+  const wisataGrowthCountUp = useCountUp({ 
+    end: statsData.wisata.visitorGrowthRate, 
+    duration: 2000, 
+    prefix: statsData.wisata.visitorGrowthRate >= 0 ? '+' : '', 
+    suffix: '%',
+    enabled: dataLoaded 
+  })
 
   return (
     <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-white">
@@ -65,7 +149,7 @@ const UmkmDanWisata = () => {
               className="object-cover object-[center_30%]"
             />
 
-            {/* Glass Badge - Top Right */}
+            {/* UMKM Glass Badge */}
             <motion.div 
               className="absolute top-12 right-14 bg-gray-300/10 backdrop-blur-xs border border-gray-300/50 rounded-lg p-4 pt-2"
               initial={{ opacity: 0, scale: 0.8 }}
@@ -75,13 +159,24 @@ const UmkmDanWisata = () => {
               <Image className="mx-auto" src="/assets/icons/top-widget.svg" alt="" width={45} height={45} />
               <div className="flex items-center gap-2 my-2">
                 <span className="text-md font-medium text-white">UMKM Aktif</span>
-                <div className="bg-white text-[#5B903A] text-xs px-2 py-1 rounded-full flex items-center gap-2">
-                  <Image src="/assets/icons/trend-up.svg" alt="Trend" width={12} height={12} className="w-3" />
+                <div className={`text-xs px-2 py-1 rounded-full flex items-center gap-2 ${
+                  statsData.umkm.growthRate >= 0 
+                    ? 'bg-white text-[#5B903A]' 
+                    : 'bg-red-100 text-red-700'
+                }`}>
+                  <Image 
+                    src="/assets/icons/trend-up.svg" 
+                    alt="Trend" 
+                    width={12} 
+                    height={12} 
+                    className={`w-3 ${statsData.umkm.growthRate < 0 ? 'rotate-180' : ''}`}
+                  />
                   <span ref={umkmGrowthCountUp.ref}>{umkmGrowthCountUp.count}</span>
                 </div>
               </div>
-              <p ref={umkmCountUp.ref} className="text-5xl font-medium text-white mb-2">{umkmCountUp.count}</p>
-              <p className="text-sm text-white">Terdaftar tahun ini</p>
+              {/* ✅ Changed from <p> to <span> with display block */}
+              <span ref={umkmCountUp.ref} className="text-5xl font-medium text-white mb-2 block">{umkmCountUp.count}</span>
+              <p className="text-sm text-white">Terdaftar & aktif</p>
             </motion.div>
           </motion.div>
 
@@ -244,7 +339,7 @@ const UmkmDanWisata = () => {
             className="order-1 lg:order-2 lg:col-span-7 relative rounded-3xl overflow-hidden h-[500px] shadow-xl"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: wisataVisible ? 1 : 0, y: wisataVisible ? 0 : 40 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] as any }}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
             whileHover={{ 
               scale: 1.02, 
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3)',
@@ -258,7 +353,7 @@ const UmkmDanWisata = () => {
               className="object-cover"
             />
 
-            {/* Glass Badge - Top Left */}
+            {/* Wisata Glass Badge */}
             <motion.div 
               className="absolute top-8 left-8 bg-gray-300/10 backdrop-blur-xs border border-gray-300/50 rounded-lg p-4 pt-2"
               initial={{ opacity: 0, scale: 0.8 }}
@@ -266,18 +361,29 @@ const UmkmDanWisata = () => {
                 opacity: wisataVisible ? 1 : 0, 
                 scale: wisataVisible ? 1 : 0.8 
               }}
-              transition={{ duration: 0.6, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] as any }}
+              transition={{ duration: 0.6, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
             >
               <Image className="mx-auto" src="/assets/icons/top-widget.svg" alt="" width={45} height={45} />
               <div className="flex items-center gap-2 my-2">
                 <span className="text-md font-medium text-white">Destinasi</span>
-                <div className="bg-white text-[#5B903A] text-xs px-2 py-1 rounded-full flex items-center gap-2">
-                  <Image src="/assets/icons/trend-up.svg" alt="Trend" width={12} height={12} className="w-3" />
+                <div className={`text-xs px-2 py-1 rounded-full flex items-center gap-2 ${
+                  statsData.wisata.visitorGrowthRate >= 0 
+                    ? 'bg-white text-[#5B903A]' 
+                    : 'bg-red-100 text-red-700'
+                }`}>
+                  <Image 
+                    src="/assets/icons/trend-up.svg" 
+                    alt="Trend" 
+                    width={12} 
+                    height={12} 
+                    className={`w-3 ${statsData.wisata.visitorGrowthRate < 0 ? 'rotate-180' : ''}`}
+                  />
                   <span ref={wisataGrowthCountUp.ref}>{wisataGrowthCountUp.count}</span>
                 </div>
               </div>
-              <p ref={wisataVisitorCountUp.ref} className="text-5xl font-medium text-white mb-2">{wisataVisitorCountUp.count}</p>
-              <p className="text-sm text-white">Kunjungan tahun ini</p>
+              {/* ✅ Changed from <p> to <span> with display block */}
+              <span ref={wisataCountUp.ref} className="text-5xl font-medium text-white mb-2 block">{wisataCountUp.count}</span>
+              <p className="text-sm text-white">Destinasi tersedia</p>
             </motion.div>
           </motion.div>
         </div>

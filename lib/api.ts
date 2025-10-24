@@ -246,4 +246,11 @@ export const authApi = {
 
 export const dashboardApi = {
   getStats: () => apiClient.get('/dashboard/stats'),
+  // Public API untuk homepage hero section
+  getHomeStats: () => apiClient.get('/dashboard/home-stats'),
+  // Public API untuk StatistikDesa section
+  getPublicStats: (timeRange?: string) => 
+    apiClient.get(`/dashboard/public-stats${timeRange ? `?timeRange=${timeRange}` : ''}`),
+  // ✅ NEW: Public API untuk UmkmDanWisata section
+  getUmkmWisataStats: () => apiClient.get('/dashboard/umkm-wisata-stats'),
 };

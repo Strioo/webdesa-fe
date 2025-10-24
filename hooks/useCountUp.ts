@@ -1,105 +1,65 @@
 import { useEffect, useRef, useState } from 'react'
 
-interface UseCountUpOptions {
+interface UseCountUpProps {
   end: number
-  start?: number
   duration?: number
   decimals?: number
-  separator?: string
   prefix?: string
   suffix?: string
-  enableScrollSpy?: boolean
-  scrollSpyOnce?: boolean
+  separator?: string
+  enabled?: boolean
 }
 
 export const useCountUp = ({
   end,
-  start = 0,
   duration = 2000,
   decimals = 0,
-  separator = ',',
   prefix = '',
   suffix = '',
-  enableScrollSpy = true,
-  scrollSpyOnce = true
-}: UseCountUpOptions) => {
-  const [count, setCount] = useState(start)
-  const [hasAnimated, setHasAnimated] = useState(false)
-  const elementRef = useRef<any>(null)
+  separator = '',
+  enabled = true
+}: UseCountUpProps) => {
+  const [count, setCount] = useState<string>('0')
+  // ✅ Change to HTMLElement to support any element type
+  const ref = useRef<HTMLElement>(null)
+  const animationRef = useRef<number | null>(null)
 
   useEffect(() => {
-    if (!enableScrollSpy || (scrollSpyOnce && hasAnimated)) {
-      return
+    if (!enabled) return
+
+    const startTime = Date.now()
+    const startValue = 0
+
+    const animate = () => {
+      const currentTime = Date.now()
+      const progress = Math.min((currentTime - startTime) / duration, 1)
+      
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4)
+      const currentValue = startValue + (end - startValue) * easeOutQuart
+
+      let formattedValue = currentValue.toFixed(decimals)
+      
+      if (separator) {
+        const parts = formattedValue.split('.')
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, separator)
+        formattedValue = parts.join(',')
+      }
+
+      setCount(`${prefix}${formattedValue}${suffix}`)
+
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(animate)
+      }
     }
 
-    const element = elementRef.current
-    if (!element) return
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated) {
-          animateCount()
-          if (scrollSpyOnce) {
-            setHasAnimated(true)
-          }
-        }
-      },
-      { threshold: 0.1, rootMargin: '50px' }
-    )
-
-    observer.observe(element)
+    animationRef.current = requestAnimationFrame(animate)
 
     return () => {
-      if (element) {
-        observer.unobserve(element)
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [hasAnimated, enableScrollSpy, scrollSpyOnce])
+  }, [end, duration, decimals, prefix, suffix, separator, enabled])
 
-  const animateCount = () => {
-    const startTime = Date.now()
-    const endTime = startTime + duration
-
-    const updateCount = () => {
-      const now = Date.now()
-      const progress = Math.min((now - startTime) / duration, 1)
-
-      // Easing function (easeOutExpo)
-      const easeOutExpo = (t: number) => {
-        return t === 1 ? 1 : 1 - Math.pow(2, -10 * t)
-      }
-
-      const currentCount = start + (end - start) * easeOutExpo(progress)
-      setCount(currentCount)
-
-      if (now < endTime) {
-        requestAnimationFrame(updateCount)
-      } else {
-        setCount(end)
-      }
-    }
-
-    requestAnimationFrame(updateCount)
-  }
-
-  const formatNumber = (num: number): string => {
-    const fixed = num.toFixed(decimals)
-    const parts = fixed.split('.')
-    
-    // Add thousand separators
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, separator)
-    
-    const formatted = parts.join('.')
-    return `${prefix}${formatted}${suffix}`
-  }
-
-  return {
-    count: formatNumber(count),
-    countValue: count,
-    ref: elementRef,
-    reset: () => {
-      setCount(start)
-      setHasAnimated(false)
-    }
-  }
+  return { count, ref }
 }

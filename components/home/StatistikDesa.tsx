@@ -7,6 +7,24 @@ import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useCountUp } from '@/hooks/useCountUp'
 import { useInViewStagger } from '@/lib/animation'
+import { dashboardApi } from '@/lib/api'
+
+interface PopulationDataPoint {
+  month: string
+  value: number
+  date: string
+}
+
+interface PublicStatsData {
+  totalWisata: number
+  totalUMKM: number
+  totalTourists: number
+  population: {
+    total: number
+    growthRate: number
+    monthlyData: PopulationDataPoint[]
+  }
+}
 
 const StatistikDesa = () => {
     const [isVisible, setIsVisible] = useState(false)
@@ -19,10 +37,86 @@ const StatistikDesa = () => {
         amount: 0.2
     })
 
-    // Count-up animations
-    const destinationCountUp = useCountUp({ end: 20, duration: 2000 })
-    const umkmCountUp = useCountUp({ end: 150, duration: 2000, suffix: '+' })
-    const touristCountUp = useCountUp({ end: 50000, duration: 2500, separator: '.' })
+    // State untuk data real-time
+    const [statsData, setStatsData] = useState<PublicStatsData>({
+        totalWisata: 20,
+        totalUMKM: 150,
+        totalTourists: 50000,
+        population: {
+            total: 9650,
+            growthRate: 9.66,
+            monthlyData: []
+        }
+    })
+
+    const [timeRange, setTimeRange] = useState('3months')
+    const [isLoading, setIsLoading] = useState(true)
+    const [dataLoaded, setDataLoaded] = useState(false)
+
+    // Count-up animations with real data
+    const destinationCountUp = useCountUp({ 
+        end: statsData.totalWisata, 
+        duration: 2000, 
+        enabled: dataLoaded 
+    })
+    
+    const umkmCountUp = useCountUp({ 
+        end: statsData.totalUMKM, 
+        duration: 2000, 
+        suffix: '+', 
+        enabled: dataLoaded 
+    })
+    
+    const touristCountUp = useCountUp({ 
+        end: statsData.totalTourists, 
+        duration: 2500, 
+        separator: '.', 
+        enabled: dataLoaded 
+    })
+
+    const populationCountUp = useCountUp({
+        end: statsData.population.total,
+        duration: 2500,
+        separator: '.',
+        enabled: dataLoaded
+    })
+
+    const growthRateCountUp = useCountUp({
+        end: statsData.population.growthRate,
+        duration: 2000,
+        decimals: 2,
+        prefix: statsData.population.growthRate >= 0 ? '+' : '',
+        suffix: '%',
+        enabled: dataLoaded
+    })
+
+    // Fetch data real-time
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                setIsLoading(true)
+                
+                const response = await dashboardApi.getPublicStats(timeRange)
+                
+                if (response.success && response.data) {
+                    setStatsData(response.data as PublicStatsData)
+                    setDataLoaded(true)
+                }
+            } catch (error) {
+                console.error('Error fetching public stats:', error)
+                // Keep using fallback data if error
+                setDataLoaded(true)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        fetchStats()
+
+        // Refresh data every 5 minutes
+        const interval = setInterval(fetchStats, 5 * 60 * 1000)
+        return () => clearInterval(interval)
+    }, [timeRange])
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -42,65 +136,6 @@ const StatistikDesa = () => {
             }
         }
     }, [])
-
-    // Dataset showcase dengan variasi naik-turun jelas (12 bulan penuh)
-    const [populationData] = useState([
-        { month: 'Jan', value: 7200, date: '2024-01-01' },
-        { month: 'Feb', value: 7850, date: '2024-02-01' },
-        { month: 'Mar', value: 7450, date: '2024-03-01' },
-        { month: 'Apr', value: 8300, date: '2024-04-01' },
-        { month: 'May', value: 7900, date: '2024-05-01' },
-        { month: 'Jun', value: 8650, date: '2024-06-01' },
-        { month: 'Jul', value: 8200, date: '2024-07-01' },
-        { month: 'Aug', value: 9100, date: '2024-08-01' },
-        { month: 'Sep', value: 8500, date: '2024-09-01' },
-        { month: 'Oct', value: 9400, date: '2024-10-01' },
-        { month: 'Nov', value: 8800, date: '2024-11-01' },
-        { month: 'Dec', value: 9650, date: '2024-12-01' }
-    ])
-
-    // Data tahunan dengan pola pertumbuhan bertahap (6 tahun)
-    const [yearlyPopulationData] = useState([
-        { year: '2020', value: 6500, date: '2020-01-01' },
-        { year: '2021', value: 7100, date: '2021-01-01' },
-        { year: '2022', value: 7600, date: '2022-01-01' },
-        { year: '2023', value: 8200, date: '2023-01-01' },
-        { year: '2024', value: 8700, date: '2024-01-01' },
-        { year: '2025', value: 9200, date: '2025-01-01' }
-    ])
-
-    const [timeRange, setTimeRange] = useState('3months')
-
-    // Dataset per periode dengan pola showcase lebih dramatis
-    const get3MonthsData = () => [
-        { month: 'Okt', value: 9400, date: '2024-10-01' },
-        { month: 'Nov', value: 8800, date: '2024-11-01' },
-        { month: 'Des', value: 9650, date: '2024-12-01' },
-    ]
-
-    const get6MonthsData = () => [
-        { month: 'Jul', value: 8200, date: '2024-07-01' },
-        { month: 'Agu', value: 9100, date: '2024-08-01' },
-        { month: 'Sep', value: 8500, date: '2024-09-01' },
-        { month: 'Okt', value: 9400, date: '2024-10-01' },
-        { month: 'Nov', value: 8800, date: '2024-11-01' },
-        { month: 'Des', value: 9650, date: '2024-12-01' },
-    ]
-
-    const get1YearData = () => populationData
-
-    const getCurrentData = () => {
-        switch (timeRange) {
-            case '3months':
-                return get3MonthsData()
-            case '6months':
-                return get6MonthsData()
-            case '1year':
-                return get1YearData()
-            default:
-                return get3MonthsData()
-        }
-    }
 
     return (
         <div ref={sectionRef}>
@@ -306,9 +341,17 @@ const StatistikDesa = () => {
                         >
                             <div className="card-body p-6 sm:p-8">
                                 <div className="flex justify-between items-start mb-6">
-                                    <h3 className="text-2xl font-semibold text-gray-900 leading-tight">
-                                        Pertumbuhan<br />Penduduk
-                                    </h3>
+                                    <div>
+                                        <h3 className="text-2xl font-semibold text-gray-900 leading-tight mb-2">
+                                            Pertumbuhan<br />Penduduk
+                                        </h3>
+                                        <div className="flex items-center gap-2">
+                                            <span ref={populationCountUp.ref} className="text-lg font-bold text-[#5B903A]">
+                                                {populationCountUp.count}
+                                            </span>
+                                            <span className="text-sm text-gray-500">Warga Terdaftar</span>
+                                        </div>
+                                    </div>
 
                                     {/* Time Range Filter */}
                                     <div className="dropdown dropdown-end">
@@ -352,20 +395,46 @@ const StatistikDesa = () => {
                                     </div>
                                 </div>
 
+                                {/* Growth Rate Badge */}
+                                {statsData.population.growthRate !== 0 && (
+                                    <div className="mb-4">
+                                        <span ref={growthRateCountUp.ref} className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
+                                            statsData.population.growthRate >= 0 
+                                                ? 'bg-green-100 text-green-700' 
+                                                : 'bg-red-100 text-red-700'
+                                        }`}>
+                                            {growthRateCountUp.count}
+                                            <svg 
+                                                className={`w-4 h-4 ${statsData.population.growthRate < 0 ? 'rotate-180' : ''}`} 
+                                                fill="none" 
+                                                stroke="currentColor" 
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                            </svg>
+                                        </span>
+                                    </div>
+                                )}
+
                                 {/* Area Chart */}
                                 <div className="relative -mx-2">
-                                    <PopulationChart
-                                        data={getCurrentData()}
-                                        color="#5B903A"
-                                        showGrid={true}
-                                        height={200}
-                                    />
-
+                                    {statsData.population.monthlyData.length > 0 ? (
+                                        <PopulationChart
+                                            data={statsData.population.monthlyData}
+                                            color="#5B903A"
+                                            showGrid={true}
+                                            height={200}
+                                        />
+                                    ) : (
+                                        <div className="h-[200px] flex items-center justify-center text-gray-400">
+                                            Loading data...
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </motion.div>
 
-                        {/* Tourism Stats Card - UPDATED */}
+                        {/* Tourism Stats Card */}
                         <motion.div 
                             className="card w-full lg:w-2/5 bg-[#F5F5F5] border-2 border-gray-300 rounded-3xl shadow-sm overflow-hidden relative will-change-transform cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B903A] focus-visible:ring-offset-2"
                             whileHover={{ 
@@ -378,7 +447,7 @@ const StatistikDesa = () => {
                             aria-label="Tourism Statistics"
                         >
                             <div className="card-body p-6 sm:p-8 lg:p-10">
-                                {/* Decorative cards grid - with consistent gradient (di atas) - Hidden on mobile & tablet */}
+                                {/* Decorative cards grid - same as before */}
                                 <div className="absolute -right-4 -top-24 left-6 w-[90%] h-max hidden lg:block">
                                     <div className="grid grid-rows-2 gap-3 w-full h-full bg-gradient-to-br from-[#CCDDC2] to-[#B8D4A8]/80 border-2 border-[#C0C0C0] px-2 py-5 rounded-xl">
                                         {/* Top Row - Large card with subtle gradient (terpotong atas) */}
@@ -425,9 +494,10 @@ const StatistikDesa = () => {
                                 <div className="relative z-10 mt-auto">
                                     <div className="flex justify-between items-start gap-6">
                                         <div className="flex-1">
-                                            <h2 ref={touristCountUp.ref} className="text-4xl font-bold text-gray-900 mb-0 leading-tight">
-                                                {touristCountUp.count}+
-                                            </h2>
+                                            {/* ✅ Changed from <h2> with ref to <div> containing <span> with ref */}
+                                            <div className="text-4xl font-bold text-gray-900 mb-0 leading-tight">
+                                                <span ref={touristCountUp.ref} className="inline">{touristCountUp.count}</span>+
+                                            </div>
                                             <p className="text-2xl font-semibold text-gray-900">
                                                 Wisatawan/Tahun
                                             </p>

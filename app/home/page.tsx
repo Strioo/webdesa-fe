@@ -1,7 +1,6 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import Navbar from '@/components/Navbar'
 import HeroSection from '@/components/home/HeroSection'
 
 // Lazy load components yang tidak immediately visible
@@ -28,7 +27,7 @@ const Footer = dynamic(() => import('@/components/Footer'), {
 export default function Home() {
   return (
     <div>
-      <Navbar />
+      {/* Navbar sudah ada di root layout, tidak perlu duplikat */}
       <HeroSection />
       <StatistikDesa />
       <UmkmDanWisata />
