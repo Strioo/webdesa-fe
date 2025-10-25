@@ -50,12 +50,6 @@ export default function ProfileVisiMisiSection() {
               variants={itemVariants}
               whileHover={{ y: -4 }}
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 mb-4 
-                             bg-gray-100 rounded-full">
-                <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                  Visi Kami
-                </span>
-              </div>
 
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
                 VISI
@@ -75,12 +69,6 @@ export default function ProfileVisiMisiSection() {
               variants={itemVariants}
               whileHover={{ y: -4 }}
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 mb-4 
-                             bg-gray-100 rounded-full">
-                <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                  Misi Kami
-                </span>
-              </div>
 
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
                 MISI

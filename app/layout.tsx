@@ -57,7 +57,7 @@ export default function RootLayout({
         }} />
       </head>
       <body
-        className={`${lato.variable} ${raleway.variable} antialiased bg-white`}
+        className={`${lato.variable} ${raleway.variable} antialiased bg-white overflow-x-hidden`}
         style={{ fontFamily: 'var(--font-lato)' }}
       >
         <AnimationProvider>
