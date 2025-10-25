@@ -18,7 +18,7 @@ export default function HeroLapor({ onOpenModal }: HeroLaporProps) {
   }, [])
 
   return (
-    <section className="relative w-full min-h-screen h-screen flex items-center overflow-hidden -mt-[88px] pt-[88px]">
+    <section className="relative w-full min-h-[900px] md:h-[900px] flex items-center overflow-hidden -mt-[88px] pt-[120px] sm:pt-[140px]">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <Image

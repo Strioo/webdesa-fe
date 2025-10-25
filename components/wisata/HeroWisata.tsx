@@ -58,7 +58,7 @@ export default function HeroWisata() {
   }
 
   return (
-    <section className="relative w-full min-h-[900px] md:h-[900px] overflow-hidden -mt-[88px] pt-[88px]">
+    <section className="relative w-full min-h-[900px] md:h-[900px] overflow-hidden -mt-[88px] pt-[120px] sm:pt-[140px]">
       {/* Background Image - BRIGHT, NO DARK OVERLAY */}
       <div className="absolute inset-0 z-0">
         <Image

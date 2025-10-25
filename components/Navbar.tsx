@@ -131,15 +131,15 @@ const Navbar = memo(function Navbar({
   ]
 
   return (
-    <nav className="fixed inset-x-0 top-0 z-50">
-      <div className="w-full px-4 sm:px-6 lg:px-8 pt-4">
+    <nav className="fixed inset-x-0 top-0 z-[100] overflow-hidden">
+      <div className="w-full px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-2 sm:pb-0 max-w-[100vw]">
         <motion.div 
-          className="navbar max-w-[1400px] mx-auto w-full rounded-full px-4 md:px-6 flex items-center justify-between will-change-transform"
+          className="navbar max-w-[1400px] mx-auto w-full rounded-full px-4 md:px-6 flex items-center justify-between will-change-transform overflow-hidden"
           animate={{
-            backgroundColor: isScrolled ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 255, 255, 0.95)',
+            backgroundColor: isScrolled ? 'rgba(255, 255, 255, 0.85)' : 'rgba(255, 255, 255, 0.95)',
             boxShadow: isScrolled 
-              ? '0 0 0 1px rgba(0, 0, 0, 0.05)' 
-              : '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              ? '0 2px 8px rgba(0, 0, 0, 0.08)' 
+              : '0 4px 12px rgba(0, 0, 0, 0.1)',
           }}
           transition={{ 
             duration: 0.18, 
@@ -148,8 +148,8 @@ const Navbar = memo(function Navbar({
           style={{ 
             paddingTop: isScrolled ? '0.5rem' : '0.75rem',
             paddingBottom: isScrolled ? '0.5rem' : '0.75rem',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
           }}
         >
           {/* Logo */}

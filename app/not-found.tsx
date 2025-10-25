@@ -14,7 +14,9 @@ export default function NotFound() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center px-4 py-8 relative overflow-hidden">
+    <div
+      className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center px-4 py-8 pt-[120px] sm:pt-[140px] relative overflow-hidden"
+    >
       {/* Decorative Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Floating Circles */}
@@ -33,7 +35,7 @@ export default function NotFound() {
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }}
           className="absolute top-1/2 left-1/3 w-24 h-24 bg-teal-200/20 rounded-full blur-xl"
         />
-        
+
         {/* Mountain Silhouette - representing Baturaden */}
         <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-green-100/50 to-transparent">
           <svg
@@ -81,23 +83,6 @@ export default function NotFound() {
           >
             404
           </motion.h1>
-
-          {/* Interactive Leaf Icon */}
-          <motion.div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-            initial={{ rotate: -20, opacity: 0 }}
-            animate={{ rotate: 0, opacity: 0.15 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-              className="w-32 h-32 sm:w-48 sm:h-48 text-green-600"
-            >
-              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z" />
-            </svg>
-          </motion.div>
         </motion.div>
 
         {/* Title & Description */}

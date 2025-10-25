@@ -62,7 +62,7 @@ const DockNavbar = memo(function DockNavbar() {
       
       {/* Mobile Dock - Dark Theme with Safe Area */}
       <motion.nav
-        className="fixed bottom-0 left-0 right-0 z-50 lg:hidden"
+        className="fixed bottom-0 left-0 right-0 z-[90] lg:hidden"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}

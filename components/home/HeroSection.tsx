@@ -144,8 +144,8 @@ const HeroSection = () => {
 
   return (
     <div ref={sectionRef}>
-      <section className="relative bg-[url('/assets/images/bg-hero.png')] bg-cover bg-center min-h-screen w-full overflow-hidden -mt-[120px] pt-[140px]">
-        <div className="container max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-full min-h-screen flex items-end pb-10 sm:pb-16 lg:pb-20">
+      <section className="relative bg-[url('/assets/images/bg-hero.png')] bg-cover bg-center min-h-screen w-full overflow-hidden -mt-[88px] pt-[120px] sm:pt-[140px]">
+        <div className="container max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-full min-h-[calc(100vh-32px)] flex items-end pb-10 sm:pb-16 lg:pb-20">
           {/* Responsive Layout: 
               Mobile/Tablet: flex-col-reverse (Hero Content on top, Weather Card on bottom)
               Desktop: flex-row (Weather Card left, Hero Content right) 
@@ -206,11 +206,12 @@ const HeroSection = () => {
                       <p className="text-sm">L: <span ref={tempLowCountUp.ref} className="inline">{tempLowCountUp.count}</span>°C</p>
                     </div>
                     <Image
-                      src="/assets/icons/cloud.svg"
+                      src="/assets/icons/Cloud.svg"
                       alt="Weather"
                       width={64}
                       height={64}
                       className="w-16 h-16"
+                      priority
                     />
                   </div>
 
@@ -252,6 +253,7 @@ const HeroSection = () => {
                         height={16}
                         className="w-4 h-4 invert"
                         style={{ transform: 'rotate(-90deg)' }}
+                        priority
                       />
                     </span>
                   </div>

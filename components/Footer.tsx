@@ -44,13 +44,14 @@ const Footer = memo(function Footer() {
                             <h3 className="text-2xl font-bold text-gray-900">Batturaden</h3>
                         </div>
                         <p className="text-gray-600 text-base leading-relaxed">
-                            Join our community and get expert health tips, wellness updates, and trusted medical insights—delivered straight to you.
+                            Bergabunglah dengan kami untuk mendapatkan informasi terkini seputar wisata, UMKM lokal, pembangunan desa, dan layanan masyarakat Baturaden.
                         </p>
                         {/* Social Media Icons */}
                         <div className="flex gap-4 pt-2">
                             <Link
-                                href="https://instagram.com"
+                                href="https://www.instagram.com/kecamatan_baturraden/"
                                 target="_blank"
+                                rel="noopener noreferrer"
                                 className="w-10 h-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center transition-all duration-300 shadow-sm cursor-pointer"
                                 aria-label="Instagram"
                             >
@@ -59,8 +60,9 @@ const Footer = memo(function Footer() {
                                 </svg>
                             </Link>
                             <Link
-                                href="https://facebook.com"
+                                href="https://www.facebook.com/groups/seputarbaturaden/"
                                 target="_blank"
+                                rel="noopener noreferrer"
                                 className="w-10 h-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center transition-all duration-300 shadow-sm cursor-pointer"
                                 aria-label="Facebook"
                             >
@@ -69,8 +71,9 @@ const Footer = memo(function Footer() {
                                 </svg>
                             </Link>
                             <Link
-                                href="https://twitter.com"
+                                href="https://twitter.com/banyumaskab"
                                 target="_blank"
+                                rel="noopener noreferrer"
                                 className="w-10 h-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center transition-all duration-300 shadow-sm cursor-pointer"
                                 aria-label="Twitter"
                             >
@@ -79,16 +82,14 @@ const Footer = memo(function Footer() {
                                 </svg>
                             </Link>
                             <Link
-                                href="https://google.com"
+                                href="https://www.youtube.com/@BanyumasKab"
                                 target="_blank"
+                                rel="noopener noreferrer"
                                 className="w-10 h-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center transition-all duration-300 shadow-sm cursor-pointer"
-                                aria-label="Google"
+                                aria-label="YouTube"
                             >
                                 <svg className="w-5 h-5 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                                 </svg>
                             </Link>
                         </div>
@@ -99,7 +100,7 @@ const Footer = memo(function Footer() {
                         <h4 className="text-lg font-semibold text-gray-900 mb-4">Jelajahi Lebih Lanjut:</h4>
                         <ul className="space-y-3">
                             <li>
-                                <Link href="/profil-desa" className="text-gray-600 hover:text-gray-900 transition-colors duration-300 cursor-pointer">
+                                <Link href="/profile" className="text-gray-600 hover:text-gray-900 transition-colors duration-300 cursor-pointer">
                                     Profil Desa
                                 </Link>
                             </li>
@@ -150,7 +151,7 @@ const Footer = memo(function Footer() {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                     </svg>
                                 </div>
-                                <p className="text-gray-600 text-base">(0281) 123456</p>
+                                <p className="text-gray-600 text-base">(0281) 681240</p>
                             </div>
 
                             <div className="flex items-center gap-3">
@@ -174,7 +175,7 @@ const Footer = memo(function Footer() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
-                            <span>123 Main Street, Suite 100, Los Angeles, CA 90001</span>
+                            <span>Kantor Desa Baturaden, Banyumas, Jawa Tengah</span>
                         </div>
                     </div>
                 </div>
