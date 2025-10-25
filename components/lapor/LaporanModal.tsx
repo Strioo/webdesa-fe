@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, ChangeEvent, FormEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Upload, Camera, Trash2, Loader2, File } from 'lucide-react'
+import { X, Upload, Camera, Trash2, Loader2, File, CheckCircle, Clock } from 'lucide-react'
 import Image from 'next/image'
 import { LAPORAN_CATEGORIES, LAPORAN_CATEGORY_LABELS, LaporanFormData, LaporanValidationError } from '@/types/laporan'
 import { isFormValid, validateLaporan } from '@/lib/validateLaporan'
@@ -38,6 +38,7 @@ export default function LaporanModal({ isOpen, onClose }: LaporanModalProps) {
     message: string
     reason?: string
   } | null>(null)
+  const [loadingStep, setLoadingStep] = useState<number>(0)
   
   const modalRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -319,8 +320,51 @@ export default function LaporanModal({ isOpen, onClose }: LaporanModalProps) {
     }
 
     setIsSubmitting(true)
+    setLoadingStep(0)
 
     try {
+      // ✅ Prepare FormData for validation
+      const validationData = new FormData()
+      validationData.append('judul', formData.title)
+      validationData.append('deskripsi', formData.description)
+      validationData.append('kategori', formData.category)
+      if (formData.photo) {
+        validationData.append('foto', formData.photo)
+      }
+
+      // Step 1: Menganalisis laporan dengan AI
+      setLoadingStep(1)
+      const validationResult = await laporanApi.validate(validationData)
+
+      console.log('AI Validation result:', validationResult)
+
+      // Check validation result
+      if (validationResult.success && validationResult.validation) {
+        const { valid, confidence, reason, suggestions } = validationResult.validation
+
+        // If not valid or low confidence, show warning
+        if (!valid || confidence < 60) {
+          setLoadingStep(0)
+          setIsSubmitting(false)
+          
+          setNotification({
+            type: 'error',
+            message: 'Laporan Tidak Valid',
+            reason: `${reason}\n\n${suggestions || 'Mohon perbaiki foto dan deskripsi agar lebih jelas dan sesuai dengan kategori laporan.'}`
+          })
+
+          setTimeout(() => {
+            setNotification(null)
+          }, 10000)
+
+          return
+        }
+      }
+
+      // Step 2: Memvalidasi data
+      setLoadingStep(2)
+      await new Promise(resolve => setTimeout(resolve, 600))
+
       // ✅ Prepare FormData for API
       const submitData = new FormData()
       submitData.append('judul', formData.title)
@@ -333,10 +377,17 @@ export default function LaporanModal({ isOpen, onClose }: LaporanModalProps) {
         submitData.append('foto', formData.photo)
       }
 
+      // Step 3: Mengirim laporan
+      setLoadingStep(3)
+
       // ✅ Call API
       const response = await laporanApi.create(submitData)
 
       console.log('Laporan response:', response)
+
+      // Step 4: Sukses
+      setLoadingStep(4)
+      await new Promise(resolve => setTimeout(resolve, 500))
 
       if (response.success) {
         // Success notification
@@ -355,6 +406,8 @@ export default function LaporanModal({ isOpen, onClose }: LaporanModalProps) {
       }
     } catch (error) {
       console.error('Error submitting laporan:', error)
+      
+      setLoadingStep(0)
       
       // Error notification with reason
       setNotification({
@@ -753,8 +806,8 @@ export default function LaporanModal({ isOpen, onClose }: LaporanModalProps) {
               </p>
             </div>
 
-            {/* Submit Button */}
-            <div className="pt-4">
+            {/* Submit Button - Extra padding bottom for DockNavbar clearance */}
+            <div className="pt-6 pb-24 sm:pb-8">
               <button
                 type="submit"
                 disabled={isSubmitting || (Object.keys(touched).length > 0 && !isFormValid(errors))}
@@ -779,7 +832,143 @@ export default function LaporanModal({ isOpen, onClose }: LaporanModalProps) {
           </form>
         </motion.div>
 
-        {/* Notification Toast */}
+        {/* Loading Overlay with Steps */}
+        <AnimatePresence>
+          {isSubmitting && loadingStep > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm flex items-center justify-center px-4"
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full"
+              >
+                <div className="space-y-6">
+                  {/* Step 1: Menganalisis dengan AI */}
+                  <div className="flex items-center gap-4">
+                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+                      loadingStep >= 1 ? 'bg-green-500' : 'bg-gray-200'
+                    } transition-colors duration-300`}>
+                      {loadingStep > 1 ? (
+                        <CheckCircle className="w-6 h-6 text-white" />
+                      ) : loadingStep === 1 ? (
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                        >
+                          <Clock className="w-6 h-6 text-white" />
+                        </motion.div>
+                      ) : (
+                        <div className="w-4 h-4 rounded-full bg-gray-400" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className={`font-semibold ${loadingStep >= 1 ? 'text-gray-900' : 'text-gray-400'}`}>
+                        Menganalisis laporan dengan AI
+                      </p>
+                      <p className="text-sm text-gray-500">Memeriksa foto dan deskripsi...</p>
+                    </div>
+                  </div>
+
+                  {/* Step 2: Memvalidasi */}
+                  <div className="flex items-center gap-4">
+                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+                      loadingStep >= 2 ? 'bg-green-500' : 'bg-gray-200'
+                    } transition-colors duration-300`}>
+                      {loadingStep > 2 ? (
+                        <CheckCircle className="w-6 h-6 text-white" />
+                      ) : loadingStep === 2 ? (
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                        >
+                          <Clock className="w-6 h-6 text-white" />
+                        </motion.div>
+                      ) : (
+                        <div className="w-4 h-4 rounded-full bg-gray-400" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className={`font-semibold ${loadingStep >= 2 ? 'text-gray-900' : 'text-gray-400'}`}>
+                        Memvalidasi data
+                      </p>
+                      <p className="text-sm text-gray-500">Mengecek format dan isi laporan...</p>
+                    </div>
+                  </div>
+
+                  {/* Step 3: Mengirim */}
+                  <div className="flex items-center gap-4">
+                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+                      loadingStep >= 3 ? 'bg-green-500' : 'bg-gray-200'
+                    } transition-colors duration-300`}>
+                      {loadingStep > 3 ? (
+                        <CheckCircle className="w-6 h-6 text-white" />
+                      ) : loadingStep === 3 ? (
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                        >
+                          <Clock className="w-6 h-6 text-white" />
+                        </motion.div>
+                      ) : (
+                        <div className="w-4 h-4 rounded-full bg-gray-400" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className={`font-semibold ${loadingStep >= 3 ? 'text-gray-900' : 'text-gray-400'}`}>
+                        Mengirim laporan
+                      </p>
+                      <p className="text-sm text-gray-500">Menghubungkan ke server...</p>
+                    </div>
+                  </div>
+
+                  {/* Step 4: Sukses */}
+                  <div className="flex items-center gap-4">
+                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+                      loadingStep >= 4 ? 'bg-green-500' : 'bg-gray-200'
+                    } transition-colors duration-300`}>
+                      {loadingStep === 4 ? (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: 'spring', stiffness: 200, damping: 10 }}
+                        >
+                          <CheckCircle className="w-6 h-6 text-white" />
+                        </motion.div>
+                      ) : (
+                        <div className="w-4 h-4 rounded-full bg-gray-400" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className={`font-semibold ${loadingStep >= 4 ? 'text-gray-900' : 'text-gray-400'}`}>
+                        Laporan terkirim!
+                      </p>
+                      <p className="text-sm text-gray-500">Berhasil disimpan ke database</p>
+                    </div>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="pt-4">
+                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                      <motion.div
+                        className="h-full bg-gradient-to-r from-green-500 to-emerald-500"
+                        initial={{ width: '0%' }}
+                        animate={{ width: `${(loadingStep / 4) * 100}%` }}
+                        transition={{ duration: 0.5, ease: 'easeOut' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Notification Toast - Fixed position below navbar, above everything */}
         <AnimatePresence>
           {notification && (
             <motion.div
@@ -787,7 +976,7 @@ export default function LaporanModal({ isOpen, onClose }: LaporanModalProps) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -50, scale: 0.9 }}
               transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-              className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] max-w-md w-full mx-4"
+              className="fixed top-24 sm:top-28 left-1/2 -translate-x-1/2 z-[100] max-w-md w-full mx-4"
             >
               <div
                 className={`rounded-lg shadow-2xl p-4 ${

@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { wisataApi } from "@/lib/api";
+import { extractCoordinatesFromMapsUrl, isValidGoogleMapsUrl, getCurrentLocation, formatCoordinates } from "@/lib/maps-utils";
+import { getImageUrl, handleImageError } from "@/lib/utils";
 import {
   ArrowLeft,
   Save,
@@ -14,7 +16,9 @@ import {
   Image as ImageIcon,
   Tag,
   Globe,
-  X
+  X,
+  Link as LinkIcon,
+  Navigation
 } from "lucide-react";
 
 interface Wisata {
@@ -45,6 +49,9 @@ export default function EditWisataPage() {
   const [saving, setSaving] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [mapsUrl, setMapsUrl] = useState("");
+  const [extractingCoords, setExtractingCoords] = useState(false);
+  const [gettingLocation, setGettingLocation] = useState(false);
 
   const [formData, setFormData] = useState({
     nama: "",
@@ -119,6 +126,63 @@ export default function EditWisataPage() {
         setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleExtractCoordinates = async () => {
+    if (!mapsUrl.trim()) {
+      toast.error("Masukkan URL Google Maps terlebih dahulu");
+      return;
+    }
+
+    if (!isValidGoogleMapsUrl(mapsUrl)) {
+      toast.error("URL bukan link Google Maps yang valid");
+      return;
+    }
+
+    try {
+      setExtractingCoords(true);
+      const coords = await extractCoordinatesFromMapsUrl(mapsUrl);
+      
+      if (coords) {
+        setFormData({
+          ...formData,
+          latitude: coords.latitude.toString(),
+          longitude: coords.longitude.toString()
+        });
+        toast.success(`Koordinat berhasil diambil: ${formatCoordinates(coords.latitude, coords.longitude)}`);
+        setMapsUrl("");
+      } else {
+        toast.error("Gagal mengekstrak koordinat dari URL. Pastikan URL valid.");
+      }
+    } catch (error) {
+      console.error("Error extracting coordinates:", error);
+      toast.error("Terjadi kesalahan saat mengekstrak koordinat");
+    } finally {
+      setExtractingCoords(false);
+    }
+  };
+
+  const handleGetCurrentLocation = async () => {
+    try {
+      setGettingLocation(true);
+      const coords = await getCurrentLocation();
+      
+      if (coords) {
+        setFormData({
+          ...formData,
+          latitude: coords.latitude.toString(),
+          longitude: coords.longitude.toString()
+        });
+        toast.success(`Lokasi saat ini: ${formatCoordinates(coords.latitude, coords.longitude)}`);
+      } else {
+        toast.error("Gagal mendapatkan lokasi. Pastikan izin lokasi diaktifkan.");
+      }
+    } catch (error) {
+      console.error("Error getting location:", error);
+      toast.error("Terjadi kesalahan saat mendapatkan lokasi");
+    } finally {
+      setGettingLocation(false);
     }
   };
 
@@ -217,9 +281,12 @@ export default function EditWisataPage() {
               {imagePreview ? (
                 <div className="relative">
                   <img
-                    src={imagePreview}
+                    src={imagePreview.startsWith('blob:') || imagePreview.startsWith('data:') 
+                      ? imagePreview 
+                      : getImageUrl(imagePreview)}
                     alt="Preview"
                     className="w-full h-64 object-cover rounded-lg border-2 border-gray-300"
+                    onError={handleImageError}
                   />
                   <button
                     type="button"
@@ -414,35 +481,118 @@ export default function EditWisataPage() {
               <Globe className="w-5 h-5 mr-2 text-blue-600" />
               Koordinat (Opsional)
             </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Latitude
-                </label>
+
+            {/* Google Maps URL Input */}
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
+                <LinkIcon className="w-4 h-4 text-blue-600" />
+                Ekstrak dari Google Maps URL
+              </label>
+              <p className="text-xs text-gray-600 mb-3">
+                Copy-paste link Google Maps (contoh: https://maps.app.goo.gl/xxx atau https://www.google.com/maps/...)
+              </p>
+              <div className="flex gap-2">
                 <input
-                  type="number"
-                  step="any"
-                  value={formData.latitude}
-                  onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="-6.9175"
+                  type="url"
+                  value={mapsUrl}
+                  onChange={(e) => setMapsUrl(e.target.value)}
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="https://maps.app.goo.gl/..."
+                  disabled={extractingCoords}
                 />
+                <button
+                  type="button"
+                  onClick={handleExtractCoordinates}
+                  disabled={extractingCoords || !mapsUrl.trim()}
+                  className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+                >
+                  {extractingCoords ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span className="hidden sm:inline">Mengekstrak...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Globe className="w-4 h-4" />
+                      <span className="hidden sm:inline">Ekstrak</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Get Current Location */}
+            <div className="mb-6">
+              <button
+                type="button"
+                onClick={handleGetCurrentLocation}
+                disabled={gettingLocation}
+                className="w-full px-4 py-3 border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center gap-2 text-gray-700 font-medium"
+              >
+                {gettingLocation ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+                    <span>Mendapatkan Lokasi GPS...</span>
+                  </>
+                ) : (
+                  <>
+                    <Navigation className="w-5 h-5 text-blue-600" />
+                    <span>Gunakan Lokasi Saya Saat Ini</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Manual Input */}
+            <div className="border-t border-gray-200 pt-6">
+              <p className="text-sm font-medium text-gray-700 mb-4">Atau masukkan koordinat manual:</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Latitude
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={formData.latitude}
+                    onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="-6.9175"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Longitude
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={formData.longitude}
+                    onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="107.6191"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Longitude
-                </label>
-                <input
-                  type="number"
-                  step="any"
-                  value={formData.longitude}
-                  onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="107.6191"
-                />
-              </div>
+              {/* Coordinate Preview */}
+              {formData.latitude && formData.longitude && (
+                <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-sm font-medium text-green-800 flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    Koordinat: {formatCoordinates(parseFloat(formData.latitude), parseFloat(formData.longitude))}
+                  </p>
+                  <a
+                    href={`https://www.google.com/maps?q=${formData.latitude},${formData.longitude}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-600 hover:text-blue-700 underline mt-1 inline-block"
+                  >
+                    Lihat di Google Maps →
+                  </a>
+                </div>
+              )}
             </div>
           </div>
 

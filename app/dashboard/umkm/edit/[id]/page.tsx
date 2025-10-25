@@ -16,8 +16,19 @@ import {
   Tag,
   Package,
   Clock,
-  X
+  X,
+  Globe,
+  LinkIcon,
+  Navigation
 } from "lucide-react";
+import { 
+  extractCoordinatesFromMapsUrl, 
+  isValidGoogleMapsUrl, 
+  getCurrentLocation, 
+  formatCoordinates,
+  generateMapsLinkUrl 
+} from "@/lib/maps-utils";
+import { getImageUrl, handleImageError } from "@/lib/utils";
 
 interface UMKM {
   id: string;
@@ -33,6 +44,8 @@ interface UMKM {
   foto?: string;
   jamBuka?: string;
   jamTutup?: string;
+  latitude?: number;
+  longitude?: number;
   isAktif: boolean;
   createdAt: string;
 }
@@ -47,6 +60,9 @@ export default function EditUMKMPage() {
   const [saving, setSaving] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [mapsUrl, setMapsUrl] = useState("");
+  const [extractingCoords, setExtractingCoords] = useState(false);
+  const [gettingLocation, setGettingLocation] = useState(false);
 
   const [formData, setFormData] = useState({
     nama: "",
@@ -59,6 +75,8 @@ export default function EditUMKMPage() {
     harga: "",
     jamBuka: "",
     jamTutup: "",
+    latitude: "",
+    longitude: "",
     isAktif: true
   });
 
@@ -87,6 +105,8 @@ export default function EditUMKMPage() {
           harga: data.harga || "",
           jamBuka: data.jamBuka || "",
           jamTutup: data.jamTutup || "",
+          latitude: data.latitude?.toString() || "",
+          longitude: data.longitude?.toString() || "",
           isAktif: data.isAktif
         });
         if (data.foto) {
@@ -124,6 +144,63 @@ export default function EditUMKMPage() {
     }
   };
 
+  const handleExtractCoordinates = async () => {
+    if (!mapsUrl.trim()) {
+      toast.error("Masukkan URL Google Maps terlebih dahulu");
+      return;
+    }
+
+    if (!isValidGoogleMapsUrl(mapsUrl)) {
+      toast.error("URL bukan link Google Maps yang valid");
+      return;
+    }
+
+    try {
+      setExtractingCoords(true);
+      const coords = await extractCoordinatesFromMapsUrl(mapsUrl);
+      
+      if (coords) {
+        setFormData({
+          ...formData,
+          latitude: coords.latitude.toString(),
+          longitude: coords.longitude.toString()
+        });
+        toast.success(`Koordinat berhasil diambil: ${formatCoordinates(coords.latitude, coords.longitude)}`);
+        setMapsUrl("");
+      } else {
+        toast.error("Gagal mengekstrak koordinat dari URL. Pastikan URL valid.");
+      }
+    } catch (error) {
+      console.error("Error extracting coordinates:", error);
+      toast.error("Terjadi kesalahan saat mengekstrak koordinat");
+    } finally {
+      setExtractingCoords(false);
+    }
+  };
+
+  const handleGetCurrentLocation = async () => {
+    try {
+      setGettingLocation(true);
+      const coords = await getCurrentLocation();
+      
+      if (coords) {
+        setFormData({
+          ...formData,
+          latitude: coords.latitude.toString(),
+          longitude: coords.longitude.toString()
+        });
+        toast.success(`Lokasi saat ini: ${formatCoordinates(coords.latitude, coords.longitude)}`);
+      } else {
+        toast.error("Gagal mendapatkan lokasi. Pastikan izin lokasi diaktifkan.");
+      }
+    } catch (error) {
+      console.error("Error getting location:", error);
+      toast.error("Terjadi kesalahan saat mendapatkan lokasi");
+    } finally {
+      setGettingLocation(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -147,6 +224,8 @@ export default function EditUMKMPage() {
       if (formData.harga) submitData.append("harga", formData.harga);
       if (formData.jamBuka) submitData.append("jamBuka", formData.jamBuka);
       if (formData.jamTutup) submitData.append("jamTutup", formData.jamTutup);
+      if (formData.latitude) submitData.append("latitude", formData.latitude);
+      if (formData.longitude) submitData.append("longitude", formData.longitude);
       submitData.append("isAktif", String(formData.isAktif));
       
       if (imageFile) {
@@ -219,9 +298,14 @@ export default function EditUMKMPage() {
               {imagePreview ? (
                 <div className="relative">
                   <img
-                    src={imagePreview}
+                    src={
+                      imagePreview.startsWith('blob:') || imagePreview.startsWith('data:')
+                        ? imagePreview
+                        : getImageUrl(imagePreview)
+                    }
                     alt="Preview"
                     className="w-full h-64 object-cover rounded-lg border-2 border-gray-300"
+                    onError={handleImageError}
                   />
                   <button
                     type="button"
@@ -447,6 +531,126 @@ export default function EditUMKMPage() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Coordinates */}
+          <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm">
+            <h3 className="font-bold text-gray-900 text-lg mb-5 flex items-center">
+              <Globe className="w-5 h-5 mr-2 text-blue-600" />
+              Koordinat (Opsional)
+            </h3>
+
+            {/* Google Maps URL Input */}
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
+                <LinkIcon className="w-4 h-4 text-blue-600" />
+                Ekstrak dari Google Maps URL
+              </label>
+              <p className="text-xs text-gray-600 mb-3">
+                Copy-paste link Google Maps (contoh: https://maps.app.goo.gl/xxx atau https://www.google.com/maps/...)
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={mapsUrl}
+                  onChange={(e) => setMapsUrl(e.target.value)}
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="https://maps.app.goo.gl/..."
+                  disabled={extractingCoords}
+                />
+                <button
+                  type="button"
+                  onClick={handleExtractCoordinates}
+                  disabled={extractingCoords || !mapsUrl.trim()}
+                  className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
+                >
+                  {extractingCoords ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Memproses...
+                    </>
+                  ) : (
+                    "Ekstrak"
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Get Current Location */}
+            <div className="mb-6">
+              <button
+                type="button"
+                onClick={handleGetCurrentLocation}
+                disabled={gettingLocation}
+                className="w-full px-4 py-3 border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center gap-2 text-gray-700 font-medium"
+              >
+                {gettingLocation ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+                    <span>Mendapatkan lokasi...</span>
+                  </>
+                ) : (
+                  <>
+                    <Navigation className="w-5 h-5 text-blue-600" />
+                    <span>Gunakan Lokasi Saya Saat Ini</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Manual Input */}
+            <div className="border-t border-gray-200 pt-6">
+              <p className="text-sm text-gray-600 mb-4">Atau masukkan koordinat secara manual:</p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                    <MapPin className="w-4 h-4 text-gray-500" />
+                    Latitude
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={formData.latitude}
+                    onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Contoh: -6.917464"
+                  />
+                </div>
+
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                    <MapPin className="w-4 h-4 text-gray-500" />
+                    Longitude
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={formData.longitude}
+                    onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Contoh: 107.619125"
+                  />
+                </div>
+              </div>
+
+              {/* Coordinate Preview */}
+              {formData.latitude && formData.longitude && (
+                <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-sm text-green-800 mb-2 font-medium">
+                    ✓ Koordinat tersimpan: {formatCoordinates(parseFloat(formData.latitude), parseFloat(formData.longitude))}
+                  </p>
+                  <a
+                    href={generateMapsLinkUrl(parseFloat(formData.latitude), parseFloat(formData.longitude))}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 hover:text-blue-800 underline flex items-center gap-1"
+                  >
+                    Lihat di Google Maps →
+                  </a>
+                </div>
+              )}
             </div>
           </div>
 

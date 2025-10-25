@@ -252,13 +252,13 @@ export default function TransaksiPage() {
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 shadow-sm text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-blue-100">Total Pendapatan</p>
+              <p className="text-sm text-blue-100 opacity-90">Total Pendapatan</p>
               <p className="text-xl font-bold mt-1">
                 Rp {getTotalRevenue().toLocaleString('id-ID')}
               </p>
             </div>
-            <div className="p-3 bg-white bg-opacity-20 rounded-lg">
-              <TrendingUp className="w-6 h-6" />
+            <div className="p-3 bg-blue-400 rounded-lg">
+              <TrendingUp className="w-6 h-6 text-white" />
             </div>
           </div>
         </div>

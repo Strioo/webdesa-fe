@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { umkmApi } from "@/lib/api";
+import { getImageUrl, handleImageError } from "@/lib/utils"; 
 import {
   Plus,
   Search,
@@ -544,31 +545,6 @@ export default function UMKMPageContent() {
     setDeleteModal({ isOpen: true, id });
   };
 
-  const getImageUrl = (foto: string | null | undefined): string => {
-    if (!foto) return "/assets/images/placeholder.jpg";
-    if (foto.startsWith("http")) return foto;
-    const baseUrl =
-      process.env.NEXT_PUBLIC_API_URL || "http://192.168.18.3:5000";
-    return `${baseUrl}${foto}`;
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-200px)]">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Memuat data UMKM...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const stats = {
-    total: umkm.length,
-    aktif: umkm.filter((u) => u.isAktif).length,
-    tidakAktif: umkm.filter((u) => !u.isAktif).length,
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -595,7 +571,7 @@ export default function UMKMPageContent() {
             <div>
               <p className="text-sm font-medium text-gray-600">Total UMKM</p>
               <p className="text-2xl font-bold text-gray-900 mt-1">
-                {stats.total}
+                {umkm.length}
               </p>
             </div>
             <div className="p-3 bg-blue-100 rounded-lg">
@@ -608,7 +584,7 @@ export default function UMKMPageContent() {
             <div>
               <p className="text-sm font-medium text-green-800">UMKM Aktif</p>
               <p className="text-2xl font-bold text-green-600 mt-1">
-                {stats.aktif}
+                {umkm.filter((u) => u.isAktif).length}
               </p>
             </div>
             <div className="p-3 bg-green-100 rounded-lg">
@@ -621,7 +597,7 @@ export default function UMKMPageContent() {
             <div>
               <p className="text-sm font-medium text-red-800">Tidak Aktif</p>
               <p className="text-2xl font-bold text-red-600 mt-1">
-                {stats.tidakAktif}
+                {umkm.filter((u) => !u.isAktif).length}
               </p>
             </div>
             <div className="p-3 bg-red-100 rounded-lg">
@@ -684,9 +660,7 @@ export default function UMKMPageContent() {
                   src={getImageUrl(item.foto)}
                   alt={item.nama}
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-                  onError={(e) => {
-                    e.currentTarget.src = "/assets/images/placeholder.jpg";
-                  }}
+                  onError={handleImageError} // ✅ Use imported handler
                 />
               </div>
               <div className="p-5">

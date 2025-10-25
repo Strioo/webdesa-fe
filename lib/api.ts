@@ -148,6 +148,29 @@ export const laporanApi = {
   getAll: () => apiClient.get('/laporan/getall'),
   getById: (id: string) => apiClient.get(`/laporan/get/${id}`),
   getByUserId: (userId: string) => apiClient.get(`/laporan/user/get/${userId}`),
+  // ✅ NEW: Validate laporan dengan AI sebelum submit
+  validate: async (formData: FormData) => {
+    const token = getAuthToken();
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/laporan/validate`, {
+        method: 'POST',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        body: formData,
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Validation failed');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Laporan validation error:', error);
+      throw error;
+    }
+  },
   create: async (formData: FormData) => {
     const token = getAuthToken();
     
@@ -191,8 +214,77 @@ export const wisataApi = {
   getAll: () => apiClient.get('/wisata/getall'),
   getById: (id: string) => apiClient.get(`/wisata/get/${id}`),
   getBySlug: (slug: string) => apiClient.get(`/wisata/slug/${slug}`),
-  create: (data: any) => apiClient.post('/wisata/create', data),
-  update: (id: string, data: any) => apiClient.put(`/wisata/update/${id}`, data),
+  
+  create: async (formData: FormData) => {
+    const token = getAuthToken();
+    
+    try {
+      const url = `${API_BASE_URL}/wisata/create`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new ApiError(
+          data.message || 'Failed to create wisata',
+          response.status,
+          data
+        );
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(
+        error instanceof Error ? error.message : 'Network error',
+        0
+      );
+    }
+  },
+
+  update: async (id: string, formData: FormData) => {
+    const token = getAuthToken();
+    
+    try {
+      const url = `${API_BASE_URL}/wisata/update/${id}`;
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new ApiError(
+          data.message || 'Failed to update wisata',
+          response.status,
+          data
+        );
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(
+        error instanceof Error ? error.message : 'Network error',
+        0
+      );
+    }
+  },
+
   delete: (id: string) => apiClient.delete(`/wisata/delete/${id}`),
 };
 
@@ -200,8 +292,81 @@ export const umkmApi = {
   getAll: () => apiClient.get('/umkm/getall'),
   getById: (id: string) => apiClient.get(`/umkm/get/${id}`),
   getBySlug: (slug: string) => apiClient.get(`/umkm/slug/${slug}`),
-  create: (data: any) => apiClient.post('/umkm/create', data),
-  update: (id: string, data: any) => apiClient.put(`/umkm/update/${id}`, data),
+  
+  // ✅ FIXED: Use FormData for create
+  create: async (formData: FormData) => {
+    const token = getAuthToken();
+    
+    try {
+      const url = `${API_BASE_URL}/umkm/create`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+          // Don't set Content-Type - let browser set it with boundary
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new ApiError(
+          data.message || 'Failed to create UMKM',
+          response.status,
+          data
+        );
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(
+        error instanceof Error ? error.message : 'Network error',
+        0
+      );
+    }
+  },
+
+  // ✅ FIXED: Use FormData for update
+  update: async (id: string, formData: FormData) => {
+    const token = getAuthToken();
+    
+    try {
+      const url = `${API_BASE_URL}/umkm/update/${id}`;
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+          // Don't set Content-Type - let browser set it with boundary
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new ApiError(
+          data.message || 'Failed to update UMKM',
+          response.status,
+          data
+        );
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(
+        error instanceof Error ? error.message : 'Network error',
+        0
+      );
+    }
+  },
+
   delete: (id: string) => apiClient.delete(`/umkm/delete/${id}`),
 };
 
@@ -224,8 +389,77 @@ export const userApi = {
 export const programApi = {
   getAll: () => apiClient.get('/program/getall'),
   getById: (id: string) => apiClient.get(`/program/get/${id}`),
-  create: (data: any) => apiClient.post('/program/create', data),
-  update: (id: string, data: any) => apiClient.put(`/program/update/${id}`, data),
+  
+  create: async (formData: FormData) => {
+    const token = getAuthToken();
+    
+    try {
+      const url = `${API_BASE_URL}/program/create`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new ApiError(
+          data.message || 'Failed to create program',
+          response.status,
+          data
+        );
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(
+        error instanceof Error ? error.message : 'Network error',
+        0
+      );
+    }
+  },
+
+  update: async (id: string, formData: FormData) => {
+    const token = getAuthToken();
+    
+    try {
+      const url = `${API_BASE_URL}/program/update/${id}`;
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new ApiError(
+          data.message || 'Failed to update program',
+          response.status,
+          data
+        );
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(
+        error instanceof Error ? error.message : 'Network error',
+        0
+      );
+    }
+  },
+
   delete: (id: string) => apiClient.delete(`/program/delete/${id}`),
 };
 

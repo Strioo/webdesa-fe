@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Search, Grid3x3, List, AlertCircle, Building2, TrendingUp } from "lucide-react";
 import { programApi } from "@/lib/api";
+import { getImageUrl, handleImageError } from "@/lib/utils";
 import ProgramGridView from "@/components/program/ProgramGridView";
 import ProgramTableView from "@/components/program/ProgramTableView";
 
@@ -220,11 +221,11 @@ export default function ProgramPageContent() {
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 shadow-sm text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-purple-100">Rata-rata Progress</p>
+              <p className="text-sm text-purple-100 opacity-90">Rata-rata Progress</p>
               <p className="text-2xl font-bold mt-1">{getAverageProgress()}%</p>
             </div>
-            <div className="p-3 bg-white bg-opacity-20 rounded-lg">
-              <TrendingUp className="w-6 h-6" />
+            <div className="p-3 bg-purple-400 rounded-lg">
+              <TrendingUp className="w-6 h-6 text-white" />
             </div>
           </div>
         </div>

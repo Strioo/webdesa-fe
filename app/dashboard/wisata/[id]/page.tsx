@@ -18,6 +18,7 @@ import {
   Calendar,
   Users
 } from "lucide-react";
+import { getImageUrl, handleImageError } from "@/lib/utils";
 
 interface Wisata {
   id: string;
@@ -116,12 +117,10 @@ export default function DetailWisataPage() {
                 Foto Wisata
               </h3>
               <img
-                src={wisata.foto}
+                src={getImageUrl(wisata.foto)}
                 alt={wisata.nama}
                 className="w-full h-64 object-cover rounded-lg border-2 border-gray-300"
-                onError={(e) => {
-                  e.currentTarget.src = '/assets/images/placeholder.jpg';
-                }}
+                onError={handleImageError}
               />
             </div>
           )}
