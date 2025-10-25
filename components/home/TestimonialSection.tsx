@@ -168,7 +168,7 @@ const TestimonialSection = () => {
     <section ref={sectionRef} className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-[1400px] mx-auto w-full">
         {/* Header */}
-        <div className={`flex flex-col lg:flex-row justify-between items-start gap-6 sm:gap-8 mb-12 sm:mb-16 animate-on-scroll ${isVisible ? 'animate-fade-in-up' : ''}`}>
+        <div className={`flex flex-col lg:flex-row justify-between items-center lg:items-start text-center lg:text-left gap-6 sm:gap-8 mb-12 sm:mb-16 animate-on-scroll ${isVisible ? 'animate-fade-in-up' : ''}`}>
           <div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-gray-900 leading-tight">
               Cerita Nyata dari<br />Pengunjung Baturaden
@@ -316,7 +316,7 @@ const TestimonialSection = () => {
                   aria-label="Previous testimonial"
                   aria-controls="testimonial-carousel"
                 >
-                  <Image src="/assets/icons/arrowright.png" alt="" width={12} height={12} className="w-5 rotate-180" />
+                  <Image src="/assets/icons/arrow.svg" alt="" width={12} height={12} className="w-3 rotate-225" />
                 </motion.button>
 
                 <motion.button
@@ -328,7 +328,7 @@ const TestimonialSection = () => {
                   aria-label="Next testimonial"
                   aria-controls="testimonial-carousel"
                 >
-                  <Image src="/assets/icons/arrowright.png" alt="" width={12} height={12} className="w-5" />
+                  <Image src="/assets/icons/arrow.svg" alt="" width={12} height={12} className="w-3 rotate-45" />
                 </motion.button>
               </div>
             </div>
@@ -378,7 +378,7 @@ const TestimonialSection = () => {
                 className="w-10 h-10 rounded-full bg-transparent border hover:bg-gray-100 flex items-center justify-center transition-all duration-300 disabled:opacity-50 cursor-pointer"
                 aria-label="Previous testimonial"
               >
-                <Image src="/assets/icons/arrowright.png" alt="Arrow" width={12} height={12} className="w-5 rotate-180" />
+                <Image src="/assets/icons/arrow.svg" alt="" width={12} height={12} className="w-3 rotate-225" />
               </button>
 
               <button
@@ -387,7 +387,7 @@ const TestimonialSection = () => {
                 className="w-10 h-10 rounded-full bg-transparent border hover:bg-gray-100 flex items-center justify-center transition-all duration-300 disabled:opacity-50 cursor-pointer"
                 aria-label="Next testimonial"
               >
-                <Image src="/assets/icons/arrowright.png" alt="Arrow" width={12} height={12} className="w-5" />
+                <Image src="/assets/icons/arrow.svg" alt="Arrow" width={12} height={12} className="w-3 rotate-45" />
               </button>
             </div>
           </div>

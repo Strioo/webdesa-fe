@@ -39,7 +39,7 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
     >
       {/* Header Section */}
       <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 justify-between">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 justify-between items-center lg:items-start text-center lg:text-left">
           {/* Left - Title */}
           <div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">

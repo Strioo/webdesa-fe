@@ -142,7 +142,7 @@ const StatistikDesa = () => {
             <section id="statistik-section" className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
                 <div className="max-w-[1400px] mx-auto w-full">
                     {/* Header Section */}
-                    <div className={`flex flex-col lg:flex-row justify-between items-start gap-6 sm:gap-8 mb-8 sm:mb-12 animate-on-scroll ${isVisible ? 'animate-fade-in-up' : ''}`}>
+                    <div className={`flex flex-col lg:flex-row justify-between items-center lg:items-start text-center lg:text-left gap-6 sm:gap-8 mb-8 sm:mb-12 animate-on-scroll ${isVisible ? 'animate-fade-in-up' : ''}`}>
                         <div>
                             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold mb-2">
                                 Statistik Desa<br />Baturaden

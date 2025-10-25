@@ -31,7 +31,7 @@ export default function DestinationsIntro() {
       <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="max-w-[1400px] mx-auto">
           {/* Header Section - Layout Kiri-Kanan seperti Statistik */}
-          <div className={`flex flex-col lg:flex-row justify-between items-start gap-6 sm:gap-8 mb-8 sm:mb-12 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div className={`flex flex-col lg:flex-row justify-between items-center lg:items-start text-center lg:text-left gap-6 sm:gap-8 mb-8 sm:mb-12 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <div>
               <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold mb-2">
                 Destinasi Wisata

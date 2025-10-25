@@ -247,12 +247,12 @@ const HeroSection = () => {
                     <span ref={growthCountUp.ref} className="bg-[#5B903A] flex gap-1 items-center text-white text-xs px-3 py-1 rounded-full">
                       {growthCountUp.count}
                       <Image
-                        src="/assets/icons/arrowright.png"
+                        src="/assets/icons/arrow.svg"
                         alt="Growth"
                         width={16}
                         height={16}
-                        className="w-4 h-4 invert"
-                        style={{ transform: 'rotate(-90deg)' }}
+                        className="w-[10px] h-[10px] invert"
+                        style={{ transform: 'rotate(-45deg)' }}
                         priority
                       />
                     </span>

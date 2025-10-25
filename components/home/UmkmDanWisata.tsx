@@ -107,7 +107,7 @@ const UmkmDanWisata = () => {
         {/* Section Header */}
         <div 
           ref={headerRef}
-          className={`flex flex-col lg:flex-row justify-between items-start gap-6 sm:gap-8 mb-12 sm:mb-16 animate-on-scroll ${
+          className={`flex flex-col lg:flex-row justify-between items-center lg:items-start text-center lg:text-left gap-6 sm:gap-8 mb-12 sm:mb-16 animate-on-scroll ${
             headerVisible ? 'animate-fade-in-up' : ''
           }`}
         >
@@ -265,11 +265,8 @@ const UmkmDanWisata = () => {
           {/* Wisata Content - Left (Lebih sempit) */}
           <div className="order-2 lg:order-1 lg:col-span-5 bg-[#f5f5f5] rounded-3xl p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between h-[400px] sm:h-[450px] lg:h-[500px]">
             <div className="relative z-10">
-              <h3 className="text-2xl sm:text-3xl font-semibold text-gray-900 leading-snug mb-4">
-                Nikmati keindahan alam, kesejukan udara pegunungan, dan keramahan warga.
-              </h3>
-              <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
-                Dari air terjun menawan, pemandian air panas, hingga panorama hijau yang memanjakan, Baturaden selalu punya cerita indah untuk setiap pengunjung.
+              <p className="text-lg sm:text-xl lg:text-[28px] font-medium text-gray-900 leading-snug mb-4">
+                Nikmati keindahan alam, kesejukan udara pegunungan, dan keramahan warga. Dari air terjun menawan, pemandian air panas, hingga panorama hijau yang menenangkan, Baturaden selalu punya cerita indah untuk setiap pengunjung.
               </p>
             </div>
 
