@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { laporanApi } from "@/lib/api";
+import { getImageUrl, handleImageError } from "@/lib/utils";
 import {
   ArrowLeft,
   CheckCircle,
@@ -104,7 +105,6 @@ export default function DetailLaporanPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   
-  // Form states
   const [newStatus, setNewStatus] = useState("");
   const [tanggapan, setTanggapan] = useState("");
 
@@ -128,7 +128,6 @@ export default function DetailLaporanPage() {
         throw new Error(response.message || "Gagal memuat data laporan");
       }
     } catch (error: any) {
-      console.error("Error fetching laporan:", error);
       toast.error(error.message || "Gagal memuat data laporan");
       router.push("/dashboard/laporan");
     } finally {
@@ -156,7 +155,6 @@ export default function DetailLaporanPage() {
         throw new Error(response.message || "Gagal memperbarui status");
       }
     } catch (error: any) {
-      console.error("Error updating status:", error);
       toast.error(error.message || "Gagal memperbarui status laporan");
     } finally {
       setSubmitting(false);
@@ -194,7 +192,6 @@ export default function DetailLaporanPage() {
 
   return (
     <div className="space-y-6 pb-8">
-      {/* Header with Back Button */}
       <div className="flex items-center gap-4">
         <button
           onClick={() => router.push("/dashboard/laporan")}
@@ -209,9 +206,7 @@ export default function DetailLaporanPage() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Left Column - Laporan Info */}
         <div className="xl:col-span-2 space-y-6">
-          {/* Header Card */}
           <div className={`${currentConfig.bgColor} ${currentConfig.borderColor} border-2 rounded-xl p-6 shadow-sm`}>
             <div className="flex items-start justify-between mb-4">
               <h2 className="text-2xl font-bold text-gray-900 pr-4">{laporan.judul}</h2>
@@ -253,7 +248,6 @@ export default function DetailLaporanPage() {
             <KategoriBadge kategori={laporan.kategori} />
           </div>
 
-          {/* Deskripsi */}
           <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm">
             <h3 className="font-semibold text-gray-900 mb-4 flex items-center text-lg">
               <FileText className="w-5 h-5 mr-2 text-gray-600" />
@@ -262,7 +256,6 @@ export default function DetailLaporanPage() {
             <p className="text-gray-700 leading-relaxed whitespace-pre-line">{laporan.deskripsi}</p>
           </div>
 
-          {/* Foto */}
           {laporan.foto && (
             <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm">
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center text-lg">
@@ -271,18 +264,15 @@ export default function DetailLaporanPage() {
               </h3>
               <div className="relative group">
                 <img
-                  src={laporan.foto.startsWith('http') ? laporan.foto : `http://localhost:5000${laporan.foto}`}
+                  src={getImageUrl(laporan.foto)}
                   alt="Foto laporan"
                   className="w-full h-96 object-cover rounded-lg border-2 border-gray-300 shadow-sm transition-transform group-hover:scale-[1.02]"
-                  onError={(e) => {
-                    e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f3f4f6" width="100" height="100"/%3E%3Ctext fill="%239ca3af" x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14"%3EGambar tidak tersedia%3C/text%3E%3C/svg%3E';
-                  }}
+                  onError={handleImageError}
                 />
               </div>
             </div>
           )}
 
-          {/* Tanggapan Sebelumnya */}
           {laporan.tanggapan && (
             <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 shadow-sm">
               <h3 className="font-semibold text-blue-900 mb-4 flex items-center text-lg">
@@ -305,7 +295,6 @@ export default function DetailLaporanPage() {
           )}
         </div>
 
-        {/* Right Column - Update Form (Sticky) */}
         <div className="xl:col-span-1">
           <div className="sticky top-6">
             <form onSubmit={handleSubmit} className="bg-white border-2 border-gray-200 rounded-xl p-6 shadow-sm space-y-6">
@@ -379,7 +368,6 @@ export default function DetailLaporanPage() {
                 </button>
               </div>
 
-              {/* Info Box */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <p className="text-xs text-blue-800 leading-relaxed">
                   <strong>💡 Tips:</strong> Pastikan status yang dipilih sesuai dengan progress penanganan laporan. 
