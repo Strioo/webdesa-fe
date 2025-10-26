@@ -26,20 +26,34 @@ export const getImageUrl = (imagePath: string | null | undefined): string => {
   }
 
   // Build full backend URL
-  // Use production URL if available, otherwise fallback to local
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://webdesa.dikadev.id/api';
-  const BASE_URL = API_BASE_URL.replace('/api', ''); // Remove /api suffix
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  
+  // For production, use the correct backend URL
+  const BASE_URL = process.env.NODE_ENV === 'production' 
+    ? 'https://webdesa.dikadev.id' 
+    : API_BASE_URL;
   
   // Remove leading slash if exists
   const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
   
-  return `${BASE_URL}/${cleanPath}`;
+  const fullUrl = `${BASE_URL}/${cleanPath}`;
+  
+  console.log('🖼️ Image URL:', {
+    imagePath,
+    cleanPath,
+    BASE_URL,
+    fullUrl,
+    NODE_ENV: process.env.NODE_ENV
+  });
+  
+  return fullUrl;
 };
 
 /**
  * Handle image error by setting placeholder
  */
 export const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  console.log('❌ Image error:', e.currentTarget.src);
   e.currentTarget.src = '/assets/images/placeholder.jpg';
   e.currentTarget.onerror = null; // Prevent infinite loop
 };
