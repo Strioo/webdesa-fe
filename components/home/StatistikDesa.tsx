@@ -465,17 +465,20 @@ const StatistikDesa = () => {
 
                                 {/* Content Section (di bawah) - mepet ke bawah */}
                                 <div className="relative z-10 mt-auto">
-                                    <div className="flex justify-between items-start gap-6">
+                                    {/* Mobile: Vertical Stack | Desktop: Horizontal Flex */}
+                                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 lg:gap-6">
                                         <div className="flex-1">
-                                            {/* ✅ Changed from <h2> with ref to <div> containing <span> with ref */}
-                                            <div className="text-4xl font-bold text-gray-900 mb-0 leading-tight">
+                                            {/* Number - Larger on mobile */}
+                                            <div className="text-5xl sm:text-6xl lg:text-4xl font-bold text-gray-900 mb-2 leading-tight">
                                                 <span ref={touristCountUp.ref} className="inline">{touristCountUp.count}</span>+
                                             </div>
-                                            <p className="text-2xl font-semibold text-gray-900">
+                                            {/* Label */}
+                                            <p className="text-xl sm:text-2xl lg:text-2xl font-semibold text-gray-900 mb-3 lg:mb-0">
                                                 Wisatawan/Tahun
                                             </p>
                                         </div>
-                                        <p className="text-sm text-gray-600 leading-relaxed max-w-[180px]">
+                                        {/* Description - Full width on mobile, constrained on desktop */}
+                                        <p className="text-sm lg:text-sm text-gray-600 leading-relaxed lg:max-w-[180px]">
                                             Baturaden selalu jadi tujuan favorit untuk liburan dan rekreasi keluarga.
                                         </p>
                                     </div>

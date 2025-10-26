@@ -17,8 +17,6 @@ import {
   Menu,
   X,
   Settings,
-  Bell,
-  Search,
   Home,
   User as UserIcon,
   ChevronDown
@@ -65,86 +63,17 @@ const sidebarItems = [
   }
 ];
 
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  time: string;
-  read: boolean;
-  type: 'info' | 'success' | 'warning' | 'error';
-}
-
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      title: 'Laporan Baru',
-      message: 'Laporan jalan rusak di RT 01',
-      time: '5 menit yang lalu',
-      read: false,
-      type: 'info'
-    },
-    {
-      id: '2',
-      title: 'Pembayaran Berhasil',
-      message: 'Transaksi tiket Air Terjun Pelangi',
-      time: '15 menit yang lalu',
-      read: false,
-      type: 'success'
-    },
-    {
-      id: '3',
-      title: 'UMKM Baru',
-      message: 'Keripik Pisang Bu Sari terdaftar',
-      time: '1 jam yang lalu',
-      read: true,
-      type: 'info'
-    }
-  ]);
 
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout, loading } = useAuth();
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      console.log('Searching for:', searchQuery);
-    }
-  };
-
-  const unreadCount = notifications.filter(n => !n.read).length;
-
-  const markAsRead = (id: string) => {
-    setNotifications(prev =>
-      prev.map(notif =>
-        notif.id === id ? { ...notif, read: true } : notif
-      )
-    );
-  };
-
-  const markAllAsRead = () => {
-    setNotifications(prev =>
-      prev.map(notif => ({ ...notif, read: true }))
-    );
-  };
-
-  const getNotificationColor = (type: string) => {
-    switch (type) {
-      case 'success': return 'bg-green-100 text-green-800';
-      case 'warning': return 'bg-yellow-100 text-yellow-800';
-      case 'error': return 'bg-red-100 text-red-800';
-      default: return 'bg-blue-100 text-blue-800';
-    }
-  };
 
   if (loading) {
     return (
@@ -266,139 +195,44 @@ export default function DashboardLayout({
       <div className="lg:ml-64">
         <header className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-30">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4 flex-1">
+            <div className="flex items-center space-x-4">
               <button
                 onClick={() => setSidebarOpen(true)}
                 className="lg:hidden text-gray-500 hover:text-gray-700"
               >
                 <Menu className="w-6 h-6" />
               </button>
-              <form onSubmit={handleSearch} className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Cari laporan, wisata, UMKM..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none w-full"
-                />
-              </form>
+              <h1 className="text-xl font-bold text-gray-800">Dashboard Admin</h1>
             </div>
             <div className="flex items-center space-x-2">
               <div className="relative">
                 <button 
-                  onClick={() => {
-                    setShowNotifications(!showNotifications);
-                    setShowSettings(false);
-                  }}
-                  className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <Bell className="w-5 h-5" />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                      {unreadCount}
-                    </span>
-                  )}
-                </button>
-
-                {showNotifications && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                    <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-                      <h3 className="font-semibold text-gray-900">Notifikasi</h3>
-                      {unreadCount > 0 && (
-                        <button
-                          onClick={markAllAsRead}
-                          className="text-xs text-blue-600 hover:text-blue-700"
-                        >
-                          Tandai semua dibaca
-                        </button>
-                      )}
-                    </div>
-                    <div className="max-h-96 overflow-y-auto">
-                      {notifications.length > 0 ? (
-                        notifications.map((notif) => (
-                          <div
-                            key={notif.id}
-                            onClick={() => markAsRead(notif.id)}
-                            className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
-                              !notif.read ? 'bg-blue-50' : ''
-                            }`}
-                          >
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-2">
-                                  <p className="text-sm font-medium text-gray-900">{notif.title}</p>
-                                  <span className={`text-xs px-2 py-0.5 rounded-full ${getNotificationColor(notif.type)}`}>
-                                    {notif.type}
-                                  </span>
-                                </div>
-                                <p className="text-xs text-gray-600 mt-1">{notif.message}</p>
-                                <p className="text-xs text-gray-400 mt-1">{notif.time}</p>
-                              </div>
-                              {!notif.read && (
-                                <div className="w-2 h-2 bg-blue-600 rounded-full mt-1"></div>
-                              )}
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="p-8 text-center text-gray-500">
-                          <Bell className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                          <p className="text-sm">Tidak ada notifikasi</p>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-3 border-t border-gray-200 text-center">
-                      <button className="text-sm text-blue-600 hover:text-blue-700">
-                        Lihat semua notifikasi
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="relative">
-                <button 
-                  onClick={() => {
-                    setShowSettings(!showSettings);
-                    setShowNotifications(false);
-                  }}
-                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  onClick={() => setShowSettings(!showSettings)}
+                  className="flex items-center space-x-2 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 >
                   <Settings className="w-5 h-5" />
                 </button>
 
                 {showSettings && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                    <div className="p-4 border-b border-gray-200">
-                      <h3 className="font-semibold text-gray-900">Pengaturan</h3>
-                    </div>
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                     <div className="p-2">
                       <Link
-                        href="/dashboard/profile"
-                        className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 text-gray-700"
+                        href="/home"
+                        className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors"
                         onClick={() => setShowSettings(false)}
                       >
-                        <UserIcon className="w-4 h-4" />
-                        <span className="text-sm">Profil Saya</span>
-                      </Link>
-                      <Link
-                        href="/dashboard/settings"
-                        className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 text-gray-700"
-                        onClick={() => setShowSettings(false)}
-                      >
-                        <Settings className="w-4 h-4" />
-                        <span className="text-sm">Pengaturan Akun</span>
+                        <Home className="w-4 h-4" />
+                        <span className="text-sm font-medium">Kembali ke Home</span>
                       </Link>
                       <button
                         onClick={() => {
                           setShowSettings(false);
                           logout();
                         }}
-                        className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-red-50 text-red-600 w-full"
+                        className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-red-50 text-red-600 w-full transition-colors"
                       >
                         <LogOut className="w-4 h-4" />
-                        <span className="text-sm">Keluar</span>
+                        <span className="text-sm font-medium">Logout</span>
                       </button>
                     </div>
                   </div>

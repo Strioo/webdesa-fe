@@ -57,21 +57,23 @@ export default function LoginPage() {
       {/* ==================== LEFT SIDE: FORM CONTAINER ==================== */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-12 lg:px-16 xl:px-20 py-20 sm:py-24 bg-neutral-50 relative overflow-y-auto">
         {/* Logo & Branding - Floating Top Left */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-          className="fixed top-8 left-6 sm:left-12 lg:left-16 xl:left-20 flex items-center gap-3 z-50"
-        >
-          <Image
-            src="/assets/icons/logo.png"
-            alt="Logo Baturaden"
-            width={40}
-            height={40}
-            className="w-10 h-10 object-contain"
-          />
-          <span className="text-xl font-semibold text-[#5B903A]">Baturaden</span>
-        </motion.div>
+        <Link href="/home">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+            className="fixed top-8 left-6 sm:left-12 lg:left-16 xl:left-20 flex items-center gap-3 z-50 cursor-pointer group"
+          >
+            <Image
+              src="/assets/icons/logo.png"
+              alt="Logo Baturaden"
+              width={40}
+              height={40}
+              className="w-10 h-10 object-contain transition-transform duration-300 group-hover:scale-110"
+            />
+            <span className="text-xl font-semibold text-[#5B903A] transition-colors duration-300 group-hover:text-[#4a7530]">Baturaden</span>
+          </motion.div>
+        </Link>
 
         {/* Back Button - Floating Top Right (mobile/tablet), Just Left of Image (desktop) */}
         <motion.button

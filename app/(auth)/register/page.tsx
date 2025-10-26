@@ -102,8 +102,8 @@ export default function RegisterPage() {
         transition={{ duration: 0.4 }}
       >
         {/* Logo - Floating Top Left */}
-        <Link href="/" className="fixed top-8 left-6 sm:left-12 lg:left-16 xl:left-20 inline-flex items-center space-x-3 z-50 group">
-          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-neutral-200 group-hover:border-[#5B903A] transition-colors">
+        <Link href="/home" className="fixed top-8 left-6 sm:left-12 lg:left-16 xl:left-20 inline-flex items-center space-x-3 z-50 group cursor-pointer">
+          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-neutral-200 group-hover:border-[#5B903A] transition-all duration-300 group-hover:scale-110">
             <Image
               src="/assets/icons/logo.png"
               alt="Logo Baturaden"
@@ -112,7 +112,7 @@ export default function RegisterPage() {
               className="w-full h-full object-cover"
             />
           </div>
-          <span className="text-xl font-semibold text-[#5B903A]">Baturaden</span>
+          <span className="text-xl font-semibold text-[#5B903A] transition-colors duration-300 group-hover:text-[#4a7530]">Baturaden</span>
         </Link>
 
         {/* Back Button - Floating Top Right (mobile/tablet), Just Left of Image (desktop) */}

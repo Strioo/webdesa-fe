@@ -62,7 +62,7 @@ const DockNavbar = memo(function DockNavbar() {
       
       {/* Mobile Dock - Dark Theme with Safe Area */}
       <motion.nav
-        className="fixed bottom-0 left-0 right-0 z-[90] lg:hidden"
+        className="fixed bottom-0 left-0 right-0 z-[90] lg:hidden overflow-x-hidden"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -70,8 +70,8 @@ const DockNavbar = memo(function DockNavbar() {
         role="tablist"
         aria-label="Main navigation"
       >
-        <div className="mx-auto max-w-md px-4 pb-4">
-          <div className="backdrop-blur-md bg-neutral-900/55 ring-1 ring-white/15 rounded-2xl shadow-2xl">
+        <div className="w-full px-4 pb-4 flex justify-center">
+          <div className="w-full max-w-md backdrop-blur-md bg-neutral-900/55 ring-1 ring-white/15 rounded-2xl shadow-2xl">
             <div className="flex items-center justify-around px-2 py-3">
               {DOCK_ITEMS.map((item) => {
                 const isActive = pathname === item.href

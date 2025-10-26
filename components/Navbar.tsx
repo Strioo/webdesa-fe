@@ -131,10 +131,10 @@ const Navbar = memo(function Navbar({
   ]
 
   return (
-    <nav className="fixed inset-x-0 top-0 z-[100] overflow-hidden">
+    <nav className="fixed inset-x-0 top-0 z-[100]">
       <div className="w-full px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-2 sm:pb-0 max-w-[100vw]">
         <motion.div 
-          className="navbar max-w-[1400px] mx-auto w-full rounded-full px-4 md:px-6 flex items-center justify-between will-change-transform overflow-hidden"
+          className="navbar max-w-[1400px] mx-auto w-full rounded-full px-4 md:px-6 flex items-center justify-between will-change-transform"
           animate={{
             backgroundColor: isScrolled ? 'rgba(255, 255, 255, 0.85)' : 'rgba(255, 255, 255, 0.95)',
             boxShadow: isScrolled 
@@ -257,7 +257,7 @@ const Navbar = memo(function Navbar({
                   <motion.div
                     id="user-menu-dropdown"
                     ref={userMenuRef}
-                    className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl overflow-hidden z-50 border border-gray-100"
+                    className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl overflow-hidden z-[110] border border-gray-100"
                     initial={{ opacity: 0, y: -10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -386,7 +386,7 @@ const Navbar = memo(function Navbar({
                   <motion.div
                     id="user-menu-dropdown-mobile"
                     ref={userMenuRef}
-                    className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl overflow-hidden z-50 border border-gray-100"
+                    className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl overflow-hidden z-[110] border border-gray-100"
                     initial={{ opacity: 0, y: -10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
