@@ -234,6 +234,7 @@ export default function GalleryModal({
                       className="object-contain"
                       sizes="(max-width: 1024px) 100vw, 66vw"
                       priority
+                      unoptimized
                     />
                   </motion.div>
 
@@ -339,6 +340,7 @@ export default function GalleryModal({
                         fill
                         className="object-cover"
                         sizes="80px"
+                        unoptimized
                       />
                       {index === currentIndex && (
                         <div className="absolute inset-0 bg-[#5B903A]/20" />

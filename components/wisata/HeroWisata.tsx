@@ -74,14 +74,15 @@ export default function HeroWisata() {
       {/* Content Container */}
       <div className="relative z-10 h-full">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-full">
-          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-end h-full pb-10 sm:pb-16 lg:pb-20 gap-8 lg:gap-12">
+          {/* RESPONSIVE BREAKPOINT: 800px (min-[800px]) */}
+          <div className="flex flex-col min-[800px]:flex-row min-[800px]:justify-between min-[800px]:items-end h-full pb-10 sm:pb-16 lg:pb-20 gap-6 sm:gap-8 min-[800px]:gap-10 lg:gap-12">
 
             {/* Left Content */}
-            <div className="flex-1 flex flex-col justify-end pt-32 sm:pt-40 lg:pt-0">
+            <div className="flex-1 flex flex-col justify-end pt-32 sm:pt-40 min-[800px]:pt-0">
 
-              {/* Badge Glassmorph - Blur-to-Sharp Animation */}
+              {/* Badge Glassmorph - Center di <800px */}
               <motion.div
-                className="mb-6 flex justify-center sm:justify-start"
+                className="mb-6 flex justify-center min-[800px]:justify-start"
                 initial={{ opacity: 0, filter: 'blur(4px)' }}
                 animate={{ opacity: 1, filter: 'blur(0px)' }}
                 transition={{ 
@@ -102,9 +103,9 @@ export default function HeroWisata() {
                 </motion.span>
               </motion.div>
 
-              {/* Heading - Fade + Y-up 12px */}
+              {/* Heading - Center di <800px */}
               <motion.h1 
-                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-4 sm:mb-6 leading-tight text-center sm:text-left mx-auto sm:mx-0"
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-4 sm:mb-6 leading-tight text-center min-[800px]:text-left mx-auto min-[800px]:mx-0"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ 
@@ -118,9 +119,9 @@ export default function HeroWisata() {
                 Baturaden
               </motion.h1>
 
-              {/* Subtitle - Fade + Y-up 12px */}
+              {/* Subtitle - Center di <800px */}
               <motion.p 
-                className="text-[#A1A1A1] text-sm sm:text-base md:text-lg mb-6 sm:mb-8 max-w-2xl opacity-90 leading-relaxed text-center sm:text-left mx-auto sm:mx-0"
+                className="text-white/90 text-sm sm:text-base md:text-lg mb-6 sm:mb-8 max-w-2xl leading-relaxed text-center min-[800px]:text-left mx-auto min-[800px]:mx-0"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ 
@@ -134,7 +135,7 @@ export default function HeroWisata() {
                 pesan tiketmu dengan mudah.
               </motion.p>
 
-              {/* CTA Button - Transform-only (scale 1.03 hover, 0.98 tap) */}
+              {/* CTA Button - Center di <800px */}
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -143,7 +144,7 @@ export default function HeroWisata() {
                   duration: 0.35,
                   ease: [0.16, 1, 0.3, 1]
                 }}
-                className="flex justify-center sm:justify-start"
+                className="flex justify-center min-[800px]:justify-start"
               >
                 <motion.button
                   onClick={() => scrollTo('destinations')}
@@ -158,39 +159,40 @@ export default function HeroWisata() {
                   }}
                   transition={{
                     type: 'spring',
-                      stiffness: 400,
-                      damping: 25,
-                      duration: 0.15
+                    stiffness: 400,
+                    damping: 25,
+                    duration: 0.15
+                  }}
+                >
+                  <span className="text-sm sm:text-base font-medium">
+                    Jelajahi Sekarang
+                  </span>
+                  <motion.div
+                    className="flex items-center justify-center bg-[#5B903A] rounded-full w-12 h-12"
+                    whileHover={{
+                      rotate: 45,
+                      scale: 1.08,
+                    }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 300,
+                      damping: 20
                     }}
                   >
-                    <span className="text-sm sm:text-base font-medium">
-                      Jelajahi Sekarang
-                    </span>
-                    <motion.div
-                      className="flex items-center justify-center bg-[#5B903A] rounded-full w-12 h-12"
-                      whileHover={{
-                        rotate: 45,
-                        scale: 1.08,
-                      }}
-                      transition={{
-                        type: 'spring',
-                        stiffness: 300,
-                        damping: 20
-                      }}
-                    >
-                      <Image
-                        src="/assets/icons/arrow.svg"
-                        alt="Arrow"
-                        width={12}
-                        height={12}
-                        className="invert"
-                      />
-                    </motion.div>
-                  </motion.button>
+                    <Image
+                      src="/assets/icons/arrow.svg"
+                      alt="Arrow"
+                      width={12}
+                      height={12}
+                      className="invert"
+                    />
+                  </motion.div>
+                </motion.button>
               </motion.div>
             </div>
 
-            <div className="lg:w-[380px] xl:w-[420px] flex-shrink-0">
+            {/* Right: Search Glass Card - RESPONSIVE: stacked <800px, side-by-side ≥800px */}
+            <div className="w-full max-w-md mx-auto min-[800px]:w-[360px] min-[800px]:mx-0 lg:w-[380px] xl:w-[420px] flex-shrink-0">
               <SearchGlassCard onAIRecommend={handleAIRecommend} />
             </div>
 

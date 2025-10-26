@@ -128,6 +128,7 @@ export default function UmkmGallery({ images, name }: UmkmGalleryProps) {
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 25vw, 150px"
+                  unoptimized
                 />
 
                 {/* Active Indicator */}
@@ -259,6 +260,7 @@ export default function UmkmGallery({ images, name }: UmkmGalleryProps) {
                 fill
                 className="object-contain"
                 sizes="(max-width: 1280px) 100vw, 1280px"
+                unoptimized
               />
             </motion.div>
 

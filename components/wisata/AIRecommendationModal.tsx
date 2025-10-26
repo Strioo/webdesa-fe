@@ -69,9 +69,9 @@ export default function AIRecommendationModal({
           />
 
           {/* Modal */}
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pt-24 sm:pt-28 pointer-events-none">
             <motion.div
-              className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col pointer-events-auto"
+              className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[82vh] sm:max-h-[85vh] overflow-hidden flex flex-col pointer-events-auto"
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}

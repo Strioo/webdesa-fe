@@ -59,6 +59,7 @@ export default function GalleryPreview({
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 800px"
           priority
+          unoptimized
         />
 
         {/* Zoom Icon Overlay */}
@@ -124,6 +125,7 @@ export default function GalleryPreview({
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 25vw, 150px"
+                unoptimized
               />
 
               {/* Active Indicator */}

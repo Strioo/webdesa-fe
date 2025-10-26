@@ -34,19 +34,23 @@ export default function HeroLapor({ onOpenModal }: HeroLaporProps) {
       </div>
 
       {/* Content Container */}
-      <div className="relative z-10 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+      <div className="relative z-10 w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
         <motion.div
-          className="max-w-3xl mx-auto md:mx-0 text-center md:text-left"
+          className="max-w-3xl mx-auto lg:mx-0"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
           transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
         >
-          {/* Badge Glassmorph - Konsisten dengan hero lain */}
+          {/* Badge Glassmorph */}
           <motion.div
-            className="mb-6 flex justify-center md:justify-start"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
-            transition={{ duration: 0.8, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
+            className="mb-4 sm:mb-6 flex justify-center lg:justify-start"
+            initial={{ opacity: 0, filter: 'blur(4px)' }}
+            animate={{ opacity: isVisible ? 1 : 0, filter: isVisible ? 'blur(0px)' : 'blur(4px)' }}
+            transition={{ 
+              duration: 0.4, 
+              delay: 0.2,
+              ease: [0.16, 1, 0.3, 1]
+            }}
           >
             <motion.span
               className="inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full 
@@ -66,20 +70,24 @@ export default function HeroLapor({ onOpenModal }: HeroLaporProps) {
 
           {/* Heading */}
           <motion.h1
-            className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6 leading-tight"
+            className="font-bold text-white mb-4 sm:mb-6 leading-tight 
+                       text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[68px]
+                       text-center lg:text-left"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.8, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
           >
             Sampaikan Laporan Anda untuk Kemajuan Desa
           </motion.h1>
 
           {/* Description */}
           <motion.p
-            className="text-base sm:text-lg md:text-xl text-white/90 leading-relaxed max-w-2xl mx-auto md:mx-0 mb-8"
+            className="text-white/90 leading-relaxed max-w-2xl mx-auto lg:mx-0 mb-8
+                       text-sm sm:text-base md:text-lg lg:text-xl
+                       text-center lg:text-left"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
-            transition={{ duration: 0.8, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.8, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
           >
             Fitur Lapor Desa memudahkan warga menyampaikan laporan atau masukan terkait pelayanan
             dan pembangunan desa. Semua laporan akan ditangani secara transparan dan tepat waktu
@@ -88,10 +96,10 @@ export default function HeroLapor({ onOpenModal }: HeroLaporProps) {
 
           {/* CTA Button */}
           <motion.div
-            className="flex justify-center md:justify-start"
+            className="flex justify-center lg:justify-start"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
-            transition={{ duration: 0.8, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.8, delay: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
           >
             <motion.button
               onClick={() => scrollTo('info-section')}
