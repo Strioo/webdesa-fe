@@ -325,14 +325,17 @@ export default function DetailLaporanPage() {
                   <ImageIcon className="w-5 h-5 mr-2 text-gray-600" />
                   Dokumentasi
                 </h3>
-                <div className="relative group cursor-pointer" onClick={() => setIsLightboxOpen(true)}>
+                <div 
+                  className="relative group cursor-pointer overflow-hidden rounded-lg border-2 border-gray-300" 
+                  onClick={() => setIsLightboxOpen(true)}
+                >
                   <img
                     src={getImageUrl(laporan.foto)}
                     alt="Foto laporan"
-                    className="w-full h-96 object-cover rounded-lg border-2 border-gray-300 shadow-sm transition-all group-hover:scale-[1.02] group-hover:shadow-lg"
+                    className="w-full h-auto max-h-96 object-contain bg-gray-50 transition-transform group-hover:scale-105"
                     onError={handleImageError}
                   />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all rounded-lg flex items-center justify-center">
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full p-3 shadow-lg">
                       <ZoomIn className="w-6 h-6 text-gray-900" />
                     </div>
