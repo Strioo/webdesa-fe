@@ -4,20 +4,18 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { transactionApi } from "@/lib/api";
+import { getImageUrl, handleImageError } from "@/lib/utils";
 import {
   ArrowLeft,
   User,
   MapPin,
   Calendar,
   CreditCard,
-  Hash,
   Clock,
-  Phone,
   Ticket,
   Loader2,
   CheckCircle,
-  XCircle,
-  Building
+  XCircle
 } from "lucide-react";
 
 interface Transaction {
@@ -107,7 +105,6 @@ export default function DetailTransaksiPage() {
         throw new Error(response.message || "Gagal memuat data transaksi");
       }
     } catch (error: any) {
-      console.error("Error fetching transaction:", error);
       toast.error(error.message || "Gagal memuat data transaksi");
       router.push("/dashboard/transaksi");
     } finally {
@@ -201,12 +198,10 @@ export default function DetailTransaksiPage() {
             </h3>
             {transaction.wisata.foto && (
               <img
-                src={transaction.wisata.foto}
+                src={getImageUrl(transaction.wisata.foto)}
                 alt={transaction.wisata.nama}
                 className="w-full h-32 object-cover rounded-lg mb-4 border border-gray-300"
-                onError={(e) => {
-                  e.currentTarget.src = '/assets/images/placeholder.jpg';
-                }}
+                onError={handleImageError}
               />
             )}
             <h4 className="font-bold text-gray-900 mb-2">{transaction.wisata.nama}</h4>

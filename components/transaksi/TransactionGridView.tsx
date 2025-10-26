@@ -1,6 +1,7 @@
 "use client";
 
-import { Eye, Calendar, Ticket, CreditCard, User, MapPin, CheckCircle, Clock, XCircle } from "lucide-react";
+import { MapPin, Calendar, Ticket, Eye } from "lucide-react";
+import { getImageUrl, handleImageError } from "@/lib/utils";
 
 interface Transaction {
   id: string;
@@ -12,12 +13,7 @@ interface Transaction {
   namaLengkap: string;
   noTelp: string;
   status: "PENDING" | "PAID" | "CANCELLED";
-  buktiPembayaran?: string;
   orderId?: string;
-  transactionId?: string;
-  paymentType?: string;
-  vaNumber?: string;
-  bank?: string;
   createdAt: string;
   user: {
     id: string;
@@ -38,12 +34,29 @@ interface TransactionGridViewProps {
   onView: (transaction: Transaction) => void;
 }
 
+const StatusBadge = ({ status }: { status: string }) => {
+  const configs = {
+    PENDING: { color: "bg-yellow-100 text-yellow-800", label: "Pending" },
+    PAID: { color: "bg-green-100 text-green-800", label: "Lunas" },
+    CANCELLED: { color: "bg-red-100 text-red-800", label: "Dibatalkan" }
+  };
+  
+  const config = configs[status as keyof typeof configs] || configs.PENDING;
+  
+  return (
+    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${config.color}`}>
+      {config.label}
+    </span>
+  );
+};
+
 export default function TransactionGridView({ transactions, onView }: TransactionGridViewProps) {
   if (transactions.length === 0) {
     return (
-      <div className="text-center py-12">
-        <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <p className="text-gray-500">Tidak ada transaksi yang ditemukan</p>
+      <div className="text-center py-16">
+        <Ticket className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+        <p className="text-gray-500 text-lg font-medium">Tidak ada transaksi</p>
+        <p className="text-gray-400 text-sm mt-2">Transaksi yang sesuai filter akan muncul di sini</p>
       </div>
     );
   }
@@ -53,68 +66,39 @@ export default function TransactionGridView({ transactions, onView }: Transactio
       {transactions.map((transaction) => (
         <div
           key={transaction.id}
-          className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group"
+          className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all hover:border-blue-300 group"
         >
-          {/* Header with Wisata Image */}
-          {transaction.wisata.foto ? (
-            <div className="h-32 bg-gray-200 overflow-hidden relative">
+          <div className="relative h-48 bg-gray-200">
+            {transaction.wisata.foto ? (
               <img
-                src={transaction.wisata.foto}
+                src={getImageUrl(transaction.wisata.foto)}
                 alt={transaction.wisata.nama}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                onError={(e) => {
-                  e.currentTarget.src = '/assets/images/placeholder.jpg';
-                }}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                onError={handleImageError}
               />
-              <div className="absolute top-3 right-3">
-                <span className={`px-3 py-1 rounded-full text-xs font-medium shadow-lg ${
-                  transaction.status === "PAID"
-                    ? "bg-green-500 text-white"
-                    : transaction.status === "PENDING"
-                    ? "bg-yellow-500 text-white"
-                    : "bg-red-500 text-white"
-                }`}>
-                  {transaction.status === "PAID" ? "Lunas" : transaction.status === "PENDING" ? "Pending" : "Batal"}
-                </span>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                <MapPin className="w-16 h-16 text-gray-400" />
               </div>
+            )}
+            <div className="absolute top-3 right-3">
+              <StatusBadge status={transaction.status} />
             </div>
-          ) : (
-            <div className="h-32 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center relative">
-              <MapPin className="w-16 h-16 text-blue-300" />
-              <div className="absolute top-3 right-3">
-                <span className={`px-3 py-1 rounded-full text-xs font-medium shadow-lg ${
-                  transaction.status === "PAID"
-                    ? "bg-green-500 text-white"
-                    : transaction.status === "PENDING"
-                    ? "bg-yellow-500 text-white"
-                    : "bg-red-500 text-white"
-                }`}>
-                  {transaction.status === "PAID" ? "Lunas" : transaction.status === "PENDING" ? "Pending" : "Batal"}
-                </span>
-              </div>
-            </div>
-          )}
-          
+          </div>
+
           <div className="p-5">
-            {/* Wisata Name */}
-            <h3 className="text-lg font-semibold text-gray-900 mb-2 truncate">
+            <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-1">
               {transaction.wisata.nama}
             </h3>
             
-            {/* Order ID */}
-            <p className="text-xs text-gray-500 mb-3 truncate">
-              Order: {transaction.orderId}
-            </p>
-            
-            {/* Info Grid */}
-            <div className="space-y-2 text-sm text-gray-600 mb-4">
-              <div className="flex items-center">
-                <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-400" />
-                <span className="truncate">{transaction.namaLengkap}</span>
+            <div className="space-y-2 mb-4">
+              <div className="flex items-center text-sm text-gray-600">
+                <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+                <span className="line-clamp-1">{transaction.wisata.lokasi}</span>
               </div>
               
-              <div className="flex items-center">
-                <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-gray-400" />
+              <div className="flex items-center text-sm text-gray-600">
+                <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
                 <span>
                   {new Date(transaction.tanggalKunjungan).toLocaleDateString('id-ID', {
                     day: 'numeric',
@@ -123,40 +107,28 @@ export default function TransactionGridView({ transactions, onView }: Transactio
                   })}
                 </span>
               </div>
-              
-              <div className="flex items-center">
-                <Ticket className="w-4 h-4 mr-2 flex-shrink-0 text-gray-400" />
-                <span>{transaction.jumlahTiket} tiket</span>
-              </div>
 
-              <div className="flex items-center">
-                <CreditCard className="w-4 h-4 mr-2 flex-shrink-0 text-green-600" />
-                <span className="font-semibold text-green-600">
-                  Rp {transaction.totalHarga.toLocaleString('id-ID')}
-                </span>
+              <div className="flex items-center text-sm text-gray-600">
+                <Ticket className="w-4 h-4 mr-2 flex-shrink-0" />
+                <span>{transaction.jumlahTiket} Tiket</span>
               </div>
-
-              {transaction.paymentType && (
-                <div className="flex items-center">
-                  <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
-                    {transaction.paymentType.replace('_', ' ').toUpperCase()}
-                  </span>
-                </div>
-              )}
             </div>
-            
-            {/* Action Footer */}
-            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+
+            <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+              <div>
+                <p className="text-xs text-gray-500">Total</p>
+                <p className="text-lg font-bold text-green-600">
+                  Rp {transaction.totalHarga.toLocaleString('id-ID')}
+                </p>
+              </div>
+              
               <button
                 onClick={() => onView(transaction)}
-                className="flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center"
               >
-                <Eye className="w-4 h-4 mr-1" />
-                Lihat Detail
+                <Eye className="w-4 h-4 mr-1.5" />
+                Detail
               </button>
-              <span className="text-xs text-gray-400">
-                {new Date(transaction.createdAt).toLocaleDateString('id-ID')}
-              </span>
             </div>
           </div>
         </div>

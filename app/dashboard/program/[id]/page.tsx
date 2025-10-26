@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { programApi } from "@/lib/api";
+import { getImageUrl, handleImageError } from "@/lib/utils";
 import {
   ArrowLeft,
   Calendar,
@@ -122,7 +123,6 @@ export default function DetailProgramPage() {
         throw new Error(response.message || "Gagal memuat data program");
       }
     } catch (error: any) {
-      console.error("Error fetching program:", error);
       toast.error(error.message || "Gagal memuat data program");
       router.push("/dashboard/program");
     } finally {
@@ -177,12 +177,10 @@ export default function DetailProgramPage() {
                 Foto Program
               </h3>
               <img
-                src={program.foto}
+                src={getImageUrl(program.foto)}
                 alt={program.nama}
                 className="w-full h-64 object-cover rounded-lg border-2 border-gray-300"
-                onError={(e) => {
-                  e.currentTarget.src = '/assets/images/placeholder.jpg';
-                }}
+                onError={handleImageError}
               />
             </div>
           )}
