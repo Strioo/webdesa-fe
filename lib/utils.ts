@@ -28,12 +28,13 @@ export const getImageUrl = (imagePath: string | null | undefined): string => {
   // Build full backend URL
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
   
-  // For production, use the correct backend URL
+  // For production, backend serves static files at /api/uploads/
+  // For development, directly at /uploads/
   const BASE_URL = process.env.NODE_ENV === 'production' 
-    ? 'https://webdesa.dikadev.id' 
+    ? 'https://webdesa.dikadev.id/api' 
     : API_BASE_URL;
   
-  // Remove leading slash if exists
+  // Remove leading slash if exists to avoid double slash
   const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
   
   const fullUrl = `${BASE_URL}/${cleanPath}`;
