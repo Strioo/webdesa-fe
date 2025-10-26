@@ -37,24 +37,13 @@ export const getImageUrl = (imagePath: string | null | undefined): string => {
   // Remove leading slash if exists to avoid double slash
   const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
   
-  const fullUrl = `${BASE_URL}/${cleanPath}`;
-  
-  console.log('🖼️ Image URL:', {
-    imagePath,
-    cleanPath,
-    BASE_URL,
-    fullUrl,
-    NODE_ENV: process.env.NODE_ENV
-  });
-  
-  return fullUrl;
+  return `${BASE_URL}/${cleanPath}`;
 };
 
 /**
  * Handle image error by setting placeholder
  */
 export const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-  console.log('❌ Image error:', e.currentTarget.src);
   e.currentTarget.src = '/assets/images/placeholder.jpg';
   e.currentTarget.onerror = null; // Prevent infinite loop
 };

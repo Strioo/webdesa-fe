@@ -31,6 +31,7 @@ interface Wisata {
   jamTutup?: string;
   kontak?: string;
   foto?: string;
+  gambar?: string[];
   rating?: number;
   isAktif: boolean;
   createdAt: string;
@@ -107,21 +108,44 @@ export default function DetailWisataPage() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Left Column - Image & Status */}
+        {/* Left Column - Image Gallery & Status */}
         <div className="xl:col-span-1 space-y-6">
-          {/* Image Card */}
-          {wisata.foto && (
+          {/* Image Gallery Card */}
+          {(wisata.foto || (wisata.gambar && wisata.gambar.length > 0)) && (
             <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm">
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center text-lg">
                 <ImageIcon className="w-5 h-5 mr-2 text-gray-600" />
                 Foto Wisata
               </h3>
-              <img
-                src={getImageUrl(wisata.foto)}
-                alt={wisata.nama}
-                className="w-full h-64 object-cover rounded-lg border-2 border-gray-300"
-                onError={handleImageError}
-              />
+              
+              {wisata.foto && (
+                <div className="mb-4">
+                  <img
+                    src={getImageUrl(wisata.foto)}
+                    alt={wisata.nama}
+                    className="w-full h-64 object-cover rounded-lg border-2 border-blue-300"
+                    onError={handleImageError}
+                  />
+                  <p className="text-xs text-blue-600 font-medium mt-2 text-center">Foto Utama</p>
+                </div>
+              )}
+              
+              {wisata.gambar && wisata.gambar.length > 0 && (
+                <div>
+                  <p className="text-sm text-gray-600 font-medium mb-2">Galeri Tambahan</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {wisata.gambar.map((img, index) => (
+                      <img
+                        key={index}
+                        src={getImageUrl(img)}
+                        alt={`${wisata.nama} ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg border-2 border-gray-300 hover:border-blue-400 transition-colors cursor-pointer"
+                        onError={handleImageError}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

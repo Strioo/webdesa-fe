@@ -23,8 +23,8 @@ import {
 export default function CreateWisataPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>("");
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [mapsUrl, setMapsUrl] = useState("");
   const [extractingCoords, setExtractingCoords] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
@@ -44,23 +44,48 @@ export default function CreateWisataPage() {
   });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+    const files = Array.from(e.target.files || []);
+    
+    if (files.length + imageFiles.length > 5) {
+      toast.error("Maksimal 5 gambar");
+      return;
+    }
+
+    const validFiles = files.filter(file => {
       if (file.size > 5 * 1024 * 1024) {
-        toast.error("Ukuran gambar maksimal 5MB");
-        return;
+        toast.error(`${file.name}: Ukuran maksimal 5MB`);
+        return false;
       }
       if (!file.type.startsWith("image/")) {
-        toast.error("File harus berupa gambar");
-        return;
+        toast.error(`${file.name}: File harus berupa gambar`);
+        return false;
       }
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      return true;
+    });
+
+    if (validFiles.length > 0) {
+      const newFiles = [...imageFiles, ...validFiles].slice(0, 5);
+      setImageFiles(newFiles);
+
+      const newPreviews = validFiles.map(file => {
+        return new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
+      });
+
+      Promise.all(newPreviews).then(previews => {
+        setImagePreviews([...imagePreviews, ...previews].slice(0, 5));
+      });
     }
+
+    e.target.value = "";
+  };
+
+  const removeImage = (index: number) => {
+    setImageFiles(imageFiles.filter((_, i) => i !== index));
+    setImagePreviews(imagePreviews.filter((_, i) => i !== index));
   };
 
   const handleExtractCoordinates = async () => {
@@ -145,9 +170,9 @@ export default function CreateWisataPage() {
       if (formData.longitude) submitData.append("longitude", formData.longitude);
       submitData.append("isAktif", String(formData.isAktif));
       
-      if (imageFile) {
-        submitData.append("foto", imageFile);
-      }
+      imageFiles.forEach((file) => {
+        submitData.append("foto", file);
+      });
 
       const response = await wisataApi.create(submitData);
 
@@ -158,7 +183,6 @@ export default function CreateWisataPage() {
         throw new Error(response.message || "Gagal menambahkan wisata");
       }
     } catch (error: any) {
-      console.error("Error creating wisata:", error);
       toast.error(error.message || "Gagal menambahkan wisata");
     } finally {
       setLoading(false);
@@ -183,42 +207,61 @@ export default function CreateWisataPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Left Column - Image Upload */}
         <div className="xl:col-span-1">
           <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm sticky top-6">
             <h3 className="font-semibold text-gray-900 mb-4 flex items-center text-lg">
               <ImageIcon className="w-5 h-5 mr-2 text-gray-600" />
-              Foto Wisata
+              Foto Wisata (Max 5)
             </h3>
             
             <div className="space-y-4">
-              {imagePreview ? (
-                <div className="relative">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-full h-64 object-cover rounded-lg border-2 border-gray-300"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setImageFile(null);
-                      setImagePreview("");
-                    }}
-                    className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+              {imagePreviews.length > 0 ? (
+                <div className="grid grid-cols-2 gap-3">
+                  {imagePreviews.map((preview, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={preview}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg border-2 border-gray-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-1 right-1 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                      {index === 0 && (
+                        <span className="absolute bottom-1 left-1 px-2 py-0.5 bg-blue-500 text-white text-xs rounded">
+                          Utama
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                  {imagePreviews.length < 5 && (
+                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                      <ImageIcon className="w-8 h-8 text-gray-400 mb-1" />
+                      <span className="text-xs text-gray-500">Tambah</span>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        multiple
+                        onChange={handleImageChange}
+                      />
+                    </label>
+                  )}
                 </div>
               ) : (
                 <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                   <ImageIcon className="w-12 h-12 text-gray-400 mb-2" />
                   <span className="text-sm text-gray-500 mb-1">Klik untuk upload foto</span>
-                  <span className="text-xs text-gray-400">PNG, JPG maksimal 5MB</span>
+                  <span className="text-xs text-gray-400">PNG, JPG maksimal 5MB per file</span>
                   <input
                     type="file"
                     className="hidden"
                     accept="image/*"
+                    multiple
                     onChange={handleImageChange}
                   />
                 </label>

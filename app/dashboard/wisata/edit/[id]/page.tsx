@@ -47,8 +47,9 @@ export default function EditWisataPage() {
   const [wisata, setWisata] = useState<Wisata | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>("");
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
   const [mapsUrl, setMapsUrl] = useState("");
   const [extractingCoords, setExtractingCoords] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
@@ -79,7 +80,7 @@ export default function EditWisataPage() {
       const response = await wisataApi.getById(id);
       
       if (response.success && response.data) {
-        const data = response.data as Wisata;
+        const data = response.data as any;
         setWisata(data);
         setFormData({
           nama: data.nama,
@@ -94,14 +95,17 @@ export default function EditWisataPage() {
           longitude: data.longitude?.toString() || "",
           isAktif: data.isAktif
         });
-        if (data.foto) {
-          setImagePreview(data.foto);
+        
+        const images = [];
+        if (data.foto) images.push(data.foto);
+        if (data.gambar && Array.isArray(data.gambar)) {
+          images.push(...data.gambar);
         }
+        setExistingImages(images);
       } else {
         throw new Error(response.message || "Gagal memuat data wisata");
       }
     } catch (error: any) {
-      console.error("Error fetching wisata:", error);
       toast.error(error.message || "Gagal memuat data wisata");
       router.push("/dashboard/wisata");
     } finally {
@@ -110,23 +114,52 @@ export default function EditWisataPage() {
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+    const files = Array.from(e.target.files || []);
+    const totalImages = existingImages.length + imageFiles.length + files.length;
+    
+    if (totalImages > 5) {
+      toast.error("Maksimal 5 gambar total");
+      return;
+    }
+
+    const validFiles = files.filter(file => {
       if (file.size > 5 * 1024 * 1024) {
-        toast.error("Ukuran gambar maksimal 5MB");
-        return;
+        toast.error(`${file.name}: Ukuran maksimal 5MB`);
+        return false;
       }
       if (!file.type.startsWith("image/")) {
-        toast.error("File harus berupa gambar");
-        return;
+        toast.error(`${file.name}: File harus berupa gambar`);
+        return false;
       }
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      return true;
+    });
+
+    if (validFiles.length > 0) {
+      setImageFiles([...imageFiles, ...validFiles]);
+
+      const newPreviews = validFiles.map(file => {
+        return new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
+      });
+
+      Promise.all(newPreviews).then(previews => {
+        setImagePreviews([...imagePreviews, ...previews]);
+      });
     }
+
+    e.target.value = "";
+  };
+
+  const removeNewImage = (index: number) => {
+    setImageFiles(imageFiles.filter((_, i) => i !== index));
+    setImagePreviews(imagePreviews.filter((_, i) => i !== index));
+  };
+
+  const removeExistingImage = (index: number) => {
+    setExistingImages(existingImages.filter((_, i) => i !== index));
   };
 
   const handleExtractCoordinates = async () => {
@@ -211,9 +244,11 @@ export default function EditWisataPage() {
       if (formData.longitude) submitData.append("longitude", formData.longitude);
       submitData.append("isAktif", String(formData.isAktif));
       
-      if (imageFile) {
-        submitData.append("foto", imageFile);
-      }
+      submitData.append("gambar", JSON.stringify(existingImages));
+      
+      imageFiles.forEach((file) => {
+        submitData.append("foto", file);
+      });
 
       const response = await wisataApi.update(id, submitData);
 
@@ -224,7 +259,6 @@ export default function EditWisataPage() {
         throw new Error(response.message || "Gagal memperbarui wisata");
       }
     } catch (error: any) {
-      console.error("Error updating wisata:", error);
       toast.error(error.message || "Gagal memperbarui wisata");
     } finally {
       setSaving(false);
@@ -269,54 +303,84 @@ export default function EditWisataPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Left Column - Image Upload */}
         <div className="xl:col-span-1">
           <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm sticky top-6">
             <h3 className="font-semibold text-gray-900 mb-4 flex items-center text-lg">
               <ImageIcon className="w-5 h-5 mr-2 text-gray-600" />
-              Foto Wisata
+              Foto Wisata (Max 5)
             </h3>
             
             <div className="space-y-4">
-              {imagePreview ? (
-                <div className="relative">
-                  <img
-                    src={imagePreview.startsWith('blob:') || imagePreview.startsWith('data:') 
-                      ? imagePreview 
-                      : getImageUrl(imagePreview)}
-                    alt="Preview"
-                    className="w-full h-64 object-cover rounded-lg border-2 border-gray-300"
-                    onError={handleImageError}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setImageFile(null);
-                      setImagePreview("");
-                    }}
-                    className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+              {existingImages.length > 0 || imagePreviews.length > 0 ? (
+                <div className="grid grid-cols-2 gap-3">
+                  {existingImages.map((img, index) => (
+                    <div key={`existing-${index}`} className="relative group">
+                      <img
+                        src={getImageUrl(img)}
+                        alt={`Existing ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg border-2 border-gray-300"
+                        onError={handleImageError}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeExistingImage(index)}
+                        className="absolute top-1 right-1 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                      {index === 0 && (
+                        <span className="absolute bottom-1 left-1 px-2 py-0.5 bg-blue-500 text-white text-xs rounded">
+                          Utama
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                  {imagePreviews.map((preview, index) => (
+                    <div key={`new-${index}`} className="relative group">
+                      <img
+                        src={preview}
+                        alt={`New ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg border-2 border-green-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeNewImage(index)}
+                        className="absolute top-1 right-1 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                      <span className="absolute bottom-1 left-1 px-2 py-0.5 bg-green-500 text-white text-xs rounded">
+                        Baru
+                      </span>
+                    </div>
+                  ))}
+                  {(existingImages.length + imagePreviews.length) < 5 && (
+                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                      <ImageIcon className="w-8 h-8 text-gray-400 mb-1" />
+                      <span className="text-xs text-gray-500">Tambah</span>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        multiple
+                        onChange={handleImageChange}
+                      />
+                    </label>
+                  )}
                 </div>
               ) : (
                 <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                   <ImageIcon className="w-12 h-12 text-gray-400 mb-2" />
                   <span className="text-sm text-gray-500 mb-1">Klik untuk upload foto</span>
-                  <span className="text-xs text-gray-400">PNG, JPG maksimal 5MB</span>
+                  <span className="text-xs text-gray-400">PNG, JPG maksimal 5MB per file</span>
                   <input
                     type="file"
                     className="hidden"
                     accept="image/*"
+                    multiple
                     onChange={handleImageChange}
                   />
                 </label>
-              )}
-
-              {!imageFile && wisata.foto && (
-                <p className="text-xs text-gray-500 text-center">
-                  Upload foto baru untuk mengubah
-                </p>
               )}
               
               <div className="flex items-center space-x-2">
