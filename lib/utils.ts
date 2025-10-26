@@ -26,7 +26,8 @@ export const getImageUrl = (imagePath: string | null | undefined): string => {
   }
 
   // Build full backend URL
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.18.3:5000/api';
+  // Use production URL if available, otherwise fallback to local
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://webdesa.dikadev.id/api';
   const BASE_URL = API_BASE_URL.replace('/api', ''); // Remove /api suffix
   
   // Remove leading slash if exists

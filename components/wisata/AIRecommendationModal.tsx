@@ -278,6 +278,7 @@ export default function AIRecommendationModal({
                                     alt={rec.wisataData.nama}
                                     fill
                                     className="object-cover group-hover:scale-110 transition-transform duration-300"
+                                    unoptimized
                                   />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center text-gray-400">
