@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import DestinationCard, { type Destination } from './DestinationCard'
 import { useMemo, useEffect, useState } from 'react'
-import { wisataApi } from '@/lib/api'
+import { getAllWisata } from '@/data/services'
 
 interface DestinationsGridProps {
   searchParams?: {
@@ -21,22 +21,22 @@ export default function DestinationsGrid({ searchParams }: DestinationsGridProps
     const fetchWisata = async () => {
       try {
         setLoading(true)
-        const response = await wisataApi.getAll()
+        const response = await getAllWisata()
         
         if (response.success && Array.isArray(response.data)) {
-          // Transform backend data ke format frontend
+          // Transform data to frontend format
           const transformedData: Destination[] = response.data
-            .filter((w: any) => w.isAktif)
-            .map((wisata: any) => ({
+            .filter((w) => w.isActive !== false) // Show by default if isActive is undefined
+            .map((wisata) => ({
               id: wisata.id,
               slug: wisata.slug,
-              name: wisata.nama,
-              description: wisata.deskripsi,
-              price: wisata.harga || 0,
-              image: wisata.foto 
-                ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${wisata.foto}` 
-                : '/assets/images/bg-hero.png',
-              location: wisata.lokasi || 'Baturaden',
+              name: wisata.name,
+              description: wisata.description,
+              price: wisata.price || 0,
+              image: wisata.image?.startsWith('http') || wisata.image?.startsWith('/assets') 
+                ? wisata.image 
+                : `/assets/images/wisata/${wisata.slug}-1.jpg`,
+              location: wisata.location || 'Baturaden',
             }))
           
           setDestinations(transformedData)

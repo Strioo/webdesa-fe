@@ -55,11 +55,18 @@ export default function WisataDetailClient({ wisataData }: WisataDetailClientPro
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   const images = wisataData.gambar && wisataData.gambar.length > 0 
-    ? wisataData.gambar.map(img => 
-        img.startsWith('http') ? img : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${img}`
-      )
+    ? wisataData.gambar.map(img => {
+        // If image path starts with 'http', use as is (external URL)
+        if (img.startsWith('http')) return img
+        // If image path starts with '/', it's already a public path
+        if (img.startsWith('/')) return img
+        // Otherwise prepend API URL (for API images)
+        return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${img}`
+      })
     : [wisataData.foto 
-        ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${wisataData.foto}`
+        ? (wisataData.foto.startsWith('/') 
+            ? wisataData.foto 
+            : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${wisataData.foto}`)
         : '/assets/images/bg-hero.png'
       ]
 

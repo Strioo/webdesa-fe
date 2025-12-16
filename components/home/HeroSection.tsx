@@ -6,8 +6,7 @@ import { motion } from 'framer-motion'
 import PopulationChart from '@/components/ui/PopulationChart'
 import { useCountUp } from '@/hooks/useCountUp'
 import { useSmoothScroll } from '@/hooks/useSmoothScroll'
-import { fetchWeatherData } from '@/lib/weatherApi'
-import { dashboardApi } from '@/lib/api'
+import { getWeatherData, getHomeStats } from '@/data/services'
 
 interface WeatherData {
   location: string
@@ -60,23 +59,36 @@ const HeroSection = () => {
       try {
         setIsLoading(true)
         
-        // Fetch both data in parallel
-        const [weather, statsResponse] = await Promise.allSettled([
-          fetchWeatherData(),
-          dashboardApi.getHomeStats()
+        // Fetch both data in parallel using new data services
+        const [weatherResponse, statsResponse] = await Promise.allSettled([
+          getWeatherData(),
+          getHomeStats('3months') // Default to 3 months for hero section
         ])
 
         // Handle weather data
-        if (weather.status === 'fulfilled') {
-          setWeatherData(weather.value)
+        if (weatherResponse.status === 'fulfilled' && weatherResponse.value.success && weatherResponse.value.data) {
+          const weather = weatherResponse.value.data
+          setWeatherData({
+            location: weather.location,
+            temp: weather.temp,
+            tempHigh: weather.tempHigh,
+            tempLow: weather.tempLow,
+            humidity: weather.humidity,
+            rainfall: weather.rainfall,
+            pressure: weather.pressure
+          })
         } else {
           console.warn('Weather data unavailable, using fallback')
         }
 
-        // Handle population data
+        // Handle population data from HomeStats
         if (statsResponse.status === 'fulfilled' && statsResponse.value.success && statsResponse.value.data) {
-          const popData = statsResponse.value.data as { population: PopulationData }
-          setPopulationData(popData.population)
+          const homeData = statsResponse.value.data
+          setPopulationData({
+            total: homeData.population.total,
+            growthRate: homeData.population.growthRate,
+            monthlyData: homeData.population.monthlyData
+          })
         } else {
           console.warn('Population data unavailable')
         }

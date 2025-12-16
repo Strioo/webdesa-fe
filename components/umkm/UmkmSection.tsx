@@ -4,19 +4,19 @@ import { motion } from 'framer-motion'
 import { useRef, useState, useEffect } from 'react'
 import { useInView } from 'framer-motion'
 import UmkmCard, { UmkmProduct } from './UmkmCard'
-import { umkmApi } from '@/lib/api'
+import { getAllUmkm } from '@/data/services'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 // Helper to format image URL
-const getImageUrl = (foto: string | null): string => {
+const getImageUrl = (foto: string | null | undefined): string => {
   if (!foto) return '/assets/images/placeholder.jpg'
-  if (foto.startsWith('http')) return foto
+  if (foto.startsWith('http') || foto.startsWith('/assets')) return foto
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.18.3:5000'
   return `${baseUrl}${foto}`
 }
 
 // Helper to parse price
-const parsePrice = (harga: any): number => {
+const parsePrice = (harga: number | string | undefined | null): number => {
   if (!harga) return 0
   if (typeof harga === 'number') return harga
   if (typeof harga === 'string') {
@@ -39,18 +39,18 @@ export default function UmkmSection() {
     const fetchUmkm = async () => {
       try {
         setIsLoading(true)
-        const response = await umkmApi.getAll()
+        const response = await getAllUmkm()
         
         if (response.success && response.data) {
-          const transformedData: UmkmProduct[] = (response.data as any[])
-            .filter((umkm: any) => umkm.isAktif)
-            .map((umkm: any) => ({
+          const transformedData: UmkmProduct[] = response.data
+            .filter((umkm) => umkm.isActive !== false) // Default to showing if isActive is undefined
+            .map((umkm) => ({
               id: umkm.slug || umkm.id,
-              title: umkm.nama,
-              description: umkm.deskripsi,
-              price: parsePrice(umkm.harga),
-              image: getImageUrl(umkm.foto),
-              category: umkm.kategori
+              title: umkm.name,
+              description: umkm.description,
+              price: umkm.price,
+              image: getImageUrl(umkm.image),
+              category: umkm.category
             }))
           
           setAllUmkmProducts(transformedData)

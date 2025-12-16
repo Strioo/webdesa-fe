@@ -7,23 +7,24 @@ import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useCountUp } from '@/hooks/useCountUp'
 import { useInViewStagger } from '@/lib/animation'
-import { dashboardApi } from '@/lib/api'
+import { getPublicStats, getHomeStats, type HomeStats, type PopulationDataPoint } from '@/data/services'
 
-interface PopulationDataPoint {
-  month: string
-  value: number
-  date: string
+interface ChartDataPoint {
+  labels: string[]
+  wisataVisitors: number[]
+  umkmTransactions: number[]
 }
 
 interface PublicStatsData {
-  totalWisata: number
-  totalUMKM: number
-  totalTourists: number
-  population: {
-    total: number
-    growthRate: number
-    monthlyData: PopulationDataPoint[]
-  }
+  wisataVisitors: number
+  wisataVisitorsGrowth: number
+  umkmTransactions: number
+  umkmTransactionsGrowth: number
+  laporanMasuk: number
+  laporanSelesai: number
+  laporanResponseRate: number
+  populationGrowth: number
+  chartData: ChartDataPoint
 }
 
 const StatistikDesa = () => {
@@ -37,16 +38,35 @@ const StatistikDesa = () => {
         amount: 0.2
     })
 
-    // State untuk data real-time
-    const [statsData, setStatsData] = useState<PublicStatsData>({
-        totalWisata: 20,
-        totalUMKM: 150,
-        totalTourists: 50000,
+    // State untuk data statistik
+    const [publicStatsData, setPublicStatsData] = useState<PublicStatsData>({
+        wisataVisitors: 15000,
+        wisataVisitorsGrowth: 12.5,
+        umkmTransactions: 8500,
+        umkmTransactionsGrowth: 8.3,
+        laporanMasuk: 45,
+        laporanSelesai: 38,
+        laporanResponseRate: 84,
+        populationGrowth: 1.2,
+        chartData: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+            wisataVisitors: [1200, 1350, 1100, 1450, 1600, 1800, 2100, 2300, 1900, 1650, 1400, 1234],
+            umkmTransactions: [650, 720, 680, 750, 800, 850, 920, 980, 870, 790, 700, 857]
+        }
+    })
+
+    const [homeStatsData, setHomeStatsData] = useState<HomeStats>({
         population: {
             total: 9650,
-            growthRate: 9.66,
+            male: 4850,
+            female: 4800,
+            growthRate: 1.2,
             monthlyData: []
-        }
+        },
+        umkmCount: 48,
+        wisataCount: 12,
+        proyekAktif: 3,
+        laporanSelesai: 38
     })
 
     const [timeRange, setTimeRange] = useState('3months')
@@ -55,37 +75,37 @@ const StatistikDesa = () => {
 
     // Count-up animations with real data
     const destinationCountUp = useCountUp({ 
-        end: statsData.totalWisata, 
+        end: homeStatsData.wisataCount, 
         duration: 2000, 
         enabled: dataLoaded 
     })
     
     const umkmCountUp = useCountUp({ 
-        end: statsData.totalUMKM, 
+        end: homeStatsData.umkmCount, 
         duration: 2000, 
         suffix: '+', 
         enabled: dataLoaded 
     })
     
     const touristCountUp = useCountUp({ 
-        end: statsData.totalTourists, 
+        end: publicStatsData.wisataVisitors, 
         duration: 2500, 
         separator: '.', 
         enabled: dataLoaded 
     })
 
     const populationCountUp = useCountUp({
-        end: statsData.population.total,
+        end: homeStatsData.population.total,
         duration: 2500,
         separator: '.',
         enabled: dataLoaded
     })
 
     const growthRateCountUp = useCountUp({
-        end: statsData.population.growthRate,
+        end: homeStatsData.population.growthRate,
         duration: 2000,
         decimals: 2,
-        prefix: statsData.population.growthRate >= 0 ? '+' : '',
+        prefix: homeStatsData.population.growthRate >= 0 ? '+' : '',
         suffix: '%',
         enabled: dataLoaded
     })
@@ -96,14 +116,29 @@ const StatistikDesa = () => {
             try {
                 setIsLoading(true)
                 
-                const response = await dashboardApi.getPublicStats(timeRange)
+                // Fetch both public stats and home stats with timeRange parameter
+                const [publicResponse, homeResponse] = await Promise.all([
+                    getPublicStats(timeRange),
+                    getHomeStats(timeRange) // ✅ Pass timeRange parameter
+                ])
                 
-                if (response.success && response.data) {
-                    setStatsData(response.data as PublicStatsData)
-                    setDataLoaded(true)
+                if (publicResponse.success && publicResponse.data) {
+                    // Handle nested data structure from service
+                    const data = publicResponse.data as { timeRange?: string; data?: PublicStatsData } | PublicStatsData
+                    if ('data' in data && data.data) {
+                        setPublicStatsData(data.data)
+                    } else {
+                        setPublicStatsData(data as PublicStatsData)
+                    }
                 }
+
+                if (homeResponse.success && homeResponse.data) {
+                    setHomeStatsData(homeResponse.data)
+                }
+
+                setDataLoaded(true)
             } catch (error) {
-                console.error('Error fetching public stats:', error)
+                console.error('Error fetching stats:', error)
                 // Keep using fallback data if error
                 setDataLoaded(true)
             } finally {
@@ -391,9 +426,9 @@ const StatistikDesa = () => {
 
                                 {/* Area Chart */}
                                 <div className="relative -mx-2">
-                                    {statsData.population.monthlyData.length > 0 ? (
+                                    {homeStatsData.population.monthlyData.length > 0 ? (
                                         <PopulationChart
-                                            data={statsData.population.monthlyData}
+                                            data={homeStatsData.population.monthlyData}
                                             color="#5B903A"
                                             showGrid={true}
                                             height={200}

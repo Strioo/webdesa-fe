@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import UmkmDetailClient from './UmkmDetailClient'
+import { getUmkmBySlug } from '@/data/services'
 
 interface PageProps {
   params: Promise<{
@@ -8,84 +9,36 @@ interface PageProps {
   }>
 }
 
-// Fetch UMKM data from API by slug
-async function getUmkmBySlug(slug: string) {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.18.3:5000'
-    const response = await fetch(`${baseUrl}/umkm/slug/${slug}`, {
-      cache: 'no-store'
-    })
-    
-    if (!response.ok) {
-      console.error(`Failed to fetch UMKM: ${response.status}`)
-      return null
-    }
-    
-    const result = await response.json()
-    console.log('UMKM API Response:', result)
-    return result.success ? result.data : null
-  } catch (error) {
-    console.error('Error fetching UMKM:', error)
-    return null
-  }
-}
-
-// Helper to format image URL
-const getImageUrl = (foto: string | null): string => {
-  if (!foto) return '/assets/images/placeholder.jpg'
-  if (foto.startsWith('http')) return foto
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.18.3:5000'
-  return `${baseUrl}${foto}`
-}
-
-// Helper to parse produk string to array
-const parseProduk = (produk: any): string[] => {
-  if (!produk) return []
-  if (Array.isArray(produk)) return produk
-  if (typeof produk === 'string') {
-    return produk.split(/[\n,]+/).map(p => p.trim()).filter(p => p.length > 0)
-  }
-  return []
-}
-
-// Helper to parse harga
-const parseHarga = (harga: any): number => {
-  if (!harga) return 0
-  if (typeof harga === 'number') return harga
-  if (typeof harga === 'string') {
-    const numericString = harga.replace(/[^\d,.-]/g, '')
-    return parseFloat(numericString.replace(',', '')) || 0
-  }
-  return 0
-}
-
 // Server Component - Fetch data
 export default async function UmkmDetailPage({ params }: PageProps) {
   // ✅ Await params first before accessing properties
   const resolvedParams = await params
-  const umkm = await getUmkmBySlug(resolvedParams.slug)
+  const response = await getUmkmBySlug(resolvedParams.slug)
 
-  if (!umkm) {
+  // Handle response and check for null data
+  if (!response.success || !response.data) {
     notFound()
   }
 
-  // Transform API data
+  const umkm = response.data
+
+  // Transform data from Umkm type to UmkmDetailClient props
   const transformedData = {
-    id: umkm.slug || umkm.id,
-    nama: umkm.nama,
-    deskripsi: umkm.deskripsi,
-    pemilik: umkm.pemilik,
-    alamat: umkm.alamat,
-    kontak: umkm.kontak || '',
-    harga: parseHarga(umkm.harga),
-    kategori: umkm.kategori,
-    foto: getImageUrl(umkm.foto),
-    gambar: umkm.gambar && Array.isArray(umkm.gambar) && umkm.gambar.length > 0 
-      ? umkm.gambar.map((img: string) => getImageUrl(img))
-      : [getImageUrl(umkm.foto)],
-    jamBuka: umkm.jamBuka || '08:00',
-    jamTutup: umkm.jamTutup || '17:00',
-    produk: parseProduk(umkm.produk)
+    id: umkm.id,
+    nama: umkm.name,
+    deskripsi: umkm.description,
+    pemilik: umkm.owner || 'N/A',
+    alamat: umkm.address,
+    kontak: umkm.contact.phone || umkm.contact.whatsapp || '',
+    harga: umkm.price,
+    kategori: umkm.category,
+    foto: umkm.images[0] || '/assets/images/placeholder.jpg',
+    gambar: umkm.images && umkm.images.length > 0 
+      ? umkm.images
+      : [umkm.images[0] || '/assets/images/placeholder.jpg'],
+    jamBuka: umkm.operatingHours?.weekday?.split(' - ')[0] || '08:00',
+    jamTutup: umkm.operatingHours?.weekday?.split(' - ')[1]?.replace(' WIB', '') || '17:00',
+    produk: umkm.menus?.map(menu => menu.name) || []
   }
 
   return <UmkmDetailClient umkmData={transformedData} />
@@ -95,16 +48,18 @@ export default async function UmkmDetailPage({ params }: PageProps) {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   // ✅ Await params first before accessing properties
   const resolvedParams = await params
-  const umkm = await getUmkmBySlug(resolvedParams.slug)
+  const response = await getUmkmBySlug(resolvedParams.slug)
 
-  if (!umkm) {
+  if (!response.success || !response.data) {
     return {
       title: 'UMKM Tidak Ditemukan',
     }
   }
 
+  const umkm = response.data
+
   return {
-    title: `${umkm.nama} | UMKM Baturaden`,
-    description: umkm.deskripsi.substring(0, 160),
+    title: `${umkm.name} | UMKM Baturaden`,
+    description: umkm.description.substring(0, 160),
   }
 }

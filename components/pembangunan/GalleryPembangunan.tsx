@@ -3,8 +3,17 @@
 import { motion, useInView, useMotionValue, useAnimationFrame } from 'framer-motion'
 import { useRef, useState, useEffect } from 'react'
 import Image from 'next/image'
-import { ProyekPembangunan, dummyProyekPembangunan, getImageUrl } from '@/types/pembangunan'
-import { programApi } from '@/lib/api'
+import { getAllProyek, type ProyekPembangunan } from '@/data/services'
+
+// Helper to get image URL
+const getImageUrl = (foto: string | null | undefined): string => {
+  if (!foto) return '/assets/images/placeholder.jpg'
+  if (foto.startsWith('http') || foto.startsWith('/assets')) return foto
+  return `/assets/images/pembangunan/${foto}`
+}
+
+// Default dummy data for fallback
+const dummyProyekPembangunan: ProyekPembangunan[] = []
 
 export default function GalleryPembangunan() {
   const ref = useRef(null)
@@ -15,9 +24,9 @@ export default function GalleryPembangunan() {
   useEffect(() => {
     const fetchPembangunan = async () => {
       try {
-        const response = await programApi.getAll()
+        const response = await getAllProyek()
         if (response.success && response.data) {
-          setProyekData(response.data as ProyekPembangunan[])
+          setProyekData(response.data)
         }
       } catch (error) {
         console.error('Error fetching pembangunan:', error)
@@ -30,10 +39,10 @@ export default function GalleryPembangunan() {
 
   // Use data from API - only take projects with photos
   const galleryImages = proyekData
-    .filter(proyek => proyek.foto) // Only projects with photos
+    .filter(proyek => proyek.foto || (proyek.galeri && proyek.galeri.length > 0)) // Only projects with photos
     .map(proyek => ({
       id: proyek.id,
-      src: getImageUrl(proyek.foto),
+      src: getImageUrl(proyek.galeri?.[0] || proyek.foto),
       alt: proyek.nama,
       title: proyek.nama,
       kategori: proyek.kategori

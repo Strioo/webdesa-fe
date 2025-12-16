@@ -11,8 +11,27 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { ProyekPembangunan, dummyProyekPembangunan, getImageUrl, parseTimeline } from '@/types/pembangunan'
-import { programApi } from '@/lib/api'
+import { getAllProyek, type ProyekPembangunan } from '@/data/services'
+
+// Helper to get image URL
+const getImageUrl = (foto: string | null | undefined): string => {
+  if (!foto) return '/assets/images/placeholder.jpg'
+  if (foto.startsWith('http') || foto.startsWith('/assets')) return foto
+  return `/assets/images/pembangunan/${foto}`
+}
+
+// Helper to parse timeline
+const parseTimeline = (timeline: ProyekPembangunan['timeline']): { start: Date, end: Date, mulai: string, selesai: string } => {
+  return {
+    start: new Date(timeline.mulai),
+    end: new Date(timeline.selesai),
+    mulai: timeline.mulai,
+    selesai: timeline.selesai
+  }
+}
+
+// Default dummy data for fallback
+const dummyProyekPembangunan: ProyekPembangunan[] = []
 
 export default function TransparansiDanaDesa() {
   const ref = useRef(null)
@@ -25,9 +44,9 @@ export default function TransparansiDanaDesa() {
     const fetchPembangunan = async () => {
       try {
         setIsLoading(true)
-        const response = await programApi.getAll()
+        const response = await getAllProyek()
         if (response.success && response.data) {
-          setProyekData(response.data as ProyekPembangunan[])
+          setProyekData(response.data)
         }
       } catch (error) {
         console.error('Error fetching pembangunan:', error)
@@ -59,15 +78,16 @@ export default function TransparansiDanaDesa() {
   }
 
   const getKategoriColor = (kategori: ProyekPembangunan['kategori']) => {
-    const colors = {
+    const colors: Record<string, string> = {
       'Infrastruktur': 'bg-purple-50 text-purple-700',
       'Air Bersih': 'bg-cyan-50 text-cyan-700',
       'Pertanian': 'bg-green-50 text-green-700',
       'Pendidikan': 'bg-orange-50 text-orange-700',
       'Kesehatan': 'bg-pink-50 text-pink-700',
-      'Fasilitas Umum': 'bg-indigo-50 text-indigo-700'
+      'Fasilitas Umum': 'bg-indigo-50 text-indigo-700',
+      'Lingkungan': 'bg-emerald-50 text-emerald-700'
     }
-    return colors[kategori]
+    return colors[kategori] || 'bg-gray-50 text-gray-700'
   }
 
   // Calculate statistics from data
