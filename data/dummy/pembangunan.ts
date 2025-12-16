@@ -29,11 +29,11 @@ export const proyekPembangunanData: ProyekPembangunan[] = [
     },
     status: 'Berlangsung',
     progress: 65,
-    foto: '/assets/images/pembangunan/jalan-desa.jpg',
+    foto: '/assets/images/pembangunan/pembangunan-jembatan.jpg',
     galeri: [
-      '/assets/images/pembangunan/jalan-1.jpg',
-      '/assets/images/pembangunan/jalan-2.jpg',
-      '/assets/images/pembangunan/jalan-3.jpg'
+      '/assets/images/pembangunan/pembangunan-jembatan.jpg',
+      '/assets/images/pembangunan/pembangunan-sekolah.jpg',
+      '/assets/images/pembangunan/pembangunan-irigasi.jpg'
     ],
     penanggungJawab: 'Dinas Pekerjaan Umum',
     kontraktor: 'CV. Bangun Sejahtera',
@@ -61,10 +61,10 @@ export const proyekPembangunanData: ProyekPembangunan[] = [
     },
     status: 'Berlangsung',
     progress: 40,
-    foto: '/assets/images/pembangunan/air-bersih.jpg',
+    foto: '/assets/images/pembangunan/pembangunan-irigasi.jpg',
     galeri: [
-      '/assets/images/pembangunan/air-1.jpg',
-      '/assets/images/pembangunan/air-2.jpg'
+      '/assets/images/pembangunan/pembangunan-irigasi.jpg',
+      '/assets/images/pembangunan/pembangunan-jembatan.jpg'
     ],
     penanggungJawab: 'Siti Nurhaliza, S.Si.',
     kontraktor: 'CV. Tirta Mandiri',
@@ -92,11 +92,11 @@ export const proyekPembangunanData: ProyekPembangunan[] = [
     },
     status: 'Selesai',
     progress: 100,
-    foto: '/assets/images/pembangunan/sd-negeri.jpg',
+    foto: '/assets/images/pembangunan/pembangunan-sekolah.jpg',
     galeri: [
-      '/assets/images/pembangunan/sd-1.jpg',
-      '/assets/images/pembangunan/sd-2.jpg',
-      '/assets/images/pembangunan/sd-3.jpg'
+      '/assets/images/pembangunan/pembangunan-sekolah.jpg',
+      '/assets/images/pembangunan/pembangunan-jembatan.jpg',
+      '/assets/images/pembangunan/pembangunan-irigasi.jpg'
     ],
     penanggungJawab: 'Ahmad Fauzi, S.Pd.',
     kontraktor: 'CV. Edukasi Prima',
@@ -124,7 +124,11 @@ export const proyekPembangunanData: ProyekPembangunan[] = [
     },
     status: 'Berlangsung',
     progress: 25,
-    foto: '/assets/images/pembangunan/jembatan.jpg',
+    foto: '/assets/images/pembangunan/pembangunan-jembatan.jpg',
+    galeri: [
+      '/assets/images/pembangunan/pembangunan-jembatan.jpg',
+      '/assets/images/pembangunan/pembangunan-irigasi.jpg'
+    ],
     penanggungJawab: 'Bambang Sutrisno, S.T.',
     kontraktor: 'CV. Jembatan Kokoh',
     lokasi: 'Penghubung Dusun Slamet - Dusun Makmur',
@@ -150,7 +154,11 @@ export const proyekPembangunanData: ProyekPembangunan[] = [
     },
     status: 'Perencanaan',
     progress: 0,
-    foto: '/assets/images/pembangunan/irigasi.jpg',
+    foto: '/assets/images/pembangunan/pembangunan-irigasi.jpg',
+    galeri: [
+      '/assets/images/pembangunan/pembangunan-irigasi.jpg',
+      '/assets/images/pembangunan/pembangunan-sekolah.jpg'
+    ],
     penanggungJawab: 'Hendra Gunawan, S.P.',
     lokasi: 'Area Persawahan Blok Selatan',
     manfaat: [
@@ -176,10 +184,10 @@ export const proyekPembangunanData: ProyekPembangunan[] = [
     },
     status: 'Berlangsung',
     progress: 80,
-    foto: '/assets/images/pembangunan/posyandu.jpg',
+    foto: '/assets/images/pembangunan/pembangunan-sekolah.jpg',
     galeri: [
-      '/assets/images/pembangunan/posyandu-1.jpg',
-      '/assets/images/pembangunan/posyandu-2.jpg'
+      '/assets/images/pembangunan/pembangunan-sekolah.jpg',
+      '/assets/images/pembangunan/pembangunan-jembatan.jpg'
     ],
     penanggungJawab: 'Dr. Lina Marlina',
     kontraktor: 'CV. Sehat Sejahtera',
@@ -206,7 +214,12 @@ export const proyekPembangunanData: ProyekPembangunan[] = [
     },
     status: 'Perencanaan',
     progress: 0,
-    foto: '/assets/images/pembangunan/balai-desa.jpg',
+    foto: '/assets/images/pembangunan/pembangunan-jembatan.jpg',
+    galeri: [
+      '/assets/images/pembangunan/pembangunan-jembatan.jpg',
+      '/assets/images/pembangunan/pembangunan-sekolah.jpg',
+      '/assets/images/pembangunan/pembangunan-irigasi.jpg'
+    ],
     penanggungJawab: 'Suharto, S.Sos.',
     lokasi: 'Balai Desa Baturaden',
     manfaat: [
@@ -232,7 +245,11 @@ export const proyekPembangunanData: ProyekPembangunan[] = [
     },
     status: 'Berlangsung',
     progress: 55,
-    foto: '/assets/images/pembangunan/drainase.jpg',
+    foto: '/assets/images/pembangunan/pembangunan-irigasi.jpg',
+    galeri: [
+      '/assets/images/pembangunan/pembangunan-irigasi.jpg',
+      '/assets/images/pembangunan/pembangunan-jembatan.jpg'
+    ],
     penanggungJawab: 'Yusuf Hidayat, S.T.',
     kontraktor: 'CV. Saluran Jaya',
     lokasi: 'Permukiman RT 03-04',
@@ -259,10 +276,10 @@ export const proyekPembangunanData: ProyekPembangunan[] = [
     },
     status: 'Selesai',
     progress: 100,
-    foto: '/assets/images/pembangunan/taman-bermain.jpg',
+    foto: '/assets/images/pembangunan/pembangunan-sekolah.jpg',
     galeri: [
-      '/assets/images/pembangunan/taman-1.jpg',
-      '/assets/images/pembangunan/taman-2.jpg'
+      '/assets/images/pembangunan/pembangunan-sekolah.jpg',
+      '/assets/images/pembangunan/pembangunan-irigasi.jpg'
     ],
     penanggungJawab: 'Sri Wahyuni, S.Sos.',
     kontraktor: 'CV. Playground Indonesia',
@@ -289,7 +306,12 @@ export const proyekPembangunanData: ProyekPembangunan[] = [
     },
     status: 'Perencanaan',
     progress: 0,
-    foto: '/assets/images/pembangunan/embung.jpg',
+    foto: '/assets/images/pembangunan/pembangunan-irigasi.jpg',
+    galeri: [
+      '/assets/images/pembangunan/pembangunan-irigasi.jpg',
+      '/assets/images/pembangunan/pembangunan-jembatan.jpg',
+      '/assets/images/pembangunan/pembangunan-sekolah.jpg'
+    ],
     penanggungJawab: 'Dinas Pertanian Kabupaten',
     lokasi: 'Area Persawahan Desa Baturaden',
     manfaat: [
